@@ -1,0 +1,5 @@
+program test6
+  complex :: val
+  val = (1.0, 2.0)
+  print *, (val)
+end program test6

@@ -19,12 +19,26 @@ DIGIT       [0-9]
 ID          {LETTER}({LETTER}|{DIGIT}|_)*
 INT         {DIGIT}+
 REAL        {DIGIT}+\.{DIGIT}*([Ee][+-]?{DIGIT}+)?
-STRING      \'([^']|\'\')*\'
+STRING      \"[^\"]*\"|\'([^']|\'\')*\'
 
 WS          [ \t\r]+
 
 /* ---------- Rules ---------- */
 %%
+
+"!*" {
+    int c;
+    while ((c = input()) != 0) {
+        if (c == '*') {
+            if ((c = input()) == '!') break;
+            else unput(c);
+        }
+    }
+}
+
+!([^*].*)?   {}
+
+"("{REAL}","[ ]*{REAL}")"  { print_token("COMPLEX_CONST"); }
 
 "program"       { print_token("PROGRAM"); }
 "end"           { print_token("END"); }
@@ -44,6 +58,9 @@ WS          [ \t\r]+
 "return"        { print_token("RETURN"); }
 "implicit"      { print_token("IMPLICIT"); }
 "none"          { print_token("NONE"); }
+"module"        { print_token("MODULE"); }
+"contains"      { print_token("CONTAINS"); }
+"use"           { print_token("USE"); }
 
 "=="|"/="|"<="|">="|"<"|">"   { print_token("REL_OP"); }
 "="                            { print_token("ASSIGN"); }
