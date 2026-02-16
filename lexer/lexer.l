@@ -62,6 +62,8 @@ WS          [ \t\r]+
 "contains"      { print_token("CONTAINS"); }
 "use"           { print_token("USE"); }
 
+"."("true"|"false"|"t"|"f")"."  { print_token("LOGICAL_CONST"); }
+
 "=="|"/="|"<="|">="|"<"|">"   { print_token("REL_OP"); }
 "="                            { print_token("ASSIGN"); }
 "+"|"-"|"*"|"/"               { print_token("ARITH_OP"); }
