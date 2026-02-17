@@ -61,7 +61,8 @@ WS          [ \t\r]+
 "module"        { print_token("MODULE"); }
 "contains"      { print_token("CONTAINS"); }
 "use"           { print_token("USE"); }
-
+"end"{WS}+"type"    { print_token("END_TYPE"); } 
+"type"          { print_token("TYPE"); }  
 "."("true"|"false"|"t"|"f")"."  { print_token("LOGICAL_CONST"); }
 
 "=="|"/="|"<="|">="|"<"|">"   { print_token("REL_OP"); }
