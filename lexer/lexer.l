@@ -18,6 +18,11 @@ LETTER      [A-Za-z]
 DIGIT       [0-9]
 ID          {LETTER}({LETTER}|{DIGIT}|_)*
 INT         {DIGIT}+
+
+EXP     [Ee][+-]?{DIGIT}+
+REAL    ({DIGIT}+\.{DIGIT}*{EXP}?|\.[0-9]+|{DIGIT}+{EXP})
+
+STRING      \'([^']|\'\')*\'
 REAL        {DIGIT}+\.{DIGIT}*([Ee][+-]?{DIGIT}+)?
 STRING      \"[^\"]*\"|\'([^']|\'\')*\'
 
@@ -65,6 +70,49 @@ WS          [ \t\r]+
 "type"          { print_token("TYPE"); }  
 "."("true"|"false"|"t"|"f")"."  { print_token("LOGICAL_CONST"); }
 
+
+"module"        { print_token("MODULE"); }
+"contains"      { print_token("CONTAINS"); }
+"recursive"     { print_token("RECURSIVE"); }
+"result"        { print_token("RESULT"); }
+
+
+"while"         { print_token("WHILE"); }
+"select"        { print_token("SELECT"); }
+"case"          { print_token("CASE"); }
+"default"       { print_token("DEFAULT"); }
+"rank"          { print_token("RANK"); }
+
+
+"type"          { print_token("TYPE"); }
+"class"         { print_token("CLASS"); }
+"complex"       { print_token("COMPLEX"); }
+
+
+"allocate"      { print_token("ALLOCATE"); }
+"deallocate"    { print_token("DEALLOCATE"); }
+"allocated"     { print_token("ALLOCATED"); }
+"pointer"       { print_token("POINTER"); }
+"target"        { print_token("TARGET"); }
+"allocatable"   { print_token("ALLOCATABLE"); }
+"intent"        { print_token("INTENT"); }
+"inout"         { print_token("INOUT"); }
+"in"            { print_token("IN"); }
+"out"           { print_token("OUT"); }
+
+
+"use"           { print_token("USE"); }
+
+
+"open"          { print_token("OPEN"); }
+"close"         { print_token("CLOSE"); }
+"inquire"       { print_token("INQUIRE"); }
+"write"         { print_token("WRITE"); }
+"read"          { print_token("READ"); }
+"error"         { print_token("ERROR"); }
+
+
+
 "=="|"/="|"<="|">="|"<"|">"   { print_token("REL_OP"); }
 "="                            { print_token("ASSIGN"); }
 "+"|"-"|"*"|"/"               { print_token("ARITH_OP"); }
@@ -80,6 +128,8 @@ WS          [ \t\r]+
 {ID}           { print_token("IDENTIFIER"); }
 
 {WS}           { /* ignore */ }
+
+"&"[ \t]*\r?\n     { /* line continuation: ignore newline */ }
 
 \n             { /* yylineno auto-increments */ }
 
