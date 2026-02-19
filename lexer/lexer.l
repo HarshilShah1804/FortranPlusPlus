@@ -57,8 +57,6 @@ PP_EXPR    [^\n]+
 
 !([^*].*)?   {}
 
-"("{REAL}","[ ]*{REAL}")"  { print_token("COMPLEX_CONST"); }
-
 "program"       { print_token("PROGRAM"); }
 "end"           { print_token("END"); }
 "integer"       { print_token("INTEGER"); }
