@@ -36,8 +36,7 @@ INT         {DIGIT}+
 
 EXP     [Ee][+-]?{DIGIT}+
 REAL        {DIGIT}*\.{DIGIT}*([Ee][+-]?{DIGIT}+)?
-STRING      \"[^\"]*\"|\'([^']|\'\')*\'
-
+STRING      \"([^"]|\"\")*\"|\'([^']|\'\')*\'
 WS          [ \t\r]+
 PP_ID      [A-Za-z_][A-Za-z0-9_]*
 PP_EXPR    [^\n]+
