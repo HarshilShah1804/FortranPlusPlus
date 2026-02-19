@@ -126,6 +126,10 @@ PP_EXPR    [^\n]+
 "::"                           { print_token("DECL_SEP"); }
 ":"                            { print_token("COLON"); }
 ".."                          { print_token("ASSUMED_RANK_SPECIFIER"); }
+"**"                       { print_token("EXPONENT"); }
+"//"                       { print_token("CONCAT"); }
+"%"                      { print_token("DERIVED_TYPE_COMPONENT"); }
+
 
 "#define"      { print_token("PP_DEFINE"); }
 "#undef"       { print_token("PP_UNDEF"); }
