@@ -140,6 +140,8 @@ PP_EXPR    [^\n]+
 "#else"        { print_token("PP_ELSE"); }
 "#endif"       { print_token("PP_ENDIF"); }
 
+"."("and"|"or"|"not")"."  { print_token("LOGICAL_OP"); }
+
 
 {REAL}         { print_token("REAL_CONST"); }
 {INT}          { print_token("INT_CONST"); }
