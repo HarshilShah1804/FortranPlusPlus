@@ -64,7 +64,8 @@ WS          [ \t\r]+
 "end"{WS}+"type"    { print_token("END_TYPE"); } 
 "type"          { print_token("TYPE"); }  
 "."("true"|"false"|"t"|"f")"."  { print_token("LOGICAL_CONST"); }
-
+"random_seed"   {print_token("INTRINSIC");}
+"random_number"   {print_token("INTRINSIC");}
 "=="|"/="|"<="|">="|"<"|">"   { print_token("REL_OP"); }
 "="                            { print_token("ASSIGN"); }
 "+"|"-"|"*"|"/"               { print_token("ARITH_OP"); }
