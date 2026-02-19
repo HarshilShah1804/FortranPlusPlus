@@ -102,8 +102,6 @@ WS          [ \t\r]+
 "read"          { print_token("READ"); }
 "error"         { print_token("ERROR"); }
 
-
-
 "=="|"/="|"<="|">="|"<"|">"   { print_token("REL_OP"); }
 "="                            { print_token("ASSIGN"); }
 "+"|"-"|"*"|"/"               { print_token("ARITH_OP"); }
@@ -111,6 +109,8 @@ WS          [ \t\r]+
 ")"                            { print_token("RPAREN"); }
 ","                            { print_token("COMMA"); }
 "::"                           { print_token("DECL_SEP"); }
+":"                            { print_token("COLON"); }
+".."                          { print_token("ASSUMED_RANK_SPECIFIER"); }
 
 {REAL}         { print_token("REAL_CONST"); }
 {INT}          { print_token("INT_CONST"); }
