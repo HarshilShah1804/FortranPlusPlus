@@ -35,7 +35,7 @@ ID          {LETTER}({LETTER}|{DIGIT}|_)*
 INT         {DIGIT}+
 
 EXP     [Ee][+-]?{DIGIT}+
-REAL        {DIGIT}+\.{DIGIT}*([Ee][+-]?{DIGIT}+)?
+REAL        {DIGIT}*\.{DIGIT}*([Ee][+-]?{DIGIT}+)?
 STRING      \"[^\"]*\"|\'([^']|\'\')*\'
 
 WS          [ \t\r]+
