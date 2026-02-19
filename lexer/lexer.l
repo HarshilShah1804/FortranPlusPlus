@@ -66,6 +66,8 @@ WS          [ \t\r]+
 "end"{WS}+"type"    { print_token("END_TYPE"); } 
 "type"          { print_token("TYPE"); }  
 "."("true"|"false"|"t"|"f")"."  { print_token("LOGICAL_CONST"); }
+"random_seed"   {print_token("INTRINSIC");}
+"random_number"   {print_token("INTRINSIC");}
 
 "recursive"     { print_token("RECURSIVE"); }
 "result"        { print_token("RESULT"); }
