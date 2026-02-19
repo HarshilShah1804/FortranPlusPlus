@@ -7,8 +7,23 @@
 #include <stdlib.h>
 
 void print_token(const char *type) {
-    printf("Line %-3d  %-15s  %s\n", yylineno, type, yytext);
+    if (strcmp(type, "INT_CONST") == 0 ||
+        strcmp(type, "REAL_CONST") == 0 ||
+        strcmp(type, "LOGICAL_CONST") == 0) {
+
+        printf("[Line %-3d]  %-18s  Value: %s\n",
+               yylineno,
+               type,
+               yytext);
+    }
+    else {
+        printf("[Line %-3d]  %-18s  Lexeme: \"%s\"\n",
+               yylineno,
+               type,
+               yytext);
+    }
 }
+
 
 %}
 
@@ -65,6 +80,7 @@ WS          [ \t\r]+
 "use"           { print_token("USE"); }
 "end"{WS}+"type"    { print_token("END_TYPE"); } 
 "type"          { print_token("TYPE"); }  
+"len"        { print_token("LENGTH_SPECIFIER"); }
 "."("true"|"false"|"t"|"f")"."  { print_token("LOGICAL_CONST"); }
 "random_seed"   {print_token("INTRINSIC");}
 "random_number"   {print_token("INTRINSIC");}
