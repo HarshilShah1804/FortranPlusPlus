@@ -39,6 +39,8 @@ REAL        {DIGIT}+\.{DIGIT}*([Ee][+-]?{DIGIT}+)?
 STRING      \"[^\"]*\"|\'([^']|\'\')*\'
 
 WS          [ \t\r]+
+PP_ID      [A-Za-z_][A-Za-z0-9_]*
+PP_EXPR    [^\n]+
 
 /* ---------- Rules ---------- */
 %%
@@ -127,6 +129,16 @@ WS          [ \t\r]+
 "::"                           { print_token("DECL_SEP"); }
 ":"                            { print_token("COLON"); }
 ".."                          { print_token("ASSUMED_RANK_SPECIFIER"); }
+
+"#define"      { print_token("PP_DEFINE"); }
+"#undef"       { print_token("PP_UNDEF"); }
+"#ifdef"       { print_token("PP_IFDEF"); }
+"#ifndef"      { print_token("PP_IFNDEF"); }
+"#if"          { print_token("PP_IF"); }
+"#elif"        { print_token("PP_ELIF"); }
+"#else"        { print_token("PP_ELSE"); }
+"#endif"       { print_token("PP_ENDIF"); }
+
 
 {REAL}         { print_token("REAL_CONST"); }
 {INT}          { print_token("INT_CONST"); }
