@@ -6,7 +6,7 @@ LEX = flex
 
 # Flags
 CFLAGS = -Wall -Wextra
-LDFLAGS =
+LDFLAGS = -lfl
 
 # Files
 LEXER = lexer.l

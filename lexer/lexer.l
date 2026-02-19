@@ -20,9 +20,6 @@ ID          {LETTER}({LETTER}|{DIGIT}|_)*
 INT         {DIGIT}+
 
 EXP     [Ee][+-]?{DIGIT}+
-REAL    ({DIGIT}+\.{DIGIT}*{EXP}?|\.[0-9]+|{DIGIT}+{EXP})
-
-STRING      \'([^']|\'\')*\'
 REAL        {DIGIT}+\.{DIGIT}*([Ee][+-]?{DIGIT}+)?
 STRING      \"[^\"]*\"|\'([^']|\'\')*\'
 
@@ -70,9 +67,6 @@ WS          [ \t\r]+
 "type"          { print_token("TYPE"); }  
 "."("true"|"false"|"t"|"f")"."  { print_token("LOGICAL_CONST"); }
 
-
-"module"        { print_token("MODULE"); }
-"contains"      { print_token("CONTAINS"); }
 "recursive"     { print_token("RECURSIVE"); }
 "result"        { print_token("RESULT"); }
 
@@ -83,8 +77,6 @@ WS          [ \t\r]+
 "default"       { print_token("DEFAULT"); }
 "rank"          { print_token("RANK"); }
 
-
-"type"          { print_token("TYPE"); }
 "class"         { print_token("CLASS"); }
 "complex"       { print_token("COMPLEX"); }
 
@@ -99,9 +91,6 @@ WS          [ \t\r]+
 "inout"         { print_token("INOUT"); }
 "in"            { print_token("IN"); }
 "out"           { print_token("OUT"); }
-
-
-"use"           { print_token("USE"); }
 
 
 "open"          { print_token("OPEN"); }
