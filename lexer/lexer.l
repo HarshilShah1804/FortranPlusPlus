@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+int lexical_errors = 0;
+
 void print_token(const char *type) {
     if (strcmp(type, "INT_CONST") == 0 ||
         strcmp(type, "REAL_CONST") == 0 ||
@@ -28,14 +30,14 @@ void print_token(const char *type) {
 %}
 
 /* ---------- Definitions ---------- */
-
+%x BLOCK_COMMENT
 LETTER      [A-Za-z]
 DIGIT       [0-9]
 ID          {LETTER}({LETTER}|{DIGIT}|_)*
 INT         {DIGIT}+
 
 EXP     [Ee][+-]?{DIGIT}+
-REAL        {DIGIT}*\.{DIGIT}*([Ee][+-]?{DIGIT}+)?
+REAL        ({DIGIT}+\.{DIGIT}*|{DIGIT}*\.{DIGIT}+)([EeDd][+-]?{DIGIT}+)?
 STRING      \"([^"]|\"\")*\"|\'([^']|\'\')*\'
 WS          [ \t\r]+
 PP_ID      [A-Za-z_][A-Za-z0-9_]*
@@ -44,14 +46,14 @@ PP_EXPR    [^\n]+
 /* ---------- Rules ---------- */
 %%
 
-"!*" {
-    int c;
-    while ((c = input()) != 0) {
-        if (c == '*') {
-            if ((c = input()) == '!') break;
-            else unput(c);
-        }
-    }
+"!*"                    { BEGIN(BLOCK_COMMENT); }
+<BLOCK_COMMENT>"*!"     { BEGIN(INITIAL); }
+<BLOCK_COMMENT>\n       { /* yylineno auto-increments */ }
+<BLOCK_COMMENT>.        { /* ignore all other characters inside the comment */ }
+<BLOCK_COMMENT><<EOF>>  { 
+    lexical_errors++;
+    printf("[Line %-3d]  ERROR: Unclosed block comment\n", yylineno); 
+    exit(1);
 }
 
 !([^*].*)?   {}
@@ -97,7 +99,6 @@ PP_EXPR    [^\n]+
 "class"         { print_token("CLASS"); }
 "complex"       { print_token("COMPLEX"); }
 
-
 "allocate"      { print_token("ALLOCATE"); }
 "deallocate"    { print_token("DEALLOCATE"); }
 "allocated"     { print_token("ALLOCATED"); }
@@ -108,7 +109,6 @@ PP_EXPR    [^\n]+
 "inout"         { print_token("INOUT"); }
 "in"            { print_token("IN"); }
 "out"           { print_token("OUT"); }
-
 
 "open"          { print_token("OPEN"); }
 "close"         { print_token("CLOSE"); }
@@ -147,15 +147,36 @@ PP_EXPR    [^\n]+
 {INT}          { print_token("INT_CONST"); }
 {STRING}       { print_token("STRING"); }
 
-{ID}           { print_token("IDENTIFIER"); }
+{ID}           { 
+    if (yyleng > 63) {
+        printf("[Line %-3d]  ERROR: Identifier exceeds 63 chars\n", yylineno);
+        lexical_errors++;
+    } else {
+        print_token("IDENTIFIER"); 
+    }
+}
 
 {WS}           { /* ignore */ }
 
+\"([^"\n]|\"\")*\n  { 
+    printf("[Line %-3d]  ERROR: Unclosed string literal\n", yylineno - 1); 
+    lexical_errors++; 
+}
+
+\'([^'\n]|\'\')*\n  { 
+    printf("[Line %-3d]  ERROR: Unclosed string literal\n", yylineno - 1); 
+    lexical_errors++; 
+}
+
 "&"[ \t]*\r?\n     { /* line continuation: ignore newline */ }
+^[ \t]*"&"     { /* ignore leading continuation */ }
 
 \n             { /* yylineno auto-increments */ }
 
-.              { print_token("UNKNOWN"); }
+.              { 
+    printf("[Line %-3d]  ERROR: Stray character: '%s'\n", yylineno, yytext);
+    lexical_errors++;
+}
 
 %%
 
@@ -169,6 +190,14 @@ int main(int argc, char **argv) {
         yyin = fp;
     }
     yylex();
-
+    printf("\n------------------------------------------------\n");
+    if (lexical_errors == 0) {
+        printf("***Lexing successful***\n");
+        printf("Lexical Errors = 0\n");
+    } else {
+        printf("***Lexing failed***\n");
+        printf("Lexical Errors = %d\n", lexical_errors);
+    }
+    printf("------------------------------------------------\n");
     return 0;
 }
