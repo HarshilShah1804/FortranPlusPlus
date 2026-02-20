@@ -1,0 +1,4 @@
+program long_vars
+    integer :: this_is_a_ridiculously_long_variable_name_that_exceeds_sixty_three_characters
+    this_is_a_ridiculously_long_variable_name_that_exceeds_sixty_three_characters = 10
+end program

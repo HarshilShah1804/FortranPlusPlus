@@ -1,0 +1,31 @@
+[Line 1  ]  PROGRAM             Lexeme: "program"
+[Line 1  ]  IDENTIFIER          Lexeme: "stray_chars"
+[Line 2  ]  REAL                Lexeme: "real"
+[Line 2  ]  DECL_SEP            Lexeme: "::"
+[Line 2  ]  IDENTIFIER          Lexeme: "price"
+[Line 3  ]  IDENTIFIER          Lexeme: "price"
+[Line 3  ]  ASSIGN              Lexeme: "="
+[Line 3  ]  REAL_CONST          Value: 100.50
+[Line 3  ]  ERROR: Stray character: '@'
+[Line 3  ]  INT_CONST           Value: 5
+[Line 4  ]  IF                  Lexeme: "if"
+[Line 4  ]  LPAREN              Lexeme: "("
+[Line 4  ]  IDENTIFIER          Lexeme: "price"
+[Line 4  ]  REL_OP              Lexeme: ">"
+[Line 4  ]  INT_CONST           Value: 50
+[Line 4  ]  ERROR: Stray character: '$'
+[Line 4  ]  RPAREN              Lexeme: ")"
+[Line 4  ]  THEN                Lexeme: "then"
+[Line 5  ]  PRINT               Lexeme: "print"
+[Line 5  ]  ARITH_OP            Lexeme: "*"
+[Line 5  ]  COMMA               Lexeme: ","
+[Line 5  ]  STRING              Lexeme: ""Too expensive!""
+[Line 6  ]  END                 Lexeme: "end"
+[Line 6  ]  IF                  Lexeme: "if"
+[Line 7  ]  END                 Lexeme: "end"
+[Line 7  ]  PROGRAM             Lexeme: "program"
+
+------------------------------------------------
+***Lexing failed***
+Lexical Errors = 2
+------------------------------------------------

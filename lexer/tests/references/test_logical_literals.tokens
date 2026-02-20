@@ -1,0 +1,41 @@
+[Line 1  ]  PROGRAM             Lexeme: "program"
+[Line 1  ]  IDENTIFIER          Lexeme: "test_logical_literals"
+[Line 2  ]  LOGICAL             Lexeme: "logical"
+[Line 2  ]  DECL_SEP            Lexeme: "::"
+[Line 2  ]  IDENTIFIER          Lexeme: "a"
+[Line 2  ]  COMMA               Lexeme: ","
+[Line 2  ]  IDENTIFIER          Lexeme: "b"
+[Line 2  ]  COMMA               Lexeme: ","
+[Line 2  ]  IDENTIFIER          Lexeme: "c"
+[Line 2  ]  COMMA               Lexeme: ","
+[Line 2  ]  IDENTIFIER          Lexeme: "d"
+[Line 3  ]  IDENTIFIER          Lexeme: "a"
+[Line 3  ]  ASSIGN              Lexeme: "="
+[Line 3  ]  LOGICAL_CONST       Value: .true.
+[Line 4  ]  IDENTIFIER          Lexeme: "b"
+[Line 4  ]  ASSIGN              Lexeme: "="
+[Line 4  ]  LOGICAL_CONST       Value: .T.
+[Line 5  ]  IDENTIFIER          Lexeme: "c"
+[Line 5  ]  ASSIGN              Lexeme: "="
+[Line 5  ]  LOGICAL_CONST       Value: .false.
+[Line 6  ]  IDENTIFIER          Lexeme: "d"
+[Line 6  ]  ASSIGN              Lexeme: "="
+[Line 6  ]  LOGICAL_CONST       Value: .F.
+[Line 7  ]  PRINT               Lexeme: "print"
+[Line 7  ]  ARITH_OP            Lexeme: "*"
+[Line 7  ]  COMMA               Lexeme: ","
+[Line 7  ]  IDENTIFIER          Lexeme: "a"
+[Line 7  ]  COMMA               Lexeme: ","
+[Line 7  ]  IDENTIFIER          Lexeme: "b"
+[Line 7  ]  COMMA               Lexeme: ","
+[Line 7  ]  IDENTIFIER          Lexeme: "c"
+[Line 7  ]  COMMA               Lexeme: ","
+[Line 7  ]  IDENTIFIER          Lexeme: "d"
+[Line 8  ]  END                 Lexeme: "end"
+[Line 8  ]  PROGRAM             Lexeme: "program"
+[Line 8  ]  IDENTIFIER          Lexeme: "test_logical_literals"
+
+------------------------------------------------
+***Lexing successful***
+Lexical Errors = 0
+------------------------------------------------

@@ -1,0 +1,16 @@
+[Line 1  ]  TYPE                Lexeme: "type"
+[Line 1  ]  DECL_SEP            Lexeme: "::"
+[Line 1  ]  IDENTIFIER          Lexeme: "Particle"
+[Line 2  ]  END_TYPE            Lexeme: "end type"
+[Line 2  ]  IDENTIFIER          Lexeme: "Particle"
+[Line 4  ]  TYPE                Lexeme: "type"
+[Line 4  ]  LPAREN              Lexeme: "("
+[Line 4  ]  IDENTIFIER          Lexeme: "Particle"
+[Line 4  ]  RPAREN              Lexeme: ")"
+[Line 4  ]  DECL_SEP            Lexeme: "::"
+[Line 4  ]  IDENTIFIER          Lexeme: "p"
+
+------------------------------------------------
+***Lexing successful***
+Lexical Errors = 0
+------------------------------------------------

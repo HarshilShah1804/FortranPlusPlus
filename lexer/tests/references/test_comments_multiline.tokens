@@ -1,0 +1,17 @@
+[Line 1  ]  PROGRAM             Lexeme: "program"
+[Line 1  ]  IDENTIFIER          Lexeme: "test7"
+[Line 2  ]  PRINT               Lexeme: "print"
+[Line 2  ]  ARITH_OP            Lexeme: "*"
+[Line 2  ]  COMMA               Lexeme: ","
+[Line 2  ]  STRING              Lexeme: ""Start""
+[Line 6  ]  PRINT               Lexeme: "print"
+[Line 6  ]  ARITH_OP            Lexeme: "*"
+[Line 6  ]  COMMA               Lexeme: ","
+[Line 6  ]  STRING              Lexeme: ""End""
+[Line 7  ]  END                 Lexeme: "end"
+[Line 7  ]  PROGRAM             Lexeme: "program"
+
+------------------------------------------------
+***Lexing successful***
+Lexical Errors = 0
+------------------------------------------------

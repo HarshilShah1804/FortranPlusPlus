@@ -1,0 +1,27 @@
+[Line 1  ]  IDENTIFIER          Lexeme: "x"
+[Line 1  ]  ASSIGN              Lexeme: "="
+[Line 1  ]  REAL_CONST          Value: 5.
+[Line 2  ]  IDENTIFIER          Lexeme: "x"
+[Line 2  ]  ASSIGN              Lexeme: "="
+[Line 2  ]  REAL_CONST          Value: .5
+[Line 3  ]  IDENTIFIER          Lexeme: "x"
+[Line 3  ]  ASSIGN              Lexeme: "="
+[Line 3  ]  INT_CONST           Value: 5
+[Line 3  ]  IDENTIFIER          Lexeme: "e10"
+[Line 4  ]  IDENTIFIER          Lexeme: "x"
+[Line 4  ]  ASSIGN              Lexeme: "="
+[Line 4  ]  INT_CONST           Value: 3
+[Line 4  ]  IDENTIFIER          Lexeme: "E"
+[Line 4  ]  ARITH_OP            Lexeme: "-"
+[Line 4  ]  INT_CONST           Value: 2
+[Line 5  ]  IDENTIFIER          Lexeme: "x"
+[Line 5  ]  ASSIGN              Lexeme: "="
+[Line 5  ]  REAL_CONST          Value: 1.2e3
+[Line 6  ]  IDENTIFIER          Lexeme: "x"
+[Line 6  ]  ASSIGN              Lexeme: "="
+[Line 6  ]  INT_CONST           Value: 5
+
+------------------------------------------------
+***Lexing successful***
+Lexical Errors = 0
+------------------------------------------------

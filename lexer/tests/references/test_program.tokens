@@ -1,0 +1,10 @@
+[Line 1  ]  PROGRAM             Lexeme: "program"
+[Line 1  ]  IDENTIFIER          Lexeme: "main"
+[Line 3  ]  END                 Lexeme: "end"
+[Line 3  ]  PROGRAM             Lexeme: "PROGRAM"
+[Line 3  ]  IDENTIFIER          Lexeme: "main"
+
+------------------------------------------------
+***Lexing successful***
+Lexical Errors = 0
+------------------------------------------------

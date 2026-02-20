@@ -1,0 +1,47 @@
+[Line 1  ]  PROGRAM             Lexeme: "program"
+[Line 1  ]  IDENTIFIER          Lexeme: "test6"
+[Line 2  ]  COMPLEX             Lexeme: "complex"
+[Line 2  ]  DECL_SEP            Lexeme: "::"
+[Line 2  ]  IDENTIFIER          Lexeme: "val"
+[Line 3  ]  IDENTIFIER          Lexeme: "val"
+[Line 3  ]  ASSIGN              Lexeme: "="
+[Line 3  ]  LPAREN              Lexeme: "("
+[Line 3  ]  REAL_CONST          Value: 1.0
+[Line 3  ]  COMMA               Lexeme: ","
+[Line 3  ]  REAL_CONST          Value: 2.0
+[Line 3  ]  RPAREN              Lexeme: ")"
+[Line 4  ]  IDENTIFIER          Lexeme: "val"
+[Line 4  ]  ASSIGN              Lexeme: "="
+[Line 4  ]  LPAREN              Lexeme: "("
+[Line 4  ]  INT_CONST           Value: 1
+[Line 4  ]  COMMA               Lexeme: ","
+[Line 4  ]  REAL_CONST          Value: 2.0
+[Line 4  ]  RPAREN              Lexeme: ")"
+[Line 5  ]  IDENTIFIER          Lexeme: "val"
+[Line 5  ]  ASSIGN              Lexeme: "="
+[Line 5  ]  LPAREN              Lexeme: "("
+[Line 5  ]  REAL_CONST          Value: 1.0
+[Line 5  ]  COMMA               Lexeme: ","
+[Line 5  ]  INT_CONST           Value: 2
+[Line 5  ]  RPAREN              Lexeme: ")"
+[Line 6  ]  IDENTIFIER          Lexeme: "val"
+[Line 6  ]  ASSIGN              Lexeme: "="
+[Line 6  ]  LPAREN              Lexeme: "("
+[Line 6  ]  INT_CONST           Value: 1
+[Line 6  ]  COMMA               Lexeme: ","
+[Line 6  ]  INT_CONST           Value: 2
+[Line 6  ]  RPAREN              Lexeme: ")"
+[Line 7  ]  PRINT               Lexeme: "print"
+[Line 7  ]  ARITH_OP            Lexeme: "*"
+[Line 7  ]  COMMA               Lexeme: ","
+[Line 7  ]  LPAREN              Lexeme: "("
+[Line 7  ]  IDENTIFIER          Lexeme: "val"
+[Line 7  ]  RPAREN              Lexeme: ")"
+[Line 8  ]  END                 Lexeme: "end"
+[Line 8  ]  PROGRAM             Lexeme: "program"
+[Line 8  ]  IDENTIFIER          Lexeme: "test6"
+
+------------------------------------------------
+***Lexing successful***
+Lexical Errors = 0
+------------------------------------------------

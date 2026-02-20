@@ -1,0 +1,15 @@
+[Line 1  ]  PROGRAM             Lexeme: "program"
+[Line 1  ]  IDENTIFIER          Lexeme: "long_vars"
+[Line 2  ]  INTEGER             Lexeme: "integer"
+[Line 2  ]  DECL_SEP            Lexeme: "::"
+[Line 2  ]  ERROR: Identifier exceeds 63 chars
+[Line 3  ]  ERROR: Identifier exceeds 63 chars
+[Line 3  ]  ASSIGN              Lexeme: "="
+[Line 3  ]  INT_CONST           Value: 10
+[Line 4  ]  END                 Lexeme: "end"
+[Line 4  ]  PROGRAM             Lexeme: "program"
+
+------------------------------------------------
+***Lexing failed***
+Lexical Errors = 2
+------------------------------------------------

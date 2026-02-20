@@ -1,0 +1,15 @@
+[Line 1  ]  PROGRAM             Lexeme: "program"
+[Line 1  ]  IDENTIFIER          Lexeme: "assumed_rank"
+[Line 2  ]  INTEGER             Lexeme: "integer"
+[Line 2  ]  DECL_SEP            Lexeme: "::"
+[Line 2  ]  IDENTIFIER          Lexeme: "assumed_rank"
+[Line 2  ]  LPAREN              Lexeme: "("
+[Line 2  ]  ASSUMED_RANK_SPECIFIER  Lexeme: ".."
+[Line 2  ]  RPAREN              Lexeme: ")"
+[Line 3  ]  END                 Lexeme: "end"
+[Line 3  ]  PROGRAM             Lexeme: "program"
+
+------------------------------------------------
+***Lexing successful***
+Lexical Errors = 0
+------------------------------------------------
