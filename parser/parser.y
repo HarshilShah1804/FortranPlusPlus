@@ -1,0 +1,113 @@
+%{
+#include <stdio.h>
+#include <stdlib.h>
+
+void yyerror(const char *s);
+int yylex();
+%}
+
+%token PROGRAM MODULE END CONTAINS USE NONE IMPLICIT
+%token INTEGER REAL LOGICAL CHARACTER TYPE CLASS END_TYPE COMPLEX
+%token IF THEN ELSE DO ENDIF LEN LOGICAL_CONST INTRINSIC WHILE SELECT CASE DEFAULT RANK 
+%token STOP PRINT CALL SUBROUTINE FUNCTION RETURN RECURSIVE RESULT
+%token ALLOCATE DEALLOCATE ALLOCATED POINTER TARGET ALLOCATABLE INTENT IN OUT INOUT
+%token OPEN CLOSE INQUIRE WRITE READ ERROR
+%token REL_OP ASSIGN ARITH_OP LPAREN RPAREN COMMA DECL_SEP COLON ASSUMED_RANK_SPECIFIER EXPONENT CONCAT DERIVED_TYPE_COMPONENT
+%token PP_DEFINE PP_UNDEF PP_IFDEF PP_IFNDEF PP_IF PP_ELIF PP_ELSE PP_ENDIF LOGICAL_OP
+%token IDENTIFIER INT_CONST REAL_CONST STRING
+
+%%
+
+start: program_unit | module_unit
+     ;
+    
+program_unit: PROGRAM IDENTIFIER program_body END PROGRAM IDENTIFIER
+            | PROGRAM IDENTIFIER program_body END
+            ;
+
+module_unit: MODULE IDENTIFIER module_body END MODULE IDENTIFIER
+           | MODULE IDENTIFIER module_body END
+           ;
+
+program_body: declarations executables
+            ;
+
+module_body: declarations
+
+declarations: /* empty */
+            | declarations type_spec attributes DECL_SEP IDENTIFIER
+            | declarations IMPLICIT NONE
+            | declarations USE IDENTIFIER
+            ;
+
+type_spec: INTEGER
+         | REAL
+         | LOGICAL
+         | CHARACTER
+         | TYPE LPAREN IDENTIFIER RPAREN 
+         | CLASS IDENTIFIER
+         | COMPLEX
+         ;
+
+attributes: /* empty */
+          | attributes ALLOCATABLE
+          | attributes POINTER
+          | attributes TARGET
+          | attributes INTENT LPAREN IN RPAREN
+          | attributes INTENT LPAREN OUT RPAREN
+          | attributes INTENT LPAREN INOUT RPAREN
+          ;
+
+executables: executable
+           | executables executable
+           ;
+
+executable: assignment_stmt
+          | if_stmt
+          | print_stmt
+          ;
+
+assignment_stmt: IDENTIFIER ASSIGN expression ;
+
+if_stmt: IF LPAREN expression RPAREN THEN executables else_block ENDIF ;
+
+else_block: /* empty */
+          | ELSE executables
+          ;
+
+print_stmt: PRINT COMMA argument_list ;
+
+expression: expression ARITH_OP expression
+          | expression EXPONENT expression
+          | expression REL_OP expression
+          | expression LOGICAL_OP expression
+          | factor
+          ;
+
+factor: array_access
+      | function_call
+      | IDENTIFIER
+      | INT_CONST
+      | REAL_CONST
+      | LOGICAL_CONST
+      | STRING
+      | LPAREN expression RPAREN
+      ;
+
+array_access: IDENTIFIER LPAREN argument_list RPAREN ; 
+
+function_call: IDENTIFIER LPAREN argument_list RPAREN ;
+
+argument_list: expression
+             | argument_list COMMA expression
+             ;
+
+%%
+
+void yyerror(const char *s) {
+    fprintf(stderr, "Error: %s\n", s);
+}
+
+int main(void) {
+    return yyparse();
+}
