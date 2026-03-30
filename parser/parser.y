@@ -32,7 +32,7 @@ module_unit: MODULE IDENTIFIER module_body END MODULE IDENTIFIER
 program_body: declarations executables
             ;
 
-module_body: declarations
+module_body: declarations;
 
 declarations: /* empty */
             | declarations type_spec attributes DECL_SEP IDENTIFIER
@@ -62,15 +62,56 @@ executables: executable
            | executables executable
            ;
 
-executable: assignment_stmt
-          | if_stmt
-          | print_stmt
-          ;
+executable:
+      assignment_stmt
+    | if_stmt
+    | print_stmt
+    | do_stmt
+    | dowhile_stmt
+    | select_stmt
+    | call_stmt
+    | return_stmt
+    | stop_stmt
+    ;
 
 assignment_stmt: IDENTIFIER ASSIGN expression ;
 
 if_stmt: IF LPAREN expression RPAREN THEN executables else_block ENDIF ;
 
+do_stmt:
+    DO IDENTIFIER ASSIGN expression COMMA expression executables END DO
+    ;
+
+dowhile_stmt:
+    DO WHILE LPAREN expression RPAREN executables END DO
+    ;
+
+select_stmt:
+    SELECT CASE LPAREN expression RPAREN case_blocks END SELECT
+    ;
+
+case_blocks:
+      case_block
+    | case_blocks case_block
+    ;
+
+case_block:
+      CASE LPAREN expression RPAREN executables
+    | CASE DEFAULT executables
+    ;
+
+call_stmt:
+    CALL IDENTIFIER LPAREN argument_list RPAREN
+    ;
+
+return_stmt:
+    RETURN
+    ;
+
+stop_stmt:
+    STOP
+    ;
+    
 else_block: /* empty */
           | ELSE executables
           ;
