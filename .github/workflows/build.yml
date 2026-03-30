@@ -1,4 +1,4 @@
-name: Build Lexer
+name: Build Parser
 
 on:
   push:
@@ -16,6 +16,5 @@ jobs:
 
       - name: Build lexer
         run: |
-          cd lexer
-          make clean
-          make
+          chmod +x ./compile.sh
+          ./compile.sh
