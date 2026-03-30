@@ -5,6 +5,7 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include "../parser/y.tab.h"
 
 int lexical_errors = 0;
 
@@ -58,94 +59,95 @@ PP_EXPR    [^\n]+
 
 !([^*].*)?   {}
 
-"program"       { print_token("PROGRAM"); }
-"end"           { print_token("END"); }
-"integer"       { print_token("INTEGER"); }
-"real"          { print_token("REAL"); }
-"logical"       { print_token("LOGICAL"); }
-"character"     { print_token("CHARACTER"); }
-"if"            { print_token("IF"); }
-"then"          { print_token("THEN"); }
-"else"          { print_token("ELSE"); }
-"do"            { print_token("DO"); }
-"stop"          { print_token("STOP"); }
-"print"         { print_token("PRINT"); }
-"call"          { print_token("CALL"); }
-"subroutine"    { print_token("SUBROUTINE"); }
-"function"      { print_token("FUNCTION"); }
-"return"        { print_token("RETURN"); }
-"implicit"      { print_token("IMPLICIT"); }
-"none"          { print_token("NONE"); }
-"module"        { print_token("MODULE"); }
-"contains"      { print_token("CONTAINS"); }
-"use"           { print_token("USE"); }
-"end"{WS}+"type"    { print_token("END_TYPE"); } 
-"type"          { print_token("TYPE"); }  
-"len"        { print_token("LENGTH_SPECIFIER"); }
-"."("true"|"false"|"t"|"f")"."  { print_token("LOGICAL_CONST"); }
-"random_seed"   {print_token("INTRINSIC");}
-"random_number"   {print_token("INTRINSIC");}
+"program"       { print_token("PROGRAM"); return PROGRAM; }
+"end"           { print_token("END"); return END; }
+"integer"       { print_token("INTEGER"); return INTEGER; }
+"real"          { print_token("REAL"); return REAL; }
+"logical"       { print_token("LOGICAL"); return LOGICAL; }
+"character"     { print_token("CHARACTER"); return CHARACTER; }
+"if"            { print_token("IF"); return IF; }
+"endif"         { print_token("ENDIF"); return ENDIF; }
+"then"          { print_token("THEN"); return THEN; }
+"else"          { print_token("ELSE"); return ELSE; }
+"do"            { print_token("DO"); return DO; }
+"stop"          { print_token("STOP"); return STOP; }
+"print"         { print_token("PRINT"); return PRINT; }
+"call"          { print_token("CALL"); return CALL; }
+"subroutine"    { print_token("SUBROUTINE"); return SUBROUTINE; }
+"function"      { print_token("FUNCTION"); return FUNCTION; }
+"return"        { print_token("RETURN"); return RETURN; }
+"implicit"      { print_token("IMPLICIT"); return IMPLICIT; }
+"none"          { print_token("NONE"); return NONE; }
+"module"        { print_token("MODULE"); return MODULE; }
+"contains"      { print_token("CONTAINS"); return CONTAINS; }
+"use"           { print_token("USE"); return USE; }
+"end"{WS}+"type"    { print_token("END_TYPE"); return END_TYPE; } 
+"type"          { print_token("TYPE"); return TYPE; }  
+"len"        { print_token("LENGTH_SPECIFIER"); return LENGTH_SPECIFIER; }
+"."("true"|"false"|"t"|"f")"."  { print_token("LOGICAL_CONST"); return LOGICAL_CONST; }
+"random_seed"   {print_token("INTRINSIC"); return INTRINSIC;}
+"random_number"   {print_token("INTRINSIC"); return INTRINSIC;}
 
-"recursive"     { print_token("RECURSIVE"); }
-"result"        { print_token("RESULT"); }
-
-
-"while"         { print_token("WHILE"); }
-"select"        { print_token("SELECT"); }
-"case"          { print_token("CASE"); }
-"default"       { print_token("DEFAULT"); }
-"rank"          { print_token("RANK"); }
-
-"class"         { print_token("CLASS"); }
-"complex"       { print_token("COMPLEX"); }
-
-"allocate"      { print_token("ALLOCATE"); }
-"deallocate"    { print_token("DEALLOCATE"); }
-"allocated"     { print_token("ALLOCATED"); }
-"pointer"       { print_token("POINTER"); }
-"target"        { print_token("TARGET"); }
-"allocatable"   { print_token("ALLOCATABLE"); }
-"intent"        { print_token("INTENT"); }
-"inout"         { print_token("INOUT"); }
-"in"            { print_token("IN"); }
-"out"           { print_token("OUT"); }
-
-"open"          { print_token("OPEN"); }
-"close"         { print_token("CLOSE"); }
-"inquire"       { print_token("INQUIRE"); }
-"write"         { print_token("WRITE"); }
-"read"          { print_token("READ"); }
-"error"         { print_token("ERROR"); }
-
-"=="|"/="|"<="|">="|"<"|">"   { print_token("REL_OP"); }
-"="                            { print_token("ASSIGN"); }
-"+"|"-"|"*"|"/"               { print_token("ARITH_OP"); }
-"("                            { print_token("LPAREN"); }
-")"                            { print_token("RPAREN"); }
-","                            { print_token("COMMA"); }
-"::"                           { print_token("DECL_SEP"); }
-":"                            { print_token("COLON"); }
-".."                          { print_token("ASSUMED_RANK_SPECIFIER"); }
-"**"                       { print_token("EXPONENT"); }
-"//"                       { print_token("CONCAT"); }
-"%"                      { print_token("DERIVED_TYPE_COMPONENT"); }
+"recursive"     { print_token("RECURSIVE"); return RECURSIVE; }
+"result"        { print_token("RESULT"); return RESULT; }
 
 
-"#define"      { print_token("PP_DEFINE"); }
-"#undef"       { print_token("PP_UNDEF"); }
-"#ifdef"       { print_token("PP_IFDEF"); }
-"#ifndef"      { print_token("PP_IFNDEF"); }
-"#if"          { print_token("PP_IF"); }
-"#elif"        { print_token("PP_ELIF"); }
-"#else"        { print_token("PP_ELSE"); }
-"#endif"       { print_token("PP_ENDIF"); }
+"while"         { print_token("WHILE"); return WHILE; }
+"select"        { print_token("SELECT"); return SELECT; }
+"case"          { print_token("CASE"); return CASE; }
+"default"       { print_token("DEFAULT"); return DEFAULT; }
+"rank"          { print_token("RANK"); return RANK; }
 
-"."("and"|"or"|"not")"."  { print_token("LOGICAL_OP"); }
+"class"         { print_token("CLASS"); return CLASS; }
+"complex"       { print_token("COMPLEX"); return COMPLEX; }
+
+"allocate"      { print_token("ALLOCATE"); return ALLOCATE; }
+"deallocate"    { print_token("DEALLOCATE"); return DEALLOCATE; }
+"allocated"     { print_token("ALLOCATED"); return ALLOCATED; }
+"pointer"       { print_token("POINTER"); return POINTER; }
+"target"        { print_token("TARGET"); return TARGET; }
+"allocatable"   { print_token("ALLOCATABLE"); return ALLOCATABLE; }
+"intent"        { print_token("INTENT"); return INTENT; }
+"inout"         { print_token("INOUT"); return INOUT; }
+"in"            { print_token("IN"); return IN; }
+"out"           { print_token("OUT"); return OUT; }
+
+"open"          { print_token("OPEN"); return OPEN; }
+"close"         { print_token("CLOSE"); return CLOSE; }
+"inquire"       { print_token("INQUIRE"); return INQUIRE; }
+"write"         { print_token("WRITE"); return WRITE; }
+"read"          { print_token("READ"); return READ; }
+"error"         { print_token("ERROR"); return ERROR; }
+
+"=="|"/="|"<="|">="|"<"|">"   { print_token("REL_OP"); return REL_OP; }
+"="                            { print_token("ASSIGN"); return ASSIGN; }
+"+"|"-"|"*"|"/"               { print_token("ARITH_OP"); return ARITH_OP; }
+"("                            { print_token("LPAREN"); return LPAREN; }
+")"                            { print_token("RPAREN"); return RPAREN; }
+","                            { print_token("COMMA"); return COMMA; }
+"::"                           { print_token("DECL_SEP"); return DECL_SEP; }
+":"                            { print_token("COLON"); return COLON; }
+".."                          { print_token("ASSUMED_RANK_SPECIFIER"); return ASSUMED_RANK_SPECIFIER; }
+"**"                       { print_token("EXPONENT"); return EXPONENT; }
+"//"                       { print_token("CONCAT"); return CONCAT; }
+"%"                      { print_token("DERIVED_TYPE_COMPONENT"); return DERIVED_TYPE_COMPONENT; }
 
 
-{REAL}         { print_token("REAL_CONST"); }
-{INT}          { print_token("INT_CONST"); }
-{STRING}       { print_token("STRING"); }
+"#define"      { print_token("PP_DEFINE"); return PP_DEFINE; }
+"#undef"       { print_token("PP_UNDEF"); return PP_UNDEF; }
+"#ifdef"       { print_token("PP_IFDEF"); return PP_IFDEF; }
+"#ifndef"      { print_token("PP_IFNDEF"); return PP_IFNDEF; }
+"#if"          { print_token("PP_IF"); return PP_IF; }
+"#elif"        { print_token("PP_ELIF"); return PP_ELIF; }
+"#else"        { print_token("PP_ELSE"); return PP_ELSE; }
+"#endif"       { print_token("PP_ENDIF"); return PP_ENDIF; }
+
+"."("and"|"or"|"not")"."  { print_token("LOGICAL_OP"); return LOGICAL_OP; }
+
+
+{REAL}         { print_token("REAL_CONST"); return REAL_CONST; }
+{INT}          { print_token("INT_CONST"); return INT_CONST; }
+{STRING}       { print_token("STRING"); return STRING; }
 
 {ID}           { 
     if (yyleng > 63) {
@@ -153,6 +155,7 @@ PP_EXPR    [^\n]+
         lexical_errors++;
     } else {
         print_token("IDENTIFIER"); 
+        return IDENTIFIER;
     }
 }
 
@@ -169,7 +172,7 @@ PP_EXPR    [^\n]+
 }
 
 "&"[ \t]*\r?\n     { /* line continuation: ignore newline */ }
-^[ \t]*"&"     { /* ignore leading continuation */ }
+^[ \t]+"&"     { /* ignore leading continuation */ }
 
 \n             { /* yylineno auto-increments */ }
 
@@ -179,25 +182,3 @@ PP_EXPR    [^\n]+
 }
 
 %%
-
-int main(int argc, char **argv) {
-    if (argc > 1) {
-        FILE *fp = fopen(argv[1], "r");
-        if (!fp) {
-            perror("File open failed");
-            return 1;
-        }
-        yyin = fp;
-    }
-    yylex();
-    printf("\n------------------------------------------------\n");
-    if (lexical_errors == 0) {
-        printf("***Lexing successful***\n");
-        printf("Lexical Errors = 0\n");
-    } else {
-        printf("***Lexing failed***\n");
-        printf("Lexical Errors = %d\n", lexical_errors);
-    }
-    printf("------------------------------------------------\n");
-    return 0;
-}

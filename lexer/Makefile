@@ -1,6 +1,3 @@
-# Compiler
-CC = gcc
-
 # Tools
 LEX = flex
 
@@ -10,14 +7,9 @@ CFLAGS = -Wall -Wextra
 # Files
 LEXER = lexer.l
 LEXER_C = lex.yy.c
-TARGET = lexer
 
-# Default target
-all: $(TARGET)
-
-# Build lexer
-$(TARGET): $(LEXER_C)
-	$(CC) $(CFLAGS) $(LEXER_C) -o $(TARGET) $(LDFLAGS)
+# Default target → ONLY generate lex.yy.c
+all: $(LEXER_C)
 
 # Generate C file from Flex
 $(LEXER_C): $(LEXER)
@@ -25,7 +17,7 @@ $(LEXER_C): $(LEXER)
 
 # Clean generated files
 clean:
-	rm -f $(LEXER_C) $(TARGET)
+	rm -f $(LEXER_C)
 
 # Rebuild from scratch
 rebuild: clean all
