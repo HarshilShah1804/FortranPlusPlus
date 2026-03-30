@@ -14,7 +14,7 @@ int yylex();
 %token OPEN CLOSE INQUIRE WRITE READ ERROR
 %token REL_OP ASSIGN ARITH_OP LPAREN RPAREN COMMA DECL_SEP COLON ASSUMED_RANK_SPECIFIER EXPONENT CONCAT DERIVED_TYPE_COMPONENT
 %token PP_DEFINE PP_UNDEF PP_IFDEF PP_IFNDEF PP_IF PP_ELIF PP_ELSE PP_ENDIF LOGICAL_OP
-%token IDENTIFIER INT_CONST REAL_CONST STRING
+%token IDENTIFIER INT_CONST REAL_CONST STRING LENGTH_SPECIFIER
 
 %%
 
@@ -22,11 +22,11 @@ start: program_unit | module_unit
      ;
     
 program_unit: PROGRAM IDENTIFIER program_body END PROGRAM IDENTIFIER
-            | PROGRAM IDENTIFIER program_body END
+            | PROGRAM IDENTIFIER program_body END PROGRAM
             ;
 
 module_unit: MODULE IDENTIFIER module_body END MODULE IDENTIFIER
-           | MODULE IDENTIFIER module_body END
+           | MODULE IDENTIFIER module_body END MODULE
            ;
 
 program_body: declarations executables
@@ -108,6 +108,30 @@ void yyerror(const char *s) {
     fprintf(stderr, "Error: %s\n", s);
 }
 
-int main(void) {
-    return yyparse();
+extern FILE *yyin;
+
+int main(int argc, char **argv) {
+    if (argc > 1) {
+        FILE *file = fopen(argv[1], "r");
+        if (!file) {
+            perror("Error opening file");
+            return 1;
+        }
+        yyin = file;
+    } else {
+        printf("Usage: ./compiler <filename.f90>\n");
+        return 1;
+    }
+
+    printf("Starting parse...\n");
+    if (yyparse() == 0) {
+        printf("Parsing completed successfully!\n");
+    } else {
+        printf("Parsing failed.\n");
+    }
+
+    if (yyin != stdin) {
+        fclose(yyin);
+    }
+    return 0;
 }
