@@ -30,12 +30,17 @@ module_unit: MODULE IDENTIFIER module_body END MODULE IDENTIFIER
            ;
 
 program_body: declarations executables
+            | declarations executables contains_block
             ;
 
-module_body: declarations;
+module_body: declarations
+           | declarations contains_block
+           ;
+
+contains_block: CONTAINS subprogram_list ;
 
 declarations: /* empty */
-            | declarations type_spec attributes DECL_SEP IDENTIFIER
+            | declarations type_spec attributes DECL_SEP identifier_list
             | declarations IMPLICIT NONE
             | declarations USE IDENTIFIER
             ;
@@ -58,6 +63,11 @@ attributes: /* empty */
           | attributes INTENT LPAREN INOUT RPAREN
           ;
 
+identifier_list: /* empty */
+               | IDENTIFIER
+               | identifier_list COMMA IDENTIFIER
+               ;
+
 executables: executable
            | executables executable
            ;
@@ -74,7 +84,7 @@ executable:
     | stop_stmt
     ;
 
-assignment_stmt: IDENTIFIER ASSIGN expression ;
+assignment_stmt: variable_ref ASSIGN expression ;
 
 if_stmt: IF LPAREN expression RPAREN THEN executables else_block ENDIF ;
 
@@ -127,7 +137,7 @@ expression: expression ARITH_OP expression
 
 factor: array_access
       | function_call
-      | IDENTIFIER
+      | variable_ref
       | INT_CONST
       | REAL_CONST
       | LOGICAL_CONST
@@ -135,9 +145,25 @@ factor: array_access
       | LPAREN expression RPAREN
       ;
 
-array_access: IDENTIFIER LPAREN argument_list RPAREN ; 
+array_access: variable_ref LPAREN argument_list RPAREN ;
 
-function_call: IDENTIFIER LPAREN argument_list RPAREN ;
+function_call: variable_ref LPAREN argument_list RPAREN ;
+
+variable_ref: IDENTIFIER
+            | variable_ref DERIVED_TYPE_COMPONENT IDENTIFIER
+            ;
+
+subprogram_list: subprogram
+               | subprogram_list subprogram
+               ;
+
+subprogram: SUBROUTINE IDENTIFIER LPAREN identifier_list RPAREN program_body END SUBROUTINE
+          | SUBROUTINE IDENTIFIER LPAREN identifier_list RPAREN program_body END SUBROUTINE IDENTIFIER
+          | FUNCTION IDENTIFIER LPAREN identifier_list RPAREN program_body END FUNCTION
+          | FUNCTION IDENTIFIER LPAREN identifier_list RPAREN program_body END FUNCTION IDENTIFIER
+          | RECURSIVE FUNCTION IDENTIFIER LPAREN identifier_list RPAREN RESULT LPAREN IDENTIFIER RPAREN program_body END FUNCTION
+          | RECURSIVE FUNCTION IDENTIFIER LPAREN identifier_list RPAREN RESULT LPAREN IDENTIFIER RPAREN program_body END FUNCTION IDENTIFIER
+          ;
 
 argument_list: expression
              | argument_list COMMA expression
