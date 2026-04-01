@@ -63,10 +63,11 @@ void print_reverse_tree(ASTNode* node, int depth) {
 %token <str> ARITH_OP REL_OP LOGICAL_OP ASSIGN EXPONENT DECL_SEP DERIVED_TYPE_COMPONENT
 
 %type <node> start program_unit module_unit program_body module_body
-%type <node> contains_block declarations type_spec attributes identifier_list
+%type <node> contains_block declarations type_spec attributes declaration_attributes
+%type <node> identifier_list declarator_list declarator
 %type <node> executables executable assignment_stmt if_stmt else_block
 %type <node> do_stmt dowhile_stmt select_stmt case_blocks case_block
-%type <node> call_stmt return_stmt stop_stmt print_stmt
+%type <node> call_stmt return_stmt stop_stmt print_stmt allocate_stmt deallocate_stmt
 %type <node> expression factor array_access function_call variable_ref
 %type <node> subprogram_list subprogram argument_list
 
@@ -132,7 +133,7 @@ contains_block: CONTAINS subprogram_list {
               ;
 
 declarations: /* empty */ { $$ = create_node("declarations", "empty"); }
-            | declarations type_spec attributes DECL_SEP identifier_list {
+            | declarations type_spec declaration_attributes DECL_SEP declarator_list {
                 $$ = create_node("declarations", NULL);
                 add_child($$, $1); add_child($$, $2);
                 add_child($$, $3); add_child($$, $5);
@@ -172,6 +173,10 @@ attributes: /* empty */ { $$ = create_node("attributes", "empty"); }
           | attributes INTENT LPAREN INOUT RPAREN { $$ = create_node("attributes", "INTENT INOUT"); add_child($$, $1); }
           ;
 
+declaration_attributes: /* empty */ { $$ = create_node("declaration_attributes", "empty"); }
+                      | COMMA attributes { $$ = create_node("declaration_attributes", NULL); add_child($$, $2); }
+                      ;
+
 identifier_list: /* empty */  { $$ = create_node("identifier_list", "empty"); }
                | IDENTIFIER   {
                     $$ = create_node("identifier_list", NULL);
@@ -183,6 +188,27 @@ identifier_list: /* empty */  { $$ = create_node("identifier_list", "empty"); }
                     add_child($$, create_node("IDENTIFIER", $3));
                }
                ;
+
+declarator_list: declarator {
+                $$ = create_node("declarator_list", NULL);
+                add_child($$, $1);
+            }
+            | declarator_list COMMA declarator {
+                $$ = create_node("declarator_list", NULL);
+                add_child($$, $1);
+                add_child($$, $3);
+            }
+            ;
+
+declarator: IDENTIFIER {
+             $$ = create_node("declarator", NULL);
+             add_child($$, create_node("IDENTIFIER", $1));
+        }
+        | IDENTIFIER LPAREN COLON RPAREN {
+             $$ = create_node("declarator", "deferred_shape");
+             add_child($$, create_node("IDENTIFIER", $1));
+        }
+        ;
 
 executables: executable {
                 $$ = create_node("executables", NULL);
@@ -197,6 +223,8 @@ executables: executable {
 executable: assignment_stmt { $$ = create_node("executable", NULL); add_child($$, $1); }
           | if_stmt          { $$ = create_node("executable", NULL); add_child($$, $1); }
           | print_stmt       { $$ = create_node("executable", NULL); add_child($$, $1); }
+          | allocate_stmt    { $$ = create_node("executable", NULL); add_child($$, $1); }
+          | deallocate_stmt  { $$ = create_node("executable", NULL); add_child($$, $1); }
           | do_stmt          { $$ = create_node("executable", NULL); add_child($$, $1); }
           | dowhile_stmt     { $$ = create_node("executable", NULL); add_child($$, $1); }
           | select_stmt      { $$ = create_node("executable", NULL); add_child($$, $1); }
@@ -276,16 +304,24 @@ call_stmt: CALL IDENTIFIER LPAREN argument_list RPAREN {
 return_stmt: RETURN { $$ = create_node("return_stmt", "RETURN"); } ;
 stop_stmt:   STOP   { $$ = create_node("stop_stmt",   "STOP");   } ;
 
-print_stmt: PRINT COMMA argument_list {
-                $$ = create_node("print_stmt", NULL);
-                add_child($$, $3);
-          }
-          | PRINT ARITH_OP COMMA argument_list {
+print_stmt: PRINT ARITH_OP COMMA argument_list {
                 $$ = create_node("print_stmt", NULL);
                 add_child($$, create_node("FORMAT_SPEC", $2));
                 add_child($$, $4);
           }
           ;
+
+allocate_stmt: ALLOCATE LPAREN argument_list RPAREN {
+                                $$ = create_node("allocate_stmt", NULL);
+                                add_child($$, $3);
+                            }
+                            ;
+
+deallocate_stmt: DEALLOCATE LPAREN argument_list RPAREN {
+                                    $$ = create_node("deallocate_stmt", NULL);
+                                    add_child($$, $3);
+                                }
+                                ;
 
 expression: expression ARITH_OP expression {
                 $$ = create_node("expression", NULL);
