@@ -17,9 +17,19 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential flex yacc
-          
-      - name: Build lexer
+          sudo apt-get install -y build-essential flex bison libfl-dev python3
+
+      - name: Build lexer and parser
         run: |
           chmod +x ./compile.sh
           ./compile.sh
+
+      - name: Generate parsing table
+        run: |
+          python3 create_parsing_table.py
+
+      - name: Upload parsing table artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: parsing-table
+          path: parser/parsing_table.csv
