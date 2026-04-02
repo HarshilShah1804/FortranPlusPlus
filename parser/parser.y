@@ -80,7 +80,7 @@ assignment_stmt: IDENTIFIER ASSIGN expression ;
 if_stmt: IF LPAREN expression RPAREN THEN executables else_block ENDIF ;
 
 do_stmt:
-    DO IDENTIFIER ASSIGN expression COMMA expression executables END DO
+    DO IDENTIFIER ASSIGN expression COMMA expression step_opt executables END DO
     ;
 
 dowhile_stmt:
@@ -115,6 +115,11 @@ stop_stmt:
 
 pointer_stmt:
     IDENTIFIER PTR_ASSIGN IDENTIFIER
+    ;
+    
+step_opt:
+      /* empty */
+    | COMMA expression
     ;
     
 else_block: /* empty */
