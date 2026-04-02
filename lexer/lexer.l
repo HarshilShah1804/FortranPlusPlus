@@ -118,6 +118,7 @@ PP_EXPR    [^\n]+
 "error"         { print_token("ERROR"); }
 
 "=="|"/="|"<="|">="|"<"|">"   { print_token("REL_OP"); }
+"=>"                           { print_token("PTR_ASSIGN"); }
 "="                            { print_token("ASSIGN"); }
 "+"|"-"|"*"|"/"               { print_token("ARITH_OP"); }
 "("                            { print_token("LPAREN"); }

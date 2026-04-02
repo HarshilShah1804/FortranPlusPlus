@@ -15,7 +15,7 @@ int yylex();
 %token REL_OP ASSIGN ARITH_OP LPAREN RPAREN COMMA DECL_SEP COLON ASSUMED_RANK_SPECIFIER EXPONENT CONCAT DERIVED_TYPE_COMPONENT
 %token PP_DEFINE PP_UNDEF PP_IFDEF PP_IFNDEF PP_IF PP_ELIF PP_ELSE PP_ENDIF LOGICAL_OP
 %token IDENTIFIER INT_CONST REAL_CONST STRING
-
+%token PTR_ASSIGN
 %%
 
 start: program_unit | module_unit
@@ -72,6 +72,7 @@ executable:
     | call_stmt
     | return_stmt
     | stop_stmt
+    | pointer_stmt
     ;
 
 assignment_stmt: IDENTIFIER ASSIGN expression ;
@@ -110,6 +111,10 @@ return_stmt:
 
 stop_stmt:
     STOP
+    ;
+
+pointer_stmt:
+    IDENTIFIER PTR_ASSIGN IDENTIFIER
     ;
     
 else_block: /* empty */
