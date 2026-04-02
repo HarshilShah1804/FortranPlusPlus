@@ -67,6 +67,7 @@ void print_reverse_tree(ASTNode* node, int depth) {
 %type <node> identifier_list declarator_list declarator
 %type <node> executables executable assignment_stmt if_stmt else_block
 %type <node> do_stmt dowhile_stmt select_stmt case_blocks case_block
+%type <node> select_rank_stmt rank_blocks rank_block
 %type <node> call_stmt return_stmt stop_stmt print_stmt allocate_stmt deallocate_stmt
 %type <node> expression factor array_access function_call variable_ref
 %type <node> subprogram_list subprogram argument_list
@@ -227,6 +228,7 @@ executable: assignment_stmt { $$ = create_node("executable", NULL); add_child($$
           | deallocate_stmt  { $$ = create_node("executable", NULL); add_child($$, $1); }
           | do_stmt          { $$ = create_node("executable", NULL); add_child($$, $1); }
           | dowhile_stmt     { $$ = create_node("executable", NULL); add_child($$, $1); }
+          | select_rank_stmt { $$ = create_node("executable", NULL); add_child($$, $1); }
           | select_stmt      { $$ = create_node("executable", NULL); add_child($$, $1); }
           | call_stmt        { $$ = create_node("executable", NULL); add_child($$, $1); }
           | return_stmt      { $$ = create_node("executable", NULL); add_child($$, $1); }
@@ -273,6 +275,39 @@ select_stmt: SELECT CASE LPAREN expression RPAREN case_blocks END SELECT {
                 add_child($$, $4); add_child($$, $6);
            }
            ;
+select_rank_stmt: SELECT RANK LPAREN IDENTIFIER RPAREN rank_blocks END SELECT {
+                      $$ = create_node("select_rank_stmt", NULL);
+                      add_child($$, create_node("IDENTIFIER", $4));
+                      add_child($$, $6);
+                  }
+                  ;
+
+rank_blocks: rank_block {
+                 $$ = create_node("rank_blocks", NULL);
+                 add_child($$, $1);
+            }
+            | rank_blocks rank_block {
+                 $$ = create_node("rank_blocks", NULL);
+                 add_child($$, $1); add_child($$, $2);
+            }
+            ;
+
+rank_block: RANK LPAREN INT_CONST RPAREN executables {
+                $$ = create_node("rank_block", NULL);
+                add_child($$, create_node("RANK_VALUE", $3));
+                add_child($$, $5);
+            }
+          | RANK LPAREN ARITH_OP RPAREN executables {
+                $$ = create_node("rank_block", NULL);
+                add_child($$, create_node("RANK_VALUE", $3));
+                add_child($$, $5);
+            }
+          | RANK DEFAULT executables {
+                $$ = create_node("rank_block", "DEFAULT");
+                add_child($$, $3);
+          }
+          ;
+
 
 case_blocks: case_block {
                 $$ = create_node("case_blocks", NULL);
