@@ -42,6 +42,42 @@ void print_reverse_tree(ASTNode* node, int depth) {
     else
         printf("%s\n", node->symbol);
 }
+
+// CLOJURE FORMATTING
+void make_sym_clojure_compatible(char *str) {
+    if (!str) return;
+    for (int i = 0; str[i]; i++) {
+        if (str[i] == '@') {
+            str[i] = '/';
+        }
+    }
+}
+
+void print_clojure_tree(ASTNode* node, int depth) {
+    if (node == NULL) return;
+
+    for (int i = 0; i < depth; i++) printf("  ");
+
+    printf("(:%s", node->symbol); 
+
+    if (node->lexeme) {
+        char *lex_copy = strdup(node->lexeme);
+        make_sym_clojure_compatible(lex_copy);
+        printf(" \"%s\"", lex_copy);
+        free(lex_copy);
+    }
+
+    if (node->num_children == 0) {
+        printf(")\n");
+    } else {
+        printf("\n");
+        for (int i = 0; i < node->num_children; i++) {
+            print_clojure_tree(node->children[i], depth + 1);
+        }
+        for (int i = 0; i < depth; i++) printf("  ");
+        printf(")\n");
+    }
+}
 %}
 
 %union {
@@ -476,8 +512,14 @@ int main(int argc, char **argv) {
     printf("Starting parse\n");
     if (yyparse() == 0) {
         printf("Parsing done!\n");
+
         printf("\nReverse Derivation Tree\n");
         print_reverse_tree(root, 0);
+
+        printf("\nClojure Serialization Format\n");
+        print_clojure_tree(root, 0);
+        printf("\n\n");
+
     } else {
         printf("Parsing failed.\n");
     }
