@@ -75,6 +75,7 @@ void print_reverse_tree(ASTNode* node, int depth) {
 %left REL_OP
 %left ARITH_OP
 %right EXPONENT
+%right UNARY
 
 %%
 
@@ -348,6 +349,16 @@ expression: expression ARITH_OP expression {
                 add_child($$, $3);
             }
           | factor { $$ = create_node("expression", NULL); add_child($$, $1); }
+          | ARITH_OP expression %prec UNARY {
+                $$ = create_node("expression", NULL);
+                add_child($$, create_node("UNARY_OP", $1));
+                add_child($$, $2);
+            }
+          | LOGICAL_OP expression %prec UNARY {
+                $$ = create_node("expression", NULL);
+                add_child($$, create_node("UNARY_OP", $1));
+                add_child($$, $2);
+            }
           ;
 
 factor: array_access  { $$ = create_node("factor", NULL); add_child($$, $1); }
