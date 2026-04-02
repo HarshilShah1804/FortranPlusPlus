@@ -42,6 +42,42 @@ void print_reverse_tree(ASTNode* node, int depth) {
     else
         printf("%s\n", node->symbol);
 }
+
+// CLOJURE FORMATTING
+void make_sym_clojure_compatible(char *str) {
+    if (!str) return;
+    for (int i = 0; str[i]; i++) {
+        if (str[i] == '@') {
+            str[i] = '/';
+        }
+    }
+}
+
+void print_clojure_tree(ASTNode* node, int depth) {
+    if (node == NULL) return;
+
+    for (int i = 0; i < depth; i++) printf("  ");
+
+    printf("(:%s", node->symbol); 
+
+    if (node->lexeme) {
+        char *lex_copy = strdup(node->lexeme);
+        make_sym_clojure_compatible(lex_copy);
+        printf(" \"%s\"", lex_copy);
+        free(lex_copy);
+    }
+
+    if (node->num_children == 0) {
+        printf(")\n");
+    } else {
+        printf("\n");
+        for (int i = 0; i < node->num_children; i++) {
+            print_clojure_tree(node->children[i], depth + 1);
+        }
+        for (int i = 0; i < depth; i++) printf("  ");
+        printf(")\n");
+    }
+}
 %}
 
 %union {
@@ -55,7 +91,7 @@ void print_reverse_tree(ASTNode* node, int depth) {
 %token STOP PRINT CALL SUBROUTINE FUNCTION RETURN RECURSIVE RESULT
 %token ALLOCATE DEALLOCATE ALLOCATED POINTER TARGET ALLOCATABLE INTENT IN OUT INOUT
 %token OPEN CLOSE INQUIRE WRITE READ ERROR
-%token LPAREN RPAREN COMMA COLON ASSUMED_RANK_SPECIFIER CONCAT
+%token LPAREN RPAREN COMMA COLON ASSUMED_RANK_SPECIFIER CONCAT PTR_ASSIGN
 %token PP_DEFINE PP_UNDEF PP_IFDEF PP_IFNDEF PP_IF PP_ELIF PP_ELSE PP_ENDIF
 %token LENGTH_SPECIFIER
 
@@ -67,7 +103,8 @@ void print_reverse_tree(ASTNode* node, int depth) {
 %type <node> identifier_list declarator_list declarator
 %type <node> executables executable assignment_stmt if_stmt else_block
 %type <node> do_stmt dowhile_stmt select_stmt case_blocks case_block
-%type <node> call_stmt return_stmt stop_stmt print_stmt allocate_stmt deallocate_stmt
+%type <node> select_rank_stmt rank_blocks rank_block
+%type <node> call_stmt return_stmt stop_stmt print_stmt allocate_stmt deallocate_stmt pointer_stmt step_opt
 %type <node> expression factor array_access function_call variable_ref
 %type <node> subprogram_list subprogram argument_list
 
@@ -75,6 +112,7 @@ void print_reverse_tree(ASTNode* node, int depth) {
 %left REL_OP
 %left ARITH_OP
 %right EXPONENT
+%right UNARY
 
 %%
 
@@ -227,10 +265,12 @@ executable: assignment_stmt { $$ = create_node("executable", NULL); add_child($$
           | deallocate_stmt  { $$ = create_node("executable", NULL); add_child($$, $1); }
           | do_stmt          { $$ = create_node("executable", NULL); add_child($$, $1); }
           | dowhile_stmt     { $$ = create_node("executable", NULL); add_child($$, $1); }
+          | select_rank_stmt { $$ = create_node("executable", NULL); add_child($$, $1); }
           | select_stmt      { $$ = create_node("executable", NULL); add_child($$, $1); }
           | call_stmt        { $$ = create_node("executable", NULL); add_child($$, $1); }
           | return_stmt      { $$ = create_node("executable", NULL); add_child($$, $1); }
           | stop_stmt        { $$ = create_node("executable", NULL); add_child($$, $1); }
+          | pointer_stmt     { $$ = create_node("executable", NULL); add_child($$, $1); }
           ;
 
 assignment_stmt: variable_ref ASSIGN expression {
@@ -254,11 +294,11 @@ else_block: /* empty */ { $$ = create_node("else_block", "empty"); }
           }
           ;
 
-do_stmt: DO IDENTIFIER ASSIGN expression COMMA expression executables END DO {
+do_stmt: DO IDENTIFIER ASSIGN expression COMMA expression step_opt executables END DO {
             $$ = create_node("do_stmt", NULL);
             add_child($$, create_node("IDENTIFIER", $2));
             add_child($$, create_node("ASSIGN", $3));
-            add_child($$, $4); add_child($$, $6); add_child($$, $7);
+            add_child($$, $4); add_child($$, $6); add_child($$, $8);
        }
        ;
 
@@ -273,6 +313,39 @@ select_stmt: SELECT CASE LPAREN expression RPAREN case_blocks END SELECT {
                 add_child($$, $4); add_child($$, $6);
            }
            ;
+select_rank_stmt: SELECT RANK LPAREN IDENTIFIER RPAREN rank_blocks END SELECT {
+                      $$ = create_node("select_rank_stmt", NULL);
+                      add_child($$, create_node("IDENTIFIER", $4));
+                      add_child($$, $6);
+                  }
+                  ;
+
+rank_blocks: rank_block {
+                 $$ = create_node("rank_blocks", NULL);
+                 add_child($$, $1);
+            }
+            | rank_blocks rank_block {
+                 $$ = create_node("rank_blocks", NULL);
+                 add_child($$, $1); add_child($$, $2);
+            }
+            ;
+
+rank_block: RANK LPAREN INT_CONST RPAREN executables {
+                $$ = create_node("rank_block", NULL);
+                add_child($$, create_node("RANK_VALUE", $3));
+                add_child($$, $5);
+            }
+          | RANK LPAREN ARITH_OP RPAREN executables {
+                $$ = create_node("rank_block", NULL);
+                add_child($$, create_node("RANK_VALUE", $3));
+                add_child($$, $5);
+            }
+          | RANK DEFAULT executables {
+                $$ = create_node("rank_block", "DEFAULT");
+                add_child($$, $3);
+          }
+          ;
+
 
 case_blocks: case_block {
                 $$ = create_node("case_blocks", NULL);
@@ -299,10 +372,27 @@ call_stmt: CALL IDENTIFIER LPAREN argument_list RPAREN {
                 add_child($$, create_node("IDENTIFIER", $2));
                 add_child($$, $4);
          }
+         | CALL IDENTIFIER LPAREN RPAREN {
+                $$ = create_node("call_stmt", NULL);
+                add_child($$, create_node("IDENTIFIER", $2));
+                add_child($$, create_node("argument_list", "empty"));
+         }
          ;
 
 return_stmt: RETURN { $$ = create_node("return_stmt", "RETURN"); } ;
 stop_stmt:   STOP   { $$ = create_node("stop_stmt",   "STOP");   } ;
+pointer_stmt: variable_ref PTR_ASSIGN variable_ref {
+                $$ = create_node("pointer_stmt", NULL);
+                add_child($$, $1);
+                add_child($$, $3);
+            }
+            ;
+step_opt: /* empty */ { $$ = create_node("step_opt", "empty"); }
+        | COMMA expression {
+              $$ = create_node("step_opt", NULL);
+              add_child($$, $2);
+          }
+        ;
 
 print_stmt: PRINT ARITH_OP COMMA argument_list {
                 $$ = create_node("print_stmt", NULL);
@@ -348,6 +438,16 @@ expression: expression ARITH_OP expression {
                 add_child($$, $3);
             }
           | factor { $$ = create_node("expression", NULL); add_child($$, $1); }
+          | ARITH_OP expression %prec UNARY {
+                $$ = create_node("expression", NULL);
+                add_child($$, create_node("UNARY_OP", $1));
+                add_child($$, $2);
+            }
+          | LOGICAL_OP expression %prec UNARY {
+                $$ = create_node("expression", NULL);
+                add_child($$, create_node("UNARY_OP", $1));
+                add_child($$, $2);
+            }
           ;
 
 factor: array_access  { $$ = create_node("factor", NULL); add_child($$, $1); }
@@ -369,6 +469,11 @@ array_access: variable_ref LPAREN argument_list RPAREN {
 function_call: variable_ref LPAREN argument_list RPAREN {
                 $$ = create_node("function_call", NULL);
                 add_child($$, $1); add_child($$, $3);
+             }
+             | variable_ref LPAREN RPAREN {
+                $$ = create_node("function_call", NULL);
+                add_child($$, $1);
+                add_child($$, create_node("argument_list", "empty"));
              }
              ;
 
@@ -465,8 +570,14 @@ int main(int argc, char **argv) {
     printf("Starting parse\n");
     if (yyparse() == 0) {
         printf("Parsing done!\n");
+
         printf("\nReverse Derivation Tree\n");
         print_reverse_tree(root, 0);
+
+        printf("\nClojure Serialization Format\n");
+        print_clojure_tree(root, 0);
+        printf("\n\n");
+
     } else {
         printf("Parsing failed.\n");
     }
