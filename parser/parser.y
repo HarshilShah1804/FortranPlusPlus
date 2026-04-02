@@ -334,6 +334,11 @@ call_stmt: CALL IDENTIFIER LPAREN argument_list RPAREN {
                 add_child($$, create_node("IDENTIFIER", $2));
                 add_child($$, $4);
          }
+         | CALL IDENTIFIER LPAREN RPAREN {
+                $$ = create_node("call_stmt", NULL);
+                add_child($$, create_node("IDENTIFIER", $2));
+                add_child($$, create_node("argument_list", "empty"));
+         }
          ;
 
 return_stmt: RETURN { $$ = create_node("return_stmt", "RETURN"); } ;
@@ -404,6 +409,11 @@ array_access: variable_ref LPAREN argument_list RPAREN {
 function_call: variable_ref LPAREN argument_list RPAREN {
                 $$ = create_node("function_call", NULL);
                 add_child($$, $1); add_child($$, $3);
+             }
+             | variable_ref LPAREN RPAREN {
+                $$ = create_node("function_call", NULL);
+                add_child($$, $1);
+                add_child($$, create_node("argument_list", "empty"));
              }
              ;
 
