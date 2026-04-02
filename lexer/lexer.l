@@ -120,6 +120,7 @@ PP_EXPR    [^\n]+
 "error"         { print_token("ERROR"); return ERROR; }
 
 "=="|"/="|"<="|">="|"<"|">"   { print_token("REL_OP"); yylval.str = strdup(yytext); return REL_OP; }
+"=>"  { print_token("PTR_ASSIGN"); return PTR_ASSIGN; }
 "="                            { print_token("ASSIGN"); yylval.str = strdup(yytext); return ASSIGN; }
 "+"|"-"|"*"|"/"               { print_token("ARITH_OP"); yylval.str = strdup(yytext); return ARITH_OP; }
 "("                            { print_token("LPAREN"); return LPAREN; }

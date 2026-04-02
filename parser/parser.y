@@ -91,7 +91,7 @@ void print_clojure_tree(ASTNode* node, int depth) {
 %token STOP PRINT CALL SUBROUTINE FUNCTION RETURN RECURSIVE RESULT
 %token ALLOCATE DEALLOCATE ALLOCATED POINTER TARGET ALLOCATABLE INTENT IN OUT INOUT
 %token OPEN CLOSE INQUIRE WRITE READ ERROR
-%token LPAREN RPAREN COMMA COLON ASSUMED_RANK_SPECIFIER CONCAT
+%token LPAREN RPAREN COMMA COLON ASSUMED_RANK_SPECIFIER CONCAT PTR_ASSIGN
 %token PP_DEFINE PP_UNDEF PP_IFDEF PP_IFNDEF PP_IF PP_ELIF PP_ELSE PP_ENDIF
 %token LENGTH_SPECIFIER
 
@@ -104,7 +104,7 @@ void print_clojure_tree(ASTNode* node, int depth) {
 %type <node> executables executable assignment_stmt if_stmt else_block
 %type <node> do_stmt dowhile_stmt select_stmt case_blocks case_block
 %type <node> select_rank_stmt rank_blocks rank_block
-%type <node> call_stmt return_stmt stop_stmt print_stmt allocate_stmt deallocate_stmt
+%type <node> call_stmt return_stmt stop_stmt print_stmt allocate_stmt deallocate_stmt pointer_stmt step_opt
 %type <node> expression factor array_access function_call variable_ref
 %type <node> subprogram_list subprogram argument_list
 
@@ -270,6 +270,7 @@ executable: assignment_stmt { $$ = create_node("executable", NULL); add_child($$
           | call_stmt        { $$ = create_node("executable", NULL); add_child($$, $1); }
           | return_stmt      { $$ = create_node("executable", NULL); add_child($$, $1); }
           | stop_stmt        { $$ = create_node("executable", NULL); add_child($$, $1); }
+          | pointer_stmt     { $$ = create_node("executable", NULL); add_child($$, $1); }
           ;
 
 assignment_stmt: variable_ref ASSIGN expression {
@@ -293,11 +294,11 @@ else_block: /* empty */ { $$ = create_node("else_block", "empty"); }
           }
           ;
 
-do_stmt: DO IDENTIFIER ASSIGN expression COMMA expression executables END DO {
+do_stmt: DO IDENTIFIER ASSIGN expression COMMA expression step_opt executables END DO {
             $$ = create_node("do_stmt", NULL);
             add_child($$, create_node("IDENTIFIER", $2));
             add_child($$, create_node("ASSIGN", $3));
-            add_child($$, $4); add_child($$, $6); add_child($$, $7);
+            add_child($$, $4); add_child($$, $6); add_child($$, $8);
        }
        ;
 
@@ -380,6 +381,18 @@ call_stmt: CALL IDENTIFIER LPAREN argument_list RPAREN {
 
 return_stmt: RETURN { $$ = create_node("return_stmt", "RETURN"); } ;
 stop_stmt:   STOP   { $$ = create_node("stop_stmt",   "STOP");   } ;
+pointer_stmt: variable_ref PTR_ASSIGN variable_ref {
+                $$ = create_node("pointer_stmt", NULL);
+                add_child($$, $1);
+                add_child($$, $3);
+            }
+            ;
+step_opt: /* empty */ { $$ = create_node("step_opt", "empty"); }
+        | COMMA expression {
+              $$ = create_node("step_opt", NULL);
+              add_child($$, $2);
+          }
+        ;
 
 print_stmt: PRINT ARITH_OP COMMA argument_list {
                 $$ = create_node("print_stmt", NULL);
