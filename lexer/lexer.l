@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../ast/ast.h"
 #include "../parser/y.tab.h"
 
 int lexical_errors = 0;
