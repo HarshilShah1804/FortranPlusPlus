@@ -36,4 +36,11 @@ ASTNode* make_call(ASTNode *func, ASTNode *args);
 /* Temporary node (to be refined later) */
 ASTNode* make_call_or_index(ASTNode *base, ASTNode *args);
 
+/* Containers */
+ASTNode* make_block(void);
+void block_add(ASTNode *block, ASTNode *child);
+ASTNode* make_arg_list(void);
+void arg_list_add(ASTNode *list, ASTNode *arg);
+ASTNode* arg_list_prepend(ASTNode *list, ASTNode *arg);
+
 #endif /* AST_BUILDERS_H */
