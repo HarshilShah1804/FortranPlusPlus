@@ -9,6 +9,47 @@
 #include "../parser/y.tab.h"
 
 int lexical_errors = 0;
+int paren_balance = 0;
+int if_balance = 0;
+
+#define MAX_LINE_LENGTH 4096
+
+char current_line[MAX_LINE_LENGTH];
+size_t current_line_len = 0;
+int column = 1;
+int token_column = 1;
+
+static void reset_line(void) {
+    current_line_len = 0;
+    current_line[0] = '\0';
+    column = 1;
+}
+
+static void append_text(const char *text, int len) {
+    if (!text || len <= 0) {
+        return;
+    }
+    size_t avail = (MAX_LINE_LENGTH - 1) - current_line_len;
+    if ((size_t)len > avail) {
+        len = (int)avail;
+    }
+    if (len > 0) {
+        memcpy(current_line + current_line_len, text, (size_t)len);
+        current_line_len += (size_t)len;
+        current_line[current_line_len] = '\0';
+    }
+    column += len;
+}
+
+static void append_text_strip_newline(const char *text, int len) {
+    while (len > 0 && (text[len - 1] == '\n' || text[len - 1] == '\r')) {
+        len--;
+    }
+    append_text(text, len);
+}
+
+#define SET_TOKEN() do { token_column = column; append_text(yytext, yyleng); } while (0)
+#define APPEND_TEXT() do { append_text(yytext, yyleng); } while (0)
 
 %}
 
@@ -29,138 +70,142 @@ PP_EXPR    [^\n]+
 /* ---------- Rules ---------- */
 %%
 
-"!*"                    { BEGIN(BLOCK_COMMENT); }
-<BLOCK_COMMENT>"*!"     { BEGIN(INITIAL); }
-<BLOCK_COMMENT>\n       { /* yylineno auto-increments */ }
-<BLOCK_COMMENT>.        { /* ignore all other characters inside the comment */ }
+"!*"                    { APPEND_TEXT(); BEGIN(BLOCK_COMMENT); }
+<BLOCK_COMMENT>"*!"     { APPEND_TEXT(); BEGIN(INITIAL); }
+<BLOCK_COMMENT>\n       { reset_line(); }
+<BLOCK_COMMENT>.        { APPEND_TEXT(); }
 <BLOCK_COMMENT><<EOF>>  { 
     lexical_errors++;
     printf("[Line %-3d]  ERROR: Unclosed block comment\n", yylineno); 
     exit(1);
 }
 
-!([^*].*)?   {}
+!([^*].*)?   { APPEND_TEXT(); }
 
-"program"       {  return PROGRAM; }
-"end"           {  return END; }
-"integer"       {  return INTEGER; }
-"real"          {  return REAL; }
-"logical"       {  return LOGICAL; }
-"character"     {  return CHARACTER; }
-"if"            {  return IF; }
-"endif"         {  return ENDIF; }
-"then"          {  return THEN; }
-"else"          {  return ELSE; }
-"do"            {  return DO; }
-"stop"          {  return STOP; }
-"print"         {  return PRINT; }
-"call"          {  return CALL; }
-"subroutine"    {  return SUBROUTINE; }
-"function"      {  return FUNCTION; }
-"return"        {  return RETURN; }
-"implicit"      {  return IMPLICIT; }
-"none"          {  return NONE; }
-"module"        {  return MODULE; }
-"contains"      {  return CONTAINS; }
-"use"           {  return USE; }
-"end"{WS}+"type"    {  return END_TYPE; } 
-"type"          {  return TYPE; }  
-"len"        {  return LENGTH_SPECIFIER; }
-"."("true"|"false"|"t"|"f")"."  {  return LOGICAL_CONST; }
-"random_seed"   { return INTRINSIC;}
-"random_number"   { return INTRINSIC;}
+"program"       { SET_TOKEN(); return PROGRAM; }
+"end"           { SET_TOKEN(); return END; }
+"integer"       { SET_TOKEN(); return INTEGER; }
+"real"          { SET_TOKEN(); return REAL; }
+"logical"       { SET_TOKEN(); return LOGICAL; }
+"character"     { SET_TOKEN(); return CHARACTER; }
+"if"            { SET_TOKEN(); if_balance++; return IF; }
+"endif" | "end if"         { SET_TOKEN(); if_balance--; return ENDIF; }
+"then"          { SET_TOKEN(); return THEN; }
+"else"          { SET_TOKEN(); return ELSE; }
+"do"            { SET_TOKEN(); return DO; }
+"stop"          { SET_TOKEN(); return STOP; }
+"print"         { SET_TOKEN(); return PRINT; }
+"call"          { SET_TOKEN(); return CALL; }
+"subroutine"    { SET_TOKEN(); return SUBROUTINE; }
+"function"      { SET_TOKEN(); return FUNCTION; }
+"return"        { SET_TOKEN(); return RETURN; }
+"implicit"      { SET_TOKEN(); return IMPLICIT; }
+"none"          { SET_TOKEN(); return NONE; }
+"module"        { SET_TOKEN(); return MODULE; }
+"contains"      { SET_TOKEN(); return CONTAINS; }
+"use"           { SET_TOKEN(); return USE; }
+"end"{WS}+"type"    { SET_TOKEN(); return END_TYPE; } 
+"type"          { SET_TOKEN(); return TYPE; }  
+"len"        { SET_TOKEN(); return LENGTH_SPECIFIER; }
+"."("true"|"false"|"t"|"f")"."  { SET_TOKEN(); return LOGICAL_CONST; }
+"random_seed"   { SET_TOKEN(); return INTRINSIC; }
+"random_number"   { SET_TOKEN(); return INTRINSIC; }
 
-"recursive"     {  return RECURSIVE; }
-"result"        {  return RESULT; }
-
-
-"while"         {  return WHILE; }
-"select"        {  return SELECT; }
-"case"          {  return CASE; }
-"default"       {  return DEFAULT; }
-"rank"          {  return RANK; }
-
-"class"         {  return CLASS; }
-"complex"       {  return COMPLEX; }
-
-"allocate"      {  return ALLOCATE; }
-"deallocate"    {  return DEALLOCATE; }
-"allocated"     {  return ALLOCATED; }
-"pointer"       {  return POINTER; }
-"target"        {  return TARGET; }
-"allocatable"   {  return ALLOCATABLE; }
-"intent"        {  return INTENT; }
-"inout"         {  return INOUT; }
-"in"            {  return IN; }
-"out"           {  return OUT; }
-
-"open"          {  return OPEN; }
-"close"         {  return CLOSE; }
-"inquire"       {  return INQUIRE; }
-"write"         {  return WRITE; }
-"read"          {  return READ; }
-"error"         {  return ERROR; }
-
-"=="|"/="|"<="|">="|"<"|">"   {   return REL_OP; }
-"=>"  {  return PTR_ASSIGN; }
-"="                            {   return ASSIGN; }
-"+"|"-"|"*"|"/"               {   return ARITH_OP; }
-"("                            {  return LPAREN; }
-")"                            {  return RPAREN; }
-","                            {  return COMMA; }
-"::"                           {   return DECL_SEP; }
-":"                            {  return COLON; }
-".."                          {  return ASSUMED_RANK_SPECIFIER; }
-"**"                           {   return EXPONENT; }
-"//"                           {  return CONCAT; }
-"%"   {   return DERIVED_TYPE_COMPONENT; }
+"recursive"     { SET_TOKEN(); return RECURSIVE; }
+"result"        { SET_TOKEN(); return RESULT; }
 
 
-"#define"      {  return PP_DEFINE; }
-"#undef"       {  return PP_UNDEF; }
-"#ifdef"       {  return PP_IFDEF; }
-"#ifndef"      {  return PP_IFNDEF; }
-"#if"          {  return PP_IF; }
-"#elif"        {  return PP_ELIF; }
-"#else"        {  return PP_ELSE; }
-"#endif"       {  return PP_ENDIF; }
+"while"         { SET_TOKEN(); return WHILE; }
+"select"        { SET_TOKEN(); return SELECT; }
+"case"          { SET_TOKEN(); return CASE; }
+"default"       { SET_TOKEN(); return DEFAULT; }
+"rank"          { SET_TOKEN(); return RANK; }
 
-"."("and"|"or"|"not")"."  {   return LOGICAL_OP; }
+"class"         { SET_TOKEN(); return CLASS; }
+"complex"       { SET_TOKEN(); return COMPLEX; }
+
+"allocate"      { SET_TOKEN(); return ALLOCATE; }
+"deallocate"    { SET_TOKEN(); return DEALLOCATE; }
+"allocated"     { SET_TOKEN(); return ALLOCATED; }
+"pointer"       { SET_TOKEN(); return POINTER; }
+"target"        { SET_TOKEN(); return TARGET; }
+"allocatable"   { SET_TOKEN(); return ALLOCATABLE; }
+"intent"        { SET_TOKEN(); return INTENT; }
+"inout"         { SET_TOKEN(); return INOUT; }
+"in"            { SET_TOKEN(); return IN; }
+"out"           { SET_TOKEN(); return OUT; }
+
+"open"          { SET_TOKEN(); return OPEN; }
+"close"         { SET_TOKEN(); return CLOSE; }
+"inquire"       { SET_TOKEN(); return INQUIRE; }
+"write"         { SET_TOKEN(); return WRITE; }
+"read"          { SET_TOKEN(); return READ; }
+"error"         { SET_TOKEN(); return ERROR; }
+
+"=="|"/="|"<="|">="|"<"|">"   { SET_TOKEN(); return REL_OP; }
+"=>"  { SET_TOKEN(); return PTR_ASSIGN; }
+"="                            { SET_TOKEN(); return ASSIGN; }
+"+"|"-"|"*"|"/"               { SET_TOKEN(); return ARITH_OP; }
+"("                            { SET_TOKEN(); paren_balance++; return LPAREN; }
+")"                            { SET_TOKEN(); paren_balance--; return RPAREN; }
+","                            { SET_TOKEN(); return COMMA; }
+"::"                           { SET_TOKEN(); return DECL_SEP; }
+":"                            { SET_TOKEN(); return COLON; }
+".."                          { SET_TOKEN(); return ASSUMED_RANK_SPECIFIER; }
+"**"                           { SET_TOKEN(); return EXPONENT; }
+"//"                           { SET_TOKEN(); return CONCAT; }
+"%"   { SET_TOKEN(); return DERIVED_TYPE_COMPONENT; }
 
 
-{REAL}         {   return REAL_CONST; }
-{INT}          {   return INT_CONST; }
-{STRING}       {   return STRING; }
+"#define"      { SET_TOKEN(); return PP_DEFINE; }
+"#undef"       { SET_TOKEN(); return PP_UNDEF; }
+"#ifdef"       { SET_TOKEN(); return PP_IFDEF; }
+"#ifndef"      { SET_TOKEN(); return PP_IFNDEF; }
+"#if"          { SET_TOKEN(); return PP_IF; }
+"#elif"        { SET_TOKEN(); return PP_ELIF; }
+"#else"        { SET_TOKEN(); return PP_ELSE; }
+"#endif"       { SET_TOKEN(); return PP_ENDIF; }
+
+"."("and"|"or"|"not")"."  { SET_TOKEN(); return LOGICAL_OP; }
+
+
+{REAL}         { SET_TOKEN(); return REAL_CONST; }
+{INT}          { SET_TOKEN(); return INT_CONST; }
+{STRING}       { SET_TOKEN(); return STRING; }
 
 {ID}           { 
+    SET_TOKEN();
     if (yyleng > 63) {
         printf("[Line %-3d]  ERROR: Identifier exceeds 63 chars\n", yylineno);
         lexical_errors++;
     } else {
-         
-        
         return IDENTIFIER;
     }
 }
 
-{WS}           { /* ignore */ }
+{WS}           { APPEND_TEXT(); }
 
 \"([^"\n]|\"\")*\n  { 
+    append_text_strip_newline(yytext, yyleng);
     printf("[Line %-3d]  ERROR: Unclosed string literal\n", yylineno - 1); 
     lexical_errors++; 
+    reset_line();
 }
 
 \'([^'\n]|\'\')*\n  { 
+    append_text_strip_newline(yytext, yyleng);
     printf("[Line %-3d]  ERROR: Unclosed string literal\n", yylineno - 1); 
     lexical_errors++; 
+    reset_line();
 }
 
-"&"[ \t]*\r?\n     { /* line continuation: ignore newline */ }
-^[ \t]+"&"     { /* ignore leading continuation */ }
+"&"[ \t]*\r?\n     { append_text_strip_newline(yytext, yyleng); reset_line(); }
+^[ \t]+"&"     { APPEND_TEXT(); }
 
-\n             { /* yylineno auto-increments */ }
+\n             { reset_line(); }
 
 .              { 
+    SET_TOKEN();
     printf("[Line %-3d]  ERROR: Stray character: '%s'\n", yylineno, yytext);
     lexical_errors++;
 }

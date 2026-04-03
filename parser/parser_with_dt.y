@@ -18,6 +18,8 @@ int yylex();
   struct DerivationNode *node;
 }
 
+%define parse.error verbose
+
 %token PROGRAM MODULE END CONTAINS USE NONE IMPLICIT
 %token INTEGER REAL LOGICAL CHARACTER TYPE CLASS END_TYPE COMPLEX
 %token IF THEN ELSE DO ENDIF LEN INTRINSIC WHILE SELECT CASE DEFAULT RANK
@@ -858,12 +860,41 @@ pp_else_opt: /* empty */
 
 extern int yylineno;
 extern char *yytext;
+extern int token_column;
+extern int paren_balance;
+extern int if_balance;
+extern char current_line[];
 
 void yyerror(const char *s) {
-    fprintf(stderr, "PARSE ERROR\n");
-    fprintf(stderr, "Message : %s\n", s);
-    fprintf(stderr, "Near    : '%s'\n", yytext);
-    fprintf(stderr, "Line    : %d\n", yylineno);
+  const char *code_prefix = "-> Code: ";
+  const char *near_text = (yytext && yytext[0] != '\0') ? yytext : "EOF";
+  const char *specific_hint = NULL;
+
+  fprintf(stderr, "\x1b[31mPARSE ERROR\x1b[0m\n");
+  fprintf(stderr, "Message : %s\n", s);
+  fprintf(stderr, "Line    : %d\n", yylineno);
+  fprintf(stderr, "Column  : %d\n", token_column);
+  fprintf(stderr, "Near    : '%s'\n", near_text);
+
+  if (current_line[0] != '\0') {
+    int caret_col = (int)strlen(code_prefix) + token_column - 1;
+    if (caret_col < 0) {
+      caret_col = 0;
+    }
+    fprintf(stderr, "%s%s\n", code_prefix, current_line);
+    fprintf(stderr, "%*s^\n", caret_col, "");
+  }
+
+  if (paren_balance > 0) {
+    specific_hint = "Missing closing ')'";
+  } else if (if_balance > 0) {
+    specific_hint = "Missing ENDIF for an IF block";
+  } 
+  if (specific_hint) {
+    fprintf(stderr, "Hint    : %s\n", specific_hint);
+  } else {
+    fprintf(stderr, "Hint    : Check syntax near the token and ensure blocks and parentheses are closed.\n");
+  }
 }
 
 extern FILE *yyin;
