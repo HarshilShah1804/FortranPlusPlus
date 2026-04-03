@@ -38,7 +38,7 @@ ID          {LETTER}({LETTER}|{DIGIT}|_)*
 INT         {DIGIT}+
 
 EXP     [Ee][+-]?{DIGIT}+
-REAL        ({DIGIT}+\.{DIGIT}*|{DIGIT}*\.{DIGIT}+)([EeDd][+-]?{DIGIT}+)?
+REAL        (({DIGIT}+\.{DIGIT}*|{DIGIT}*\.{DIGIT}+)([EeDd][+-]?{DIGIT}+)?|{DIGIT}+[EeDd][+-]?{DIGIT}+)
 STRING      \"([^"]|\"\")*\"|\'([^']|\'\')*\'
 WS          [ \t\r]+
 PP_ID      [A-Za-z_][A-Za-z0-9_]*
@@ -84,7 +84,7 @@ PP_EXPR    [^\n]+
 "end"{WS}+"type"    { print_token("END_TYPE"); return END_TYPE; } 
 "type"          { print_token("TYPE"); return TYPE; }  
 "len"        { print_token("LENGTH_SPECIFIER"); return LENGTH_SPECIFIER; }
-"."("true"|"false"|"t"|"f")"."  { print_token("LOGICAL_CONST"); yylval.str = strdup(yytext); return LOGICAL_CONST; }
+"."("true"|"false"|"t"|"f")"."  { print_token("LOGICAL_CONST"); return LOGICAL_CONST; }
 "random_seed"   {print_token("INTRINSIC"); return INTRINSIC;}
 "random_number"   {print_token("INTRINSIC"); return INTRINSIC;}
 
@@ -119,19 +119,19 @@ PP_EXPR    [^\n]+
 "read"          { print_token("READ"); return READ; }
 "error"         { print_token("ERROR"); return ERROR; }
 
-"=="|"/="|"<="|">="|"<"|">"   { print_token("REL_OP"); yylval.str = strdup(yytext); return REL_OP; }
+"=="|"/="|"<="|">="|"<"|">"   { print_token("REL_OP");  return REL_OP; }
 "=>"  { print_token("PTR_ASSIGN"); return PTR_ASSIGN; }
-"="                            { print_token("ASSIGN"); yylval.str = strdup(yytext); return ASSIGN; }
-"+"|"-"|"*"|"/"               { print_token("ARITH_OP"); yylval.str = strdup(yytext); return ARITH_OP; }
+"="                            { print_token("ASSIGN");  return ASSIGN; }
+"+"|"-"|"*"|"/"               { print_token("ARITH_OP");  return ARITH_OP; }
 "("                            { print_token("LPAREN"); return LPAREN; }
 ")"                            { print_token("RPAREN"); return RPAREN; }
 ","                            { print_token("COMMA"); return COMMA; }
-"::"                           { print_token("DECL_SEP"); yylval.str = strdup(yytext); return DECL_SEP; }
+"::"                           { print_token("DECL_SEP");  return DECL_SEP; }
 ":"                            { print_token("COLON"); return COLON; }
 ".."                          { print_token("ASSUMED_RANK_SPECIFIER"); return ASSUMED_RANK_SPECIFIER; }
-"**"                           { print_token("EXPONENT"); yylval.str = strdup(yytext); return EXPONENT; }
+"**"                           { print_token("EXPONENT");  return EXPONENT; }
 "//"                           { print_token("CONCAT"); return CONCAT; }
-"%"   { print_token("DERIVED_TYPE_COMPONENT"); yylval.str = strdup(yytext); return DERIVED_TYPE_COMPONENT; }
+"%"   { print_token("DERIVED_TYPE_COMPONENT");  return DERIVED_TYPE_COMPONENT; }
 
 
 "#define"      { print_token("PP_DEFINE"); return PP_DEFINE; }
@@ -143,12 +143,12 @@ PP_EXPR    [^\n]+
 "#else"        { print_token("PP_ELSE"); return PP_ELSE; }
 "#endif"       { print_token("PP_ENDIF"); return PP_ENDIF; }
 
-"."("and"|"or"|"not")"."  { print_token("LOGICAL_OP"); yylval.str = strdup(yytext); return LOGICAL_OP; }
+"."("and"|"or"|"not")"."  { print_token("LOGICAL_OP");  return LOGICAL_OP; }
 
 
-{REAL}         { print_token("REAL_CONST"); yylval.str = strdup(yytext); return REAL_CONST; }
-{INT}          { print_token("INT_CONST"); yylval.str = strdup(yytext); return INT_CONST; }
-{STRING}       { print_token("STRING"); yylval.str = strdup(yytext); return STRING; }
+{REAL}         { print_token("REAL_CONST");  return REAL_CONST; }
+{INT}          { print_token("INT_CONST");  return INT_CONST; }
+{STRING}       { print_token("STRING");  return STRING; }
 
 {ID}           { 
     if (yyleng > 63) {
@@ -156,7 +156,7 @@ PP_EXPR    [^\n]+
         lexical_errors++;
     } else {
         print_token("IDENTIFIER"); 
-        yylval.str = strdup(yytext);
+        
         return IDENTIFIER;
     }
 }
