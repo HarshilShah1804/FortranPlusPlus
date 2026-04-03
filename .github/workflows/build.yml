@@ -36,5 +36,5 @@ jobs:
 
       - name: Run tests
         run: |
-          chomod +x ./run_parser_tests.sh
+          chmod +x ./run_parser_tests.sh
           ./run_parser_tests.sh
