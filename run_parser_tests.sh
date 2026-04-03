@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PARSER=./parser_out
-TESTS_DIR=./lexer/tests
+TESTS_DIR=./tests
 PASS=0
 FAIL=0
 

@@ -33,3 +33,8 @@ jobs:
         with:
           name: parsing-table
           path: ./parsing_table.csv
+
+      - name: Run tests
+        run: |
+          chmod +x ./run_parser_tests.sh
+          ./run_parser_tests.sh
