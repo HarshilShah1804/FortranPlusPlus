@@ -9,6 +9,8 @@
 typedef enum {
     NODE_PROGRAM,
     NODE_MODULE,
+    NODE_BLOCK,
+    NODE_ARG_LIST,
 
     NODE_DECL,
     NODE_ASSIGN,
@@ -129,4 +131,3 @@ void add_child(ASTNode *parent, ASTNode *child);
 
 
 #endif /* AST_H */
-

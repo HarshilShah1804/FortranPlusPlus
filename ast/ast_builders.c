@@ -201,3 +201,43 @@ ASTNode* make_call_or_index(ASTNode *base, ASTNode *args)
     
     return node;
 }
+
+ASTNode* make_block(void)
+{
+    return new_node(NODE_BLOCK);
+}
+
+void block_add(ASTNode *block, ASTNode *child)
+{
+    add_child(block, child);
+}
+
+ASTNode* make_arg_list(void)
+{
+    return new_node(NODE_ARG_LIST);
+}
+
+void arg_list_add(ASTNode *list, ASTNode *arg)
+{
+    add_child(list, arg);
+}
+
+ASTNode* arg_list_prepend(ASTNode *list, ASTNode *arg)
+{
+    if (!arg) {
+        return list;
+    }
+    
+    ASTNode **new_children = (ASTNode **)malloc((list->data.generic.num_children + 1) * sizeof(ASTNode *));
+    if (!new_children) {
+        return list;
+    }
+    new_children[0] = arg;
+    for (int i = 0; i < list->data.generic.num_children; ++i) {
+        new_children[i + 1] = list->data.generic.children[i];
+    }
+    free(list->data.generic.children);
+    list->data.generic.children = new_children;
+    list->data.generic.num_children++;
+    return list;
+}
