@@ -5,7 +5,7 @@ CC = gcc
 YACC = yacc
 
 # Files
-PARSER = parser_with_dt.y
+PARSER = parser.y
 PARSER_C = y.tab.c
 PARSER_H = y.tab.h
 
