@@ -12,16 +12,47 @@ def create_parse_table():
         print("Error: parser/y.output not found. Run yacc first.")
         exit(1)
 
+    declared_terminals = set()
+    with open('parser/y.output', 'r') as f:
+        text = f.read()
+
+    term_section = re.search(
+        r'Terminals, with rules where they appear\s*\n(.*?)(?=\nNonterminals,)',
+        text, re.DOTALL
+    )
+    if term_section:
+        for line in term_section.group(1).splitlines():
+            m = re.match(r'^\s+(\S+)\s+\(\d+\)', line)
+            if m:
+                declared_terminals.add(m.group(1))
+    declared_terminals.add('$end')
+
+    rules = {}   # rule_num -> lhs
+    current_lhs = None
+    for line in text.splitlines():
+        m = re.match(r'^\s+(\d+)\s+(\S+)\s*:', line)
+        if m:
+            rules[int(m.group(1))] = m.group(2)
+            current_lhs = m.group(2)
+            continue
+        m = re.match(r'^\s+(\d+)\s+\|', line)
+        if m and current_lhs:
+            rules[int(m.group(1))] = current_lhs
+
     current_state = None
+
+    default_reduces = {}   # state -> "rN"
 
     with open('parser/y.output', 'r') as f:
         for line in f:
             line = line.strip()
 
-            state_match = re.match(r'State (\d+)', line)
-            shift_match = re.match(r'(\S+)\s+shift, and go to state (\d+)', line)
-            reduce_match = re.match(r'\$default\s+reduce using rule (\d+)', line)
-            goto_match = re.match(r'(\S+)\s+go to state (\d+)', line)
+            state_match  = re.match(r'^State (\d+)$', line)
+            shift_match  = re.match(r'^(\S+)\s+shift, and go to state (\d+)', line)
+            reduce_match = re.match(r'^(\S+)\s+reduce using rule (\d+)', line)
+            default_reduce_match = re.match(r'^\$default\s+reduce using rule (\d+)', line)
+            default_accept_match = re.match(r'^\$default\s+accept', line)
+            goto_match   = re.match(r'^(\S+)\s+go to state (\d+)', line)
 
             # STATE
             if state_match:
@@ -40,31 +71,45 @@ def create_parse_table():
                 terminals.add(token)
                 continue
 
-            # REDUCE
+            # $default ACCEPT
+            if default_accept_match:
+                states[current_state]["actions"]["$end"] = "acc"
+                terminals.add("$end")
+                continue
+
+            # $default REDUCE  (expand later once all terminals are known)
+            if default_reduce_match:
+                rule = default_reduce_match.group(1)
+                default_reduces[current_state] = "r" + rule
+                continue
+
+            # Explicit REDUCE for a specific lookahead
             if reduce_match:
-                rule = reduce_match.group(1)
-                states[current_state]["actions"]["$"] = "r" + rule
-                terminals.add("$")
+                token, rule = reduce_match.groups()
+                if token != "$default":           # $default handled above
+                    states[current_state]["actions"][token] = "r" + rule
+                    terminals.add(token)
                 continue
 
-            # ACCEPT
-            if "accept" in line:
-                states[current_state]["actions"]["$"] = "acc"
-                terminals.add("$")
-                continue
-
-            # GOTO
+            # GOTO / shift-on-nonterminal
             if goto_match:
                 symbol, target = goto_match.groups()
-
-                if symbol.isupper():
+                if symbol in declared_terminals:
+                    # This can happen for terminal "go to" edges (rare) — treat as shift
+                    states[current_state]["actions"][symbol] = "s" + target
+                    terminals.add(symbol)
+                else:
                     states[current_state]["gotos"][symbol] = target
                     non_terminals.add(symbol)
-                else:
-                    states[current_state]["actions"][symbol] = target
-                    terminals.add(symbol)
 
-    terminals_list = sorted(terminals)
+    # --- expand $default reduces across all terminals found ---
+    for state, action in default_reduces.items():
+        for t in declared_terminals:
+            if t not in states[state]["actions"]:
+                states[state]["actions"][t] = action
+                terminals.add(t)
+
+    terminals_list    = sorted(terminals)
     non_terminals_list = sorted(non_terminals)
 
     header = ["State"] + terminals_list + non_terminals_list
@@ -75,11 +120,9 @@ def create_parse_table():
     for state in sorted(states.keys()):
         row = [str(state)]
 
-        # ACTION
         for t in terminals_list:
             row.append(states[state]["actions"].get(t, ""))
 
-        # GOTO
         for nt in non_terminals_list:
             row.append(states[state]["gotos"].get(nt, ""))
 
