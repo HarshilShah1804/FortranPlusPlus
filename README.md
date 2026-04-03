@@ -37,6 +37,18 @@ The repository contains **four grammar files**:
 ./compile.sh
 ```
 
+To compile on a Mac Machine, remove the `-Wconflicts-sr` and `-Wconflicts-rr` flags from `parser/Makefile`, and change one line in the parser.y like below from
+```
+%define parse.error verbose
+```
+
+to:
+```
+error-verbose
+```
+
+and then compile the parser.
+
 To compile the parser with AST, uncomment the relevant line in `compile.sh` and comment out the previous one.
 
 ### Run the Parser
