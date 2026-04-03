@@ -5,7 +5,7 @@ CC = gcc
 YACC = yacc
 
 # Files
-PARSER = parser.y
+PARSER = new_parser.y
 PARSER_C = y.tab.c
 PARSER_H = y.tab.h
 
@@ -14,7 +14,7 @@ all: $(PARSER_C) $(PARSER_H)
 
 # Generate C + header from Yacc
 $(PARSER_C) $(PARSER_H): $(PARSER)
-	$(YACC) -d -v $(PARSER)
+	$(YACC) -d -v $(PARSER) -Wconflicts-sr -Wconflicts-rr
 
 # Clean generated files
 clean:
