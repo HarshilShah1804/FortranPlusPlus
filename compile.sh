@@ -9,4 +9,4 @@ cd ../parser
 make clean && make
 cd ../
 
-gcc lexer/lex.yy.c parser/y.tab.c -o parser_out
+gcc lexer/lex.yy.c parser/y.tab.c parser/derivation_tree.c -o parser_out
