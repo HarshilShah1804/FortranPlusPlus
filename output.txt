@@ -1,0 +1,954 @@
+Test Outputs
+=====================================
+
+File: tests/test_allocate_deallocate.f90
+--- Source Code ---
+program test_allocate_deallocate
+  implicit none
+  integer, allocatable :: a(:)
+
+  allocate(a(10))
+  deallocate(a)
+end program test_allocate_deallocate
+
+--- TAC Output ---
+Starting parse
+Parsing done!
+
+Intermediate Code (Quadruples):
+OP              ARG1            ARG2            RESULT         
+------------------------------------------------------------
+program         test_allocate_deallocate -               -              
+allocate        a(10)           -               -              
+deallocate      a               -               -              
+end_prog        -               -               -              
+
+=====================================
+
+File: tests/test_assumed_rank.f90
+--- Source Code ---
+program assumed_rank
+    integer :: assumed_rank(..)
+end program
+--- TAC Output ---
+Starting parse
+Parsing done!
+
+Intermediate Code (Quadruples):
+OP              ARG1            ARG2            RESULT         
+------------------------------------------------------------
+program         assumed_rank    -               -              
+end_prog        -               -               -              
+
+=====================================
+
+File: tests/test_c_preprocessor.f90
+--- Source Code ---
+#define SIZE 10
+#ifdef SIZE
+integer :: x
+#else
+integer :: y
+#endif
+
+--- TAC Output ---
+Starting parse
+Parsing done!
+
+Intermediate Code (Quadruples):
+OP              ARG1            ARG2            RESULT         
+------------------------------------------------------------
+
+=====================================
+
+File: tests/test_comments_multiline.f90
+--- Source Code ---
+program test7
+  print *, "Start"
+  !* This is a 
+     multi-line 
+     comment *!
+  print *, "End"
+end program
+--- TAC Output ---
+Starting parse
+Parsing done!
+
+Intermediate Code (Quadruples):
+OP              ARG1            ARG2            RESULT         
+------------------------------------------------------------
+program         test7           -               -              
+print           "Start"         -               -              
+print           "End"           -               -              
+end_prog        -               -               -              
+
+=====================================
+
+File: tests/test_complex_literals.f90
+--- Source Code ---
+program test6
+  complex :: val
+  val = (1.0, 2.0)
+  val = (1, 2.0)
+  val = (1.0, 2)
+  val = (1, 2)
+  print *, (val)
+end program test6
+--- TAC Output ---
+Starting parse
+Parsing done!
+
+Intermediate Code (Quadruples):
+OP              ARG1            ARG2            RESULT         
+------------------------------------------------------------
+program         test6           -               -              
+=               complex(1.0, 2.0) -               val            
+=               complex(1, 2.0) -               val            
+=               complex(1.0, 2) -               val            
+=               complex(1, 2)   -               val            
+print           val             -               -              
+end_prog        -               -               -              
+
+=====================================
+
+File: tests/test_contains_block.f90
+--- Source Code ---
+PROGRAM test_contains_block
+  IMPLICIT NONE
+  INTEGER :: x
+  x = 10
+  CALL double(x)
+  PRINT *, x
+CONTAINS
+  SUBROUTINE double(n)
+    INTEGER :: n
+    n = n * 2
+  END SUBROUTINE double
+END PROGRAM test_contains_block
+--- TAC Output ---
+Starting parse
+Parsing done!
+
+Intermediate Code (Quadruples):
+OP              ARG1            ARG2            RESULT         
+------------------------------------------------------------
+program         test_contains_block -               -              
+=               10              -               x              
+param           x               -               -              
+call            double          1               -              
+print           x               -               -              
+func            double          -               -              
+*               n               2               t1             
+=               t1              -               n              
+endfunc         -               -               -              
+end_prog        -               -               -              
+
+=====================================
+
+File: tests/test_continue.f90
+--- Source Code ---
+program main
+    integer :: a, b, &
+               c
+end program main
+--- TAC Output ---
+Starting parse
+Parsing done!
+
+Intermediate Code (Quadruples):
+OP              ARG1            ARG2            RESULT         
+------------------------------------------------------------
+program         main            -               -              
+end_prog        -               -               -              
+
+=====================================
+
+File: tests/test_deferred_shape.f90
+--- Source Code ---
+program deferred_shape
+    integer :: a(:, :)
+end program
+--- TAC Output ---
+Starting parse
+Parsing done!
+
+Intermediate Code (Quadruples):
+OP              ARG1            ARG2            RESULT         
+------------------------------------------------------------
+program         deferred_shape  -               -              
+end_prog        -               -               -              
+
+=====================================
+
+File: tests/test_deffered_type.f90
+--- Source Code ---
+type :: Particle
+end type Particle
+
+type(Particle) :: p
+--- TAC Output ---
+Starting parse
+Parsing done!
+
+Intermediate Code (Quadruples):
+OP              ARG1            ARG2            RESULT         
+------------------------------------------------------------
+
+=====================================
+
+File: tests/test_derived_component.f90
+--- Source Code ---
+PROGRAM test_derived_component
+  IMPLICIT NONE
+  INTEGER :: x
+  x = obj%field
+  x = obj%inner%value
+  obj%field = 42
+  obj%inner%value = x + 1
+  PRINT *, obj%field
+END PROGRAM test_derived_component
+--- TAC Output ---
+Starting parse
+Parsing done!
+
+Intermediate Code (Quadruples):
+OP              ARG1            ARG2            RESULT         
+------------------------------------------------------------
+program         test_derived_component -               -              
+=               obj%field       -               x              
+=               obj%inner%value -               x              
+=               42              -               obj%field      
++               x               1               t1             
+=               t1              -               obj%inner%value
+print           obj%field       -               -              
+end_prog        -               -               -              
+
+=====================================
+
+File: tests/test_do_loop_with_steps.f90
+--- Source Code ---
+program do_step_test
+    integer :: i
+
+    do i = 1, 5
+        print *, i
+    end do
+
+    do i = 1, 10, 2
+        print *, i
+    end do
+
+end program
+--- TAC Output ---
+Starting parse
+Parsing done!
+
+Intermediate Code (Quadruples):
+OP              ARG1            ARG2            RESULT         
+------------------------------------------------------------
+program         do_step_test    -               -              
+=               1               -               i              
+L1             
+<=              i               5               t1             
+ifFalse         t1              -               L2             
+print           i               -               -              
++               i               1               t2             
+=               t2              -               i              
+goto            -               -               L1             
+L2             
+=               1               -               i              
+L3             
+<=              i               10              t3             
+ifFalse         t3              -               L4             
+print           i               -               -              
++               i               2               t4             
+=               t4              -               i              
+goto            -               -               L3             
+L4             
+end_prog        -               -               -              
+
+=====================================
+
+File: tests/test_intrinsic_subroutine.f90
+--- Source Code ---
+program test_random
+  implicit none
+  real :: x
+
+  call random_seed()
+  call random_number(x)
+
+  print *, "Random value = ", x
+end program test_random
+--- TAC Output ---
+Starting parse
+Parsing done!
+
+Intermediate Code (Quadruples):
+OP              ARG1            ARG2            RESULT         
+------------------------------------------------------------
+program         test_random     -               -              
+call            random_seed     0               -              
+param           x               -               -              
+call            random_number   1               -              
+print           "Random value = " -               -              
+print           x               -               -              
+end_prog        -               -               -              
+
+=====================================
+
+File: tests/test_line_continuation.f90
+--- Source Code ---
+program main
+    integer :: a, b, &
+               c
+end PROGRAM main
+--- TAC Output ---
+Starting parse
+Parsing done!
+
+Intermediate Code (Quadruples):
+OP              ARG1            ARG2            RESULT         
+------------------------------------------------------------
+program         main            -               -              
+end_prog        -               -               -              
+
+=====================================
+
+File: tests/test_logical_literals.f90
+--- Source Code ---
+program test_logical_literals
+  logical :: a, b, c, d
+  a = .true.
+  b = .T.
+  c = .false.
+  d = .F.
+  print *, a, b, c, d
+end program test_logical_literals
+
+--- TAC Output ---
+Starting parse
+Parsing done!
+
+Intermediate Code (Quadruples):
+OP              ARG1            ARG2            RESULT         
+------------------------------------------------------------
+program         test_logical_literals -               -              
+=               .true.          -               a              
+=               .T.             -               b              
+=               .false.         -               c              
+=               .F.             -               d              
+print           a               -               -              
+print           b               -               -              
+print           c               -               -              
+print           d               -               -              
+end_prog        -               -               -              
+
+=====================================
+
+File: tests/test_module_use.f90
+--- Source Code ---
+module geometry
+    implicit none
+    real :: pi = 3.14159
+contains
+    subroutine print_pi()
+        print *, pi
+    end subroutine
+end module geometry
+
+program main
+    use geometry
+    call print_pi()
+end program main
+--- TAC Output ---
+Starting parse
+Parsing done!
+
+Intermediate Code (Quadruples):
+OP              ARG1            ARG2            RESULT         
+------------------------------------------------------------
+func            print_pi        -               -              
+print           pi              -               -              
+endfunc         -               -               -              
+program         main            -               -              
+call            print_pi        0               -              
+end_prog        -               -               -              
+
+=====================================
+
+File: tests/test_multi_decl.f90
+--- Source Code ---
+PROGRAM test_multi_decl
+  IMPLICIT NONE
+  INTEGER :: a, b, c
+  REAL :: x, y
+  LOGICAL :: flag1, flag2
+  a = 1
+  b = 2
+  c = a + b
+  PRINT *, c
+END PROGRAM test_multi_decl
+--- TAC Output ---
+Starting parse
+Parsing done!
+
+Intermediate Code (Quadruples):
+OP              ARG1            ARG2            RESULT         
+------------------------------------------------------------
+program         test_multi_decl -               -              
+=               1               -               a              
+=               2               -               b              
++               a               b               t1             
+=               t1              -               c              
+print           c               -               -              
+end_prog        -               -               -              
+
+=====================================
+
+File: tests/test_pointerassociation.f90
+--- Source Code ---
+program pointer_basic
+    integer, target :: x
+    integer, pointer :: p
+
+    x = 10
+    p => x
+
+    print *, p
+end program
+--- TAC Output ---
+Starting parse
+Parsing done!
+
+Intermediate Code (Quadruples):
+OP              ARG1            ARG2            RESULT         
+------------------------------------------------------------
+program         pointer_basic   -               -              
+=               10              -               x              
+=>              x               -               p              
+print           p               -               -              
+end_prog        -               -               -              
+
+=====================================
+
+File: tests/test_print_format.f90
+--- Source Code ---
+program test_print_format
+  implicit none
+  integer :: x
+  x = 42
+  print *, "value = ", x
+end program test_print_format
+
+--- TAC Output ---
+Starting parse
+Parsing done!
+
+Intermediate Code (Quadruples):
+OP              ARG1            ARG2            RESULT         
+------------------------------------------------------------
+program         test_print_format -               -              
+=               42              -               x              
+print           "value = "      -               -              
+print           x               -               -              
+end_prog        -               -               -              
+
+=====================================
+
+File: tests/test_program.f90
+--- Source Code ---
+program main
+
+end PROGRAM main
+
+--- TAC Output ---
+Starting parse
+Parsing done!
+
+Intermediate Code (Quadruples):
+OP              ARG1            ARG2            RESULT         
+------------------------------------------------------------
+program         main            -               -              
+end_prog        -               -               -              
+
+=====================================
+
+File: tests/test_real.f90
+--- Source Code ---
+x = 5.
+x = .5
+x = 5e10
+x = 3E-2
+x = 1.2e3
+x = 5
+
+--- TAC Output ---
+Starting parse
+Parsing done!
+
+Intermediate Code (Quadruples):
+OP              ARG1            ARG2            RESULT         
+------------------------------------------------------------
+
+=====================================
+
+File: tests/test_select_rank.f90
+--- Source Code ---
+program test_select_rank
+  implicit none
+  integer, allocatable :: arr(:)
+
+  allocate(arr(5))
+
+  select rank(arr)
+  rank(0)
+    print *, "scalar"
+  rank(1)
+    print *, "1D array"
+  rank(*)
+    print *, "assumed rank"
+  rank default
+    print *, "other"
+  end select
+
+end program test_select_rank
+
+--- TAC Output ---
+Starting parse
+Parsing done!
+
+Intermediate Code (Quadruples):
+OP              ARG1            ARG2            RESULT         
+------------------------------------------------------------
+program         test_select_rank -               -              
+allocate        arr(5)          -               -              
+select_rank     arr             -               -              
+rank_case       -               -               -              
+print           "scalar"        -               -              
+rank_case       -               -               -              
+print           "1D array"      -               -              
+rank_case       -               -               -              
+print           "assumed rank"  -               -              
+rank_def        -               -               -              
+print           "other"         -               -              
+end_s_rank      -               -               -              
+end_prog        -               -               -              
+
+=====================================
+
+File: tests/test_string.f90
+--- Source Code ---
+program test_string
+    character :: c1
+    character(len=:), allocatable :: c2
+    character(len=5) :: c3
+    character(len=10) :: c4
+
+    character :: c5 = 'a'
+    c2 = "'hello'"
+end program test_string
+--- TAC Output ---
+Starting parse
+Parsing done!
+
+Intermediate Code (Quadruples):
+OP              ARG1            ARG2            RESULT         
+------------------------------------------------------------
+program         test_string     -               -              
+=               'a'             -               c5             
+=               "'hello'"       -               c2             
+end_prog        -               -               -              
+
+=====================================
+
+File: tests/test_subprograms.f90
+--- Source Code ---
+PROGRAM test_subprograms
+  IMPLICIT NONE
+  INTEGER :: result
+  result = add(3, 4)
+  PRINT *, result
+CONTAINS
+  FUNCTION add(a, b)
+    INTEGER :: a, b, add
+    add = a + b
+  END FUNCTION add
+
+  SUBROUTINE greet(x)
+    INTEGER :: x
+    PRINT *, x
+  END SUBROUTINE greet
+
+  RECURSIVE FUNCTION fact(n) RESULT(res)
+    INTEGER :: n, res
+    IF (n == 1) THEN
+      res = 1
+    ELSE
+      res = n * fact(n - 1)
+    END IF
+  END FUNCTION fact
+END PROGRAM test_subprograms
+--- TAC Output ---
+Starting parse
+Parsing done!
+
+Intermediate Code (Quadruples):
+OP              ARG1            ARG2            RESULT         
+------------------------------------------------------------
+program         test_subprograms -               -              
+param           3               -               -              
+param           4               -               -              
+call            add             2               t1             
+=               t1              -               result         
+print           result          -               -              
+func            add             -               -              
++               a               b               t2             
+=               t2              -               add            
+endfunc         -               -               -              
+func            greet           -               -              
+print           x               -               -              
+endfunc         -               -               -              
+func            fact            -               -              
+==              n               1               t3             
+ifFalse         t3              -               L1             
+=               1               -               res            
+goto            -               -               L2             
+L1             
+-               n               1               t4             
+param           t4              -               -              
+call            fact            1               t5             
+*               n               t5              t6             
+=               t6              -               res            
+L2             
+endfunc         -               -               -              
+end_prog        -               -               -              
+
+=====================================
+
+File: tests/test_unary_ops.f90
+--- Source Code ---
+PROGRAM test_unary_ops
+  IMPLICIT NONE
+  INTEGER :: a, b
+  LOGICAL :: flag, result
+  a = -5
+  b = +a
+  flag = .NOT. .TRUE.
+  result = .NOT. flag
+  a = -(b + 3)
+  b = -a * 2
+  PRINT *, a, b
+END PROGRAM test_unary_ops
+--- TAC Output ---
+Starting parse
+Parsing done!
+
+Intermediate Code (Quadruples):
+OP              ARG1            ARG2            RESULT         
+------------------------------------------------------------
+program         test_unary_ops  -               -              
+-               5               -               t1             
+=               t1              -               a              
++               a               -               t2             
+=               t2              -               b              
+.NOT.           .TRUE.          -               t3             
+=               t3              -               flag           
+.NOT.           flag            -               t4             
+=               t4              -               result         
++               b               3               t5             
+-               t5              -               t6             
+=               t6              -               a              
+-               a               -               t7             
+*               t7              2               t8             
+=               t8              -               b              
+print           a               -               -              
+print           b               -               -              
+end_prog        -               -               -              
+
+=====================================
+
+File: tests/test_zero_arg_functions.f90
+--- Source Code ---
+program test_zero_arg_functions
+  implicit none
+
+  call my_subroutine()
+  
+end program test_zero_arg_functions
+
+--- TAC Output ---
+Starting parse
+Parsing done!
+
+Intermediate Code (Quadruples):
+OP              ARG1            ARG2            RESULT         
+------------------------------------------------------------
+program         test_zero_arg_functions -               -              
+call            my_subroutine   0               -              
+end_prog        -               -               -              
+
+=====================================
+
+ERROR HANDLING TESTS
+=====================================
+
+File: tests/errors/test_all_keywords.f90
+--- Source Code ---
+program demo
+implicit none
+
+module mathmod
+contains
+
+recursive function add(a, b) result(res)
+integer :: a, b
+integer :: res
+res = a + b
+end function add
+
+subroutine show()
+integer :: x
+x = 5
+print *, x
+end subroutine show
+
+end module mathmod
+
+use mathmod
+
+type :: point
+integer :: x, y
+end type point
+
+class(point) :: p
+allocate(p)
+
+if (p%x > 0) then
+print *, "positive"
+else
+print *, "zero or negative"
+end if
+
+select case (p%x)
+case (1)
+print *, "one"
+case default
+print *, "other"
+end select
+
+do while (p%x < 10)
+p%x = p%x + 1
+end do
+
+open(10)
+write(10,*) p%x
+read(10,*) p%x
+close(10)
+
+inquire(10)
+
+error stop
+end program demo
+
+--- Error Output ---
+[31mPARSE ERROR[0m
+Message : syntax error, unexpected MODULE, expecting END
+Line    : 4
+Column  : 1
+Near    : 'module'
+-> Code: module
+         ^
+Hint    : Check syntax near the token and ensure blocks and parentheses are closed.
+Starting parse
+Parsing failed.
+
+=====================================
+
+File: tests/errors/test_err_lex_limits.f90
+--- Source Code ---
+program lex_limits
+  integer :: this_is_a_very_long_variable_name_that_exceeds_the_sixty_three_character_limit = 1
+  print *, "Forgot to close this quote
+end program lex_limits
+
+--- Error Output ---
+[31mPARSE ERROR[0m
+Message : syntax error, unexpected ASSIGN, expecting RESULT or IDENTIFIER
+Line    : 2
+Column  : 93
+Near    : '='
+-> Code:   integer :: this_is_a_very_long_variable_name_that_exceeds_the_sixty_three_character_limit =
+                                                                                                     ^
+Hint    : Check syntax near the token and ensure blocks and parentheses are closed.
+Starting parse
+[Line 2  ]  ERROR: Identifier exceeds 63 chars
+Parsing failed.
+
+=====================================
+
+File: tests/errors/test_err_missing_endif.f90
+--- Source Code ---
+program endif_test
+  integer :: x
+  x = 10
+  if (x > 5) then
+    print *, "Greater"
+  ! Missing the ENDIF here!
+end program endif_test
+
+--- Error Output ---
+[31mPARSE ERROR[0m
+Message : syntax error, unexpected END
+Line    : 7
+Column  : 1
+Near    : 'end'
+-> Code: end
+         ^
+Hint    : Missing ENDIF for an IF block
+Starting parse
+Parsing failed.
+
+=====================================
+
+File: tests/errors/test_err_missing_paren.f90
+--- Source Code ---
+program paren_test
+  integer :: val
+  val = (5 * 4 + 2
+  print *, val
+end program paren_test
+
+--- Error Output ---
+[31mPARSE ERROR[0m
+Message : syntax error, unexpected PRINT
+Line    : 4
+Column  : 3
+Near    : 'print'
+-> Code:   print
+           ^
+Hint    : Missing closing ')'
+Starting parse
+Parsing failed.
+
+=====================================
+
+File: tests/errors/test_err_stray.f90
+--- Source Code ---
+program stray_test
+  implicit none
+  integer :: a
+  a = 10 @ 5
+end program stray_test
+
+--- Error Output ---
+[31mPARSE ERROR[0m
+Message : syntax error, unexpected INT_CONST, expecting END
+Line    : 4
+Column  : 12
+Near    : '5'
+-> Code:   a = 10 @ 5
+                    ^
+Hint    : Check syntax near the token and ensure blocks and parentheses are closed.
+Starting parse
+[Line 4  ]  ERROR: Stray character: '@'
+Parsing failed.
+
+=====================================
+
+File: tests/errors/test_error_invalid_symbols.f90
+--- Source Code ---
+program stray_chars
+    real :: price
+    price = 100.50 @ 5  ! '@' is an invalid operator
+    if (price > 50 $) then
+        print *, "Too expensive!"
+    end if
+end program
+--- Error Output ---
+[31mPARSE ERROR[0m
+Message : syntax error, unexpected INT_CONST, expecting END
+Line    : 3
+Column  : 22
+Near    : '5'
+-> Code:     price = 100.50 @ 5
+                              ^
+Hint    : Check syntax near the token and ensure blocks and parentheses are closed.
+Starting parse
+[Line 3  ]  ERROR: Stray character: '@'
+Parsing failed.
+
+=====================================
+
+File: tests/errors/test_error_long_name.f90
+--- Source Code ---
+program long_vars
+    integer :: this_is_a_ridiculously_long_variable_name_that_exceeds_sixty_three_characters
+    this_is_a_ridiculously_long_variable_name_that_exceeds_sixty_three_characters = 10
+end program
+--- Error Output ---
+[31mPARSE ERROR[0m
+Message : syntax error, unexpected ASSIGN, expecting RESULT or IDENTIFIER
+Line    : 3
+Column  : 83
+Near    : '='
+-> Code:     this_is_a_ridiculously_long_variable_name_that_exceeds_sixty_three_characters =
+                                                                                           ^
+Hint    : Check syntax near the token and ensure blocks and parentheses are closed.
+Starting parse
+[Line 2  ]  ERROR: Identifier exceeds 63 chars
+[Line 3  ]  ERROR: Identifier exceeds 63 chars
+Parsing failed.
+
+=====================================
+
+File: tests/errors/test_error_multi_line_comment.f90
+--- Source Code ---
+program main
+    !* This is a multi-line comment that is not properly closed
+    print *, "Hello, World!"
+end program main
+--- Error Output ---
+Starting parse
+[Line 4  ]  ERROR: Unclosed block comment
+
+=====================================
+
+File: tests/errors/test_error_no_closing_bracker.f90
+--- Source Code ---
+PROGRAM test
+  a = (b + 5
+END PROGRAM test
+--- Error Output ---
+[31mPARSE ERROR[0m
+Message : syntax error, unexpected END
+Line    : 3
+Column  : 1
+Near    : 'END'
+-> Code: END
+         ^
+Hint    : Missing closing ')'
+Starting parse
+Parsing failed.
+
+=====================================
+
+File: tests/errors/test_error_no_endif.f90
+--- Source Code ---
+PROGRAM test
+  IF (a > b) THEN
+    a = b
+END PROGRAM test
+--- Error Output ---
+[31mPARSE ERROR[0m
+Message : syntax error, unexpected END
+Line    : 4
+Column  : 1
+Near    : 'END'
+-> Code: END
+         ^
+Hint    : Missing ENDIF for an IF block
+Starting parse
+Parsing failed.
+
+=====================================

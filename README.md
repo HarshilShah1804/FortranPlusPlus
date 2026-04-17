@@ -1,156 +1,73 @@
-# CS 327: Compilers  
-## Group 7
+# CS 327: Compilers
+## Lab Assignment 4: Intermediate Code Generation (Quadruples)
 
-### Members
-- Chaitanya Sharma (23110072)  
-- Harshil Shah (23110132)  
-- Jeet Joshi (23110148)  
-- Akshat Saurin Shah  
-
----
-The repository contains **four grammar files**:
-
-- **`grammar_with_conflicts.y`**  
-  Initial grammar (after Task 1) with conflicts.
-
-- **`unambiguous_grammar.y`**  
-  Conflict-resolved grammar (after Task 2).
-
-- **`parser.y`**  
-  Final grammar with:
-  - Reverse derivation tree
-  - Error handling  
-  *(Tasks 3 & 5)*
-
-- **ast_parser.y  
-    Grammar with:
-  - Error handling
-  - AST construction  
-  *(Tasks 6 - Additional)*
+### Group 7
+- **Chaitanya Sharma** (23110072)
+- **Harshil Shah** (23110132)
+- **Jeet Joshi** (23110148)
+- **Akshat Saurin Shah**
 
 ---
 
-## ⚙️ Build & Run
+This repository contains the end-to-end implementation of the Intermediate Code Generation (IR) phase for our custom Fortran-like compiler. The pipeline seamlessly translates high-level Abstract Syntax Tree (AST) representations and syntax rules into low-level **Three Address Code (TAC)**, formatted strictly as Quadruples.
 
-### Compile the Parser
+## Build & Run
+
+### 1. Compile the Pipeline
+To build the Lexer, Parser, AST, and TAC modules:
 ```bash
 ./compile.sh
 ```
 
-To compile on a Mac Machine, remove the `-Wconflicts-sr` and `-Wconflicts-rr` flags from `parser/Makefile`, and change one line in the parser.y like below from
-```
-%define parse.error verbose
-```
-
-to:
-```
-error-verbose
-```
-
-and then compile the parser.
-
-To compile the parser with AST, uncomment the relevant line in `compile.sh` and comment out the previous one.
-
-### Run the Parser
+### 2. Run a Single Test
+Parse a file and generate its IR table:
 ```bash
-./parser_out < input.txt
+./parser_out tests/test_multi_decl.f90
 ```
 
-### Run Tests
+### 3. Run all Test Cases
+Run our automated script to execute all standard and error test cases, print their source code, and append the generated Quadruple tables into an output file (`output.txt`):
 ```bash
-./run_parser_tests.sh
+./run_all_tests.sh
 ```
 
-### Generate Parsing Table
-```bash
-python ./generate_parsing_table.py
-```
+---
 
-## Task 1: LALR(1) Automaton Construction
-- Built using yacc
-- Automaton size: 318 states
-- Conflicts:
-  - 16 Shift/Reduce
-  - 44 Reduce/Reduce
+## Implementation Details & Features
 
-Full automaton available in repository as `conflict_grammar.y`.
+### Part 1: SDT-Based TAC Generation
+- **Strict Quadruple Format:** Output is rigorously formatted as `OP | ARG1 | ARG2 | RESULT`.
+- **Syntax Directed Translation:** IR is generated via SDT rules embedded directly in the Yacc grammar. 
+- **Context-Aware Execution:** Implemented a state-machine context manager (`g_ctx`). Declarative blocks (like `MODULE` or `SUBROUTINE` definitions) are cleanly isolated from executable code, preventing rogue IR generation during the definition phase.
+- **Dynamic Temporaries:** Automated generation of variables (`t1`, `t2`, `t3`) for nested arithmetic and complex expressions.
 
-## Task 2: Conflict Resolution
-1. Declaration Ambiguity:
-```
-declarations → ε
-declarations → declaration declarations
-```
-Conflict when encountering tokens like PP_DEFINE. To resolve, we can use the following grammar:
-```
-declarations_opt → ε | declarations
-declarations     → declaration | declarations declaration
-```
+### Part 2: Extended Control Flow Support
+- **Decision Making:** Fully supports `IF`, `IF-ELSE`, and `SELECT CASE` statements, dynamically generating `ifFalse` evaluation and `goto` branch labels (e.g., `L1`, `L2`).
+- **Iterative Constructs:** Supports `DO` loops (with custom step values) and `DO WHILE` loops. The TAC accurately reflects initialization, bounds-checking, increments, and back-jumping.
+- **Function/Subroutine Calls:** Maps arguments to sequential `param` instructions followed by a `call [name], [argc]` quadruple.
 
-2. Function Call vs Array Reference:
-```
-func_call → variable_ref LPAREN argument_list RPAREN
-array_ref → variable_ref LPAREN argument_list RPAREN
-```
-Identical RHS → reduce/reduce conflicts. To resolve, we can combine them into a single production and resolve the ambiguity in the semantic stage:
-```
-call_or_ref → variable_ref LPAREN argument_list RPAREN
-```
+### Part 3: Clean Tabular Output
+The internal representation utilizes a decoupled `Quad` memory array (`ir/tac.c`). During parsing, operations are pushed to this struct array. Upon a successful parse, the entire array is printed top-to-bottom in a highly readable, aligned tabular format. Additionally, an extended implementation (`ir/tac_quad_with_exp.c`) is included in the repository, which dynamically reconstructs the high-level expressions into a 5-column table (First column for expression) for enhanced debugging and readability.
 
-3. Type Definition Ambiguity
-```
-type_def → TYPE ... END_TYPE
-type_def → TYPE ... END_TYPE identifier
-```
-To resolve, we can modify the grammar to:
-```
-type_def → TYPE DECL_SEP identifier type_def_body END_TYPE type_name_opt
+### Part 4: Robust Diagnostics & Error Handling (3 Marks)
+To demonstrate the resilience of the compiler pipeline, we ran a comprehensive suite of intentional error files (`tests/errors/`). The compiler successfully intercepted unsupported constructs and syntax violations without crashing or dumping core memory:
+- **Detecting Unsupported Constructs (Lexical Limits):** The Lexer (Flex) tracks character lengths and detects invalid symbols before they corrupt the AST. As seen in `test_error_invalid_symbols.f90` and `test_err_lex_limits.f90`, the lexer logs the exact line of the stray character (`@`) or oversized identifier but continues processing safely.
+- **Meaningful Error Messages & Visual Localization:** When an invalid expression is detected, the Yacc parser halts and triggers our custom `yyerror` routine. This routine prints the exact `Line` and `Column` of the failure, extracts the raw source code string, and places a visual caret (`^`) directly under the bad token.
+- **State-Aware Hints:** The Lexer tracks nesting states (`paren_balance`, `if_balance`) in real-time. If the parser crashes due to an unclosed block, the compiler leverages these states to output human-readable hints:
+  - *Missing Parentheses:* `test_error_no_closing_bracker.f90` outputs `Hint : Missing closing ')'`
+  - *Unclosed Blocks:* `test_error_no_endif.f90` outputs `Hint : Missing ENDIF for an IF block`
+  - *Unclosed Comments:* `test_error_multi_line_comment.f90` identifies an `Unclosed block comment`.
+- **Crash Prevention:** In every single test case, memory is managed safely. TAC generation is aborted, and the program exits gracefully with `Parsing failed.` instead of causing a segmentation fault.
 
-type_name_opt → ε | identifier
-```
+---
 
-## Task 3: Reverse Derivation Tree Construction
-- Constructed a reverse derivation tree during parsing.
-- Each node contains:
-  - Production rule used
-  - Children node pointers
-- Implemented in `derivation_tree.c` and integrated into the parser.
+## Test Suite
+We have provided comprehensive `.f90` test files in the `tests/` directory to prove compiler capabilities across various constructs:
+1. `test_multi_decl.f90` (Basic arithmetic and assignment)
+2. `test_subprograms.f90` (Functions, recursion, parameters)
+3. `test_do_loop_with_steps.f90` (Iterative constructs)
+4. `test_logical_literals.f90` (Boolean logic)
+5. `test_module_use.f90` (Context isolation)
+6. *...and 9 others covering pointers, arrays, preprocessor directives, and complex literals.*
 
-Structure of a derivation tree node:
-```c
-typedef struct DerivationNode {
-    char *symbol;
-    struct DerivationNode **children;
-    size_t child_count;
-} DerivationNode;
-```
-
-Example production rule:
-```
-expression: expression ARITH_OP expression
-{
-    $$ = NODE("expression", 3, $1, LEAF("ARITH_OP"), $3);
-}
-```
-
-To create the tree, we do a post-order traversal of the parse tree, constructing nodes as we reduce productions.
-You can also use the `--tree` flag to print the normal pre-order derivation tree after parsing.
-
-## Task 4: Parsing Table Generation
-- Generated from y.output
-- Parsed using Python script
-- Outputs .csv table
-
-The file `parser/y.output` contains the LALR(1) parsing table generated by yacc. The Python script `generate_parsing_table.py` reads this file, extracts the states, actions, and goto entries, and outputs a CSV file `parsing_table.csv` that can be easily viewed in spreadsheet software.
-
-## Task 5: Error Handling
-- Implemented error handling in the parser.
-- On syntax error, prints an error message with line number and unexpected token.
-- For common error, like missing parenthesis or endif statement, the parser pinpoints the specific error to give a better error message.
-
-## Task 6: AST Construction (Additional)
-- Constructed an Abstract Syntax Tree (AST) during parsing.
-- Each AST node contains:
-  - Node type (e.g., expression, statement)
-  - Relevant data (e.g., operator type, variable name)
-- Implemented in `ast.c` and integrated into the parser.
+All test outputs (including graceful error handling) are documented in the final `output.txt` submission file.
