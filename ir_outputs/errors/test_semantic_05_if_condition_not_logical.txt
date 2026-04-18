@@ -1,0 +1,21 @@
+============================================================
+TEST: test_semantic_05_if_condition_not_logical.f90
+
+SOURCE PROGRAM
+--------------
+program test_semantic_05_if_condition_not_logical
+  implicit none
+  integer :: a
+  a = 1
+  if (a) then
+    a = a + 1
+  end if
+end program test_semantic_05_if_condition_not_logical
+
+PARSER OUTPUT
+-------------
+SEMANTIC ERROR: IF condition must be LOGICAL, got INTEGER
+
+Semantic analysis failed with 1 error(s).
+Starting parse
+Parsing done!

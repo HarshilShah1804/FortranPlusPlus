@@ -1,0 +1,47 @@
+============================================================
+TEST: test_if_while_sdt.f90
+
+SOURCE PROGRAM
+--------------
+program if_while_sdt
+  integer :: i, sum
+  i = 0
+  sum = 0
+  do while (i < 5)
+    if (i == 2) then
+      sum = sum + 10
+    else
+      sum = sum + i
+    end if
+    i = i + 1
+  end do
+end program if_while_sdt
+
+PARSER OUTPUT
+-------------
+Starting parse
+Parsing done!
+
+TAC Output:
+op               arg1                     arg2                     result                  
+---------------- ------------------------ ------------------------ ------------------------
+=                0                                                 i                       
+=                0                                                 sum                     
+label                                                              L1                      
+<                i                        5                        t1                      
+ifFalseGoto      t1                       L2                                               
+==               i                        2                        t2                      
+ifFalseGoto      t2                       L3                                               
++                sum                      10                       t3                      
+=                t3                                                sum                     
+goto             L4                                                                        
+label                                                              L3                      
++                sum                      i                        t4                      
+=                t4                                                sum                     
+label                                                              L4                      
++                i                        1                        t5                      
+=                t5                                                i                       
+goto             L1                                                                        
+label                                                              L2                      
+
+STATUS: PASS

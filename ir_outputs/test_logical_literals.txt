@@ -1,0 +1,43 @@
+============================================================
+TEST: test_logical_literals.f90
+
+SOURCE PROGRAM
+--------------
+program test_logical_literals
+  logical :: a, b, c, d, e, f, g, h
+  a = .true.
+  b = .T.
+  c = .false.
+  d = .F.
+
+  e = a .and. b
+  f = c .or. d
+  g = .not. c
+  h = (a .and. c) .or. (.not. d)
+
+end program test_logical_literals
+
+PARSER OUTPUT
+-------------
+Starting parse
+Parsing done!
+
+TAC Output:
+op               arg1                     arg2                     result                  
+---------------- ------------------------ ------------------------ ------------------------
+=                .true.                                            a                       
+=                .T.                                               b                       
+=                .false.                                           c                       
+=                .F.                                               d                       
+.and.            a                        b                        t1                      
+=                t1                                                e                       
+.or.             c                        d                        t2                      
+=                t2                                                f                       
+.not.            c                                                 t3                      
+=                t3                                                g                       
+.and.            a                        c                        t4                      
+.not.            d                                                 t5                      
+.or.             t4                       t5                       t6                      
+=                t6                                                h                                   
+
+STATUS: PASS

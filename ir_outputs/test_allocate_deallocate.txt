@@ -1,0 +1,25 @@
+============================================================
+TEST: test_allocate_deallocate.f90
+
+SOURCE PROGRAM
+--------------
+program test_allocate_deallocate
+  implicit none
+  integer, allocatable :: a(:)
+
+  allocate(a(10))
+  deallocate(a)
+end program test_allocate_deallocate
+
+PARSER OUTPUT
+-------------
+Starting parse
+Parsing done!
+
+TAC Output:
+op               arg1                     arg2                     result                  
+---------------- ------------------------ ------------------------ ------------------------
+raw                                                                allocate a(10)          
+raw                                                                deallocate a            
+
+STATUS: PASS

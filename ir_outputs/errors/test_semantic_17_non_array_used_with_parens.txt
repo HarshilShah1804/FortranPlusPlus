@@ -1,0 +1,19 @@
+============================================================
+TEST: test_semantic_17_non_array_used_with_parens.f90
+
+SOURCE PROGRAM
+--------------
+program test_semantic_17_non_array_used_with_parens
+  implicit none
+  integer :: a
+  a = 5
+  a = a(1)
+end program test_semantic_17_non_array_used_with_parens
+
+PARSER OUTPUT
+-------------
+SEMANTIC ERROR: Identifier 'a' is not an array or procedure but used with ()
+
+Semantic analysis failed with 1 error(s).
+Starting parse
+Parsing done!

@@ -1,0 +1,20 @@
+============================================================
+TEST: test_semantic_16_invalid_unary_operand.f90
+
+SOURCE PROGRAM
+--------------
+program test_semantic_16_invalid_unary_operand
+  implicit none
+  integer :: a
+  logical :: l
+  a = 1
+  l = .not. a
+end program test_semantic_16_invalid_unary_operand
+
+PARSER OUTPUT
+-------------
+SEMANTIC ERROR: Invalid operand for unary operator '.not.': INTEGER
+
+Semantic analysis failed with 1 error(s).
+Starting parse
+Parsing done!

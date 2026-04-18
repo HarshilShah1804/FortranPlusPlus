@@ -1,0 +1,43 @@
+============================================================
+TEST: test_unary_ops.f90
+
+SOURCE PROGRAM
+--------------
+PROGRAM test_unary_ops
+  IMPLICIT NONE
+  INTEGER :: a, b
+  LOGICAL :: flag, result
+  a = -5
+  b = +a
+  flag = .NOT. .TRUE.
+  result = .NOT. flag
+  a = -(b + 3)
+  b = -a * 2
+  PRINT *, a, b
+END PROGRAM test_unary_ops
+PARSER OUTPUT
+-------------
+Starting parse
+Parsing done!
+
+TAC Output:
+op               arg1                     arg2                     result                  
+---------------- ------------------------ ------------------------ ------------------------
+-                5                                                 t1                      
+=                t1                                                a                       
++                a                                                 t2                      
+=                t2                                                b                       
+.NOT.            .TRUE.                                            t3                      
+=                t3                                                flag                    
+.NOT.            flag                                              t4                      
+=                t4                                                result                  
++                b                        3                        t5                      
+-                t5                                                t6                      
+=                t6                                                a                       
+-                a                                                 t7                      
+*                t7                       2                        t8                      
+=                t8                                                b                       
+raw                                                                print a                 
+raw                                                                print b                 
+
+STATUS: PASS

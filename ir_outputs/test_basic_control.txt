@@ -1,0 +1,63 @@
+============================================================
+TEST: test_complex_literals.f90
+
+SOURCE PROGRAM
+--------------
+program test_basic_control
+  integer :: a, b, c, i, total
+
+  a = 4
+  b = 6
+  c = a + b * 2
+
+  total = 0
+  do i = 1, 5
+    total = total + i
+  end do
+
+  if (c > total) then
+    c = c - total
+  else
+    c = c + total
+  endif
+
+  print *, a, b, c, total
+end program test_basic_control
+
+PARSER OUTPUT
+-------------
+Starting parse
+Parsing done!
+
+TAC Output:
+op               arg1                     arg2                     result                  
+---------------- ------------------------ ------------------------ ------------------------
+=                4                                                 a                       
+=                6                                                 b                       
+*                b                        2                        t1                      
++                a                        t1                       t2                      
+=                t2                                                c                       
+=                0                                                 total                   
+=                1                                                 i                       
+label                                                              L1                      
+<=               i                        5                        t3                      
+ifFalseGoto      t3                       L2                                               
++                total                    i                        t4                      
+=                t4                                                total                   
++                i                        1                        t5                      
+=                t5                                                i                       
+goto             L1                                                                        
+label                                                              L2                      
+>                c                        total                    t6                      
+ifFalseGoto      t6                       L3                                               
+-                c                        total                    t7                      
+=                t7                                                c                       
+goto             L4                                                                        
+label                                                              L3                      
++                c                        total                    t8                      
+=                t8                                                c                       
+label                                                              L4                      
+raw                                                                print a                 
+raw                                                                print b                 
+raw                                                                print c                 
+raw                                                                print total             

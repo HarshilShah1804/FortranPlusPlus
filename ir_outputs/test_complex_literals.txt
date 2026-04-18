@@ -1,0 +1,28 @@
+============================================================
+TEST: test_complex_literals.f90
+
+SOURCE PROGRAM
+--------------
+program test6
+  complex :: val
+  val = (1.0, 2.0)
+  val = (1, 2.0)
+  val = (1.0, 2)
+  val = (1, 2)
+  print *, (val)
+end program test6
+PARSER OUTPUT
+-------------
+Starting parse
+Parsing done!
+
+TAC Output:
+op               arg1                     arg2                     result                  
+---------------- ------------------------ ------------------------ ------------------------
+=                complex(1.0, 2.0)                                 val                     
+=                complex(1, 2.0)                                   val                     
+=                complex(1.0, 2)                                   val                     
+=                complex(1, 2)                                     val                     
+raw                                                                print val               
+
+STATUS: PASS

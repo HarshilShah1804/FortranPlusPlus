@@ -1,0 +1,19 @@
+============================================================
+TEST: test_semantic_03_undeclared_identifier.f90
+
+SOURCE PROGRAM
+--------------
+program test_semantic_03_undeclared_identifier
+  implicit none
+  integer :: a
+  a = 1
+  b = 2
+end program test_semantic_03_undeclared_identifier
+
+PARSER OUTPUT
+-------------
+SEMANTIC ERROR: Use of undeclared identifier 'b' with IMPLICIT NONE in effect
+
+Semantic analysis failed with 1 error(s).
+Starting parse
+Parsing done!

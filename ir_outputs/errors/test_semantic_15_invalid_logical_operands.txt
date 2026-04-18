@@ -1,0 +1,21 @@
+============================================================
+TEST: test_semantic_15_invalid_logical_operands.f90
+
+SOURCE PROGRAM
+--------------
+program test_semantic_15_invalid_logical_operands
+  implicit none
+  logical :: l
+  integer :: a
+  l = .true.
+  a = 1
+  l = l .and. a
+end program test_semantic_15_invalid_logical_operands
+
+PARSER OUTPUT
+-------------
+SEMANTIC ERROR: Invalid operands for logical operator '.and.': LOGICAL and INTEGER
+
+Semantic analysis failed with 1 error(s).
+Starting parse
+Parsing done!

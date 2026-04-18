@@ -1,0 +1,14 @@
+============================================================
+TEST: test_program.f90
+
+SOURCE PROGRAM
+--------------
+program main
+
+end PROGRAM main
+
+TAC Output:
+op               arg1                     arg2                     result                  
+---------------- ------------------------ ------------------------ ------------------------
+
+STATUS: PASS

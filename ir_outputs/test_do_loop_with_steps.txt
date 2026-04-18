@@ -1,0 +1,45 @@
+============================================================
+TEST: test_do_loop_with_steps.f90
+
+SOURCE PROGRAM
+--------------
+program do_step_test
+    integer :: i
+
+    do i = 1, 5
+        print *, i
+    end do
+
+    do i = 1, 10, 2
+        print *, i
+    end do
+
+end program
+PARSER OUTPUT
+-------------
+Starting parse
+Parsing done!
+
+TAC Output:
+op               arg1                     arg2                     result                  
+---------------- ------------------------ ------------------------ ------------------------
+=                1                                                 i                       
+label                                                              L1                      
+<=               i                        5                        t1                      
+ifFalseGoto      t1                       L2                                               
+raw                                                                print i                 
++                i                        1                        t2                      
+=                t2                                                i                       
+goto             L1                                                                        
+label                                                              L2                      
+=                1                                                 i                       
+label                                                              L3                      
+<=               i                        10                       t3                      
+ifFalseGoto      t3                       L4                                               
+raw                                                                print i                 
++                i                        2                        t4                      
+=                t4                                                i                       
+goto             L3                                                                        
+label                                                              L4                      
+
+STATUS: PASS

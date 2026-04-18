@@ -1,0 +1,17 @@
+============================================================
+TEST: test_semantic_02_decl_init_mismatch.f90
+
+SOURCE PROGRAM
+--------------
+program test_semantic_02_decl_init_mismatch
+  implicit none
+  integer :: a = 3.14
+end program test_semantic_02_decl_init_mismatch
+
+PARSER OUTPUT
+-------------
+SEMANTIC ERROR: Type mismatch in declaration initialization of 'a': cannot assign REAL to INTEGER
+
+Semantic analysis failed with 1 error(s).
+Starting parse
+Parsing done!

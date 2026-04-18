@@ -1,0 +1,20 @@
+============================================================
+TEST: test_semantic_13_invalid_arithmetic_operands.f90
+
+SOURCE PROGRAM
+--------------
+program test_semantic_13_invalid_arithmetic_operands
+  implicit none
+  logical :: l
+  integer :: a
+  l = .true.
+  a = l + 1
+end program test_semantic_13_invalid_arithmetic_operands
+
+PARSER OUTPUT
+-------------
+SEMANTIC ERROR: Invalid operands for operator '+': LOGICAL and INTEGER
+
+Semantic analysis failed with 1 error(s).
+Starting parse
+Parsing done!

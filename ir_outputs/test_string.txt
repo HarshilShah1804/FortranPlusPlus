@@ -1,0 +1,15 @@
+Starting parse
+Parsing done!
+
+TAC Output:
+op               arg1                     arg2                     result                  
+---------------- ------------------------ ------------------------ ------------------------
+=                'a'                                               c5                      
+=                'z'                                               c1                      
+=                "'hello'"                                         c2                      
+=                'abcde'                                           c3                      
+=                'aQQQe'                                           c3                      
+==               c3                       'aQQQe'                  t1                      
+=                t1                                                eq_check                
+/=               c4                       'zzzzz'                  t2                      
+=                t2                                                neq_check               

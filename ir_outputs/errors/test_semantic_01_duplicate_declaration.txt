@@ -1,0 +1,17 @@
+============================================================
+TEST: test_semantic_01_duplicate_declaration.f90
+
+SOURCE PROGRAM
+--------------
+program test_semantic_01_duplicate_declaration
+  implicit none
+  integer :: a
+  real :: a
+end program test_semantic_01_duplicate_declaration
+PARSER OUTPUT
+-------------
+SEMANTIC ERROR: Duplicate declaration of 'a'
+
+Semantic analysis failed with 1 error(s).
+Starting parse
+Parsing done!

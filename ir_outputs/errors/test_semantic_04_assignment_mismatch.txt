@@ -1,0 +1,20 @@
+============================================================
+TEST: test_semantic_04_assignment_mismatch.f90
+
+SOURCE PROGRAM
+--------------
+program test_semantic_04_assignment_mismatch
+  implicit none
+  integer :: a
+  logical :: l
+  l = .true.
+  a = l
+end program test_semantic_04_assignment_mismatch
+
+PARSER OUTPUT
+-------------
+SEMANTIC ERROR: Type mismatch in assignment: cannot assign LOGICAL to INTEGER
+
+Semantic analysis failed with 1 error(s).
+Starting parse
+Parsing done!

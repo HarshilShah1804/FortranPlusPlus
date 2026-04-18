@@ -1,0 +1,20 @@
+============================================================
+TEST: test_semantic_11_do_step_zero.f90
+
+SOURCE PROGRAM
+--------------
+program test_semantic_11_do_step_zero
+  implicit none
+  integer :: i
+  do i = 1, 5, 0
+    i = i + 1
+  end do
+end program test_semantic_11_do_step_zero
+
+PARSER OUTPUT
+-------------
+SEMANTIC ERROR: DO step value cannot be zero
+
+Semantic analysis failed with 1 error(s).
+Starting parse
+Parsing done!
