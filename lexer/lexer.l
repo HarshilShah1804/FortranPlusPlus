@@ -84,13 +84,14 @@ PP_EXPR    [^\n]+
 !([^*].*)?   { APPEND_TEXT(); }
 
 "program"       { SET_TOKEN(); return PROGRAM; }
+"end"{WS}+"if"|"endif"   { SET_TOKEN(); if_balance--; return ENDIF; }
+"end"{WS}+"type"         { SET_TOKEN(); return END_TYPE; }
 "end"           { SET_TOKEN(); return END; }
 "integer"       { SET_TOKEN(); return INTEGER; }
 "real"          { SET_TOKEN(); return REAL; }
 "logical"       { SET_TOKEN(); return LOGICAL; }
 "character"     { SET_TOKEN(); return CHARACTER; }
 "if"            { SET_TOKEN(); if_balance++; return IF; }
-"endif" | "end if"         { SET_TOKEN(); if_balance--; return ENDIF; }
 "then"          { SET_TOKEN(); return THEN; }
 "else"          { SET_TOKEN(); return ELSE; }
 "do"            { SET_TOKEN(); return DO; }
@@ -105,12 +106,11 @@ PP_EXPR    [^\n]+
 "module"        { SET_TOKEN(); return MODULE; }
 "contains"      { SET_TOKEN(); return CONTAINS; }
 "use"           { SET_TOKEN(); return USE; }
-"end"{WS}+"type"    { SET_TOKEN(); return END_TYPE; } 
 "type"          { SET_TOKEN(); return TYPE; }  
 "len"        { SET_TOKEN(); return LENGTH_SPECIFIER; }
-"."("true"|"false"|"t"|"f")"."  { SET_TOKEN(); return LOGICAL_CONST; }
-"random_seed"   { SET_TOKEN(); return INTRINSIC; }
-"random_number"   { SET_TOKEN(); return INTRINSIC; }
+"."("true"|"false"|"t"|"f")"."  { SET_TOKEN(); yylval.text = strdup(yytext); return LOGICAL_CONST; }
+"random_seed"   { SET_TOKEN(); yylval.text = strdup(yytext); return INTRINSIC; }
+"random_number"   { SET_TOKEN(); yylval.text = strdup(yytext); return INTRINSIC; }
 
 "recursive"     { SET_TOKEN(); return RECURSIVE; }
 "result"        { SET_TOKEN(); return RESULT; }
@@ -143,17 +143,18 @@ PP_EXPR    [^\n]+
 "read"          { SET_TOKEN(); return READ; }
 "error"         { SET_TOKEN(); return ERROR; }
 
-"=="|"/="|"<="|">="|"<"|">"   { SET_TOKEN(); return REL_OP; }
+"=="|"/="|"<="|">="|"<"|">"   { SET_TOKEN(); yylval.text = strdup(yytext); return REL_OP; }
 "=>"  { SET_TOKEN(); return PTR_ASSIGN; }
 "="                            { SET_TOKEN(); return ASSIGN; }
-"+"|"-"|"*"|"/"               { SET_TOKEN(); return ARITH_OP; }
+"**"                           { SET_TOKEN(); yylval.text = strdup(yytext); return EXPONENT; }
+"+"|"-"                       { SET_TOKEN(); yylval.text = strdup(yytext); return ADD_OP; }
+"*"|"/"                       { SET_TOKEN(); yylval.text = strdup(yytext); return MUL_OP; }
 "("                            { SET_TOKEN(); paren_balance++; return LPAREN; }
 ")"                            { SET_TOKEN(); paren_balance--; return RPAREN; }
 ","                            { SET_TOKEN(); return COMMA; }
 "::"                           { SET_TOKEN(); return DECL_SEP; }
 ":"                            { SET_TOKEN(); return COLON; }
 ".."                          { SET_TOKEN(); return ASSUMED_RANK_SPECIFIER; }
-"**"                           { SET_TOKEN(); return EXPONENT; }
 "//"                           { SET_TOKEN(); return CONCAT; }
 "%"   { SET_TOKEN(); return DERIVED_TYPE_COMPONENT; }
 
@@ -167,12 +168,12 @@ PP_EXPR    [^\n]+
 "#else"        { SET_TOKEN(); return PP_ELSE; }
 "#endif"       { SET_TOKEN(); return PP_ENDIF; }
 
-"."("and"|"or"|"not")"."  { SET_TOKEN(); return LOGICAL_OP; }
+"."("and"|"or"|"not")"."  { SET_TOKEN(); yylval.text = strdup(yytext); return LOGICAL_OP; }
 
 
-{REAL}         { SET_TOKEN(); return REAL_CONST; }
-{INT}          { SET_TOKEN(); return INT_CONST; }
-{STRING}       { SET_TOKEN(); return STRING; }
+{REAL}         { SET_TOKEN(); yylval.text = strdup(yytext); return REAL_CONST; }
+{INT}          { SET_TOKEN(); yylval.text = strdup(yytext); return INT_CONST; }
+{STRING}       { SET_TOKEN(); yylval.text = strdup(yytext); return STRING; }
 
 {ID}           { 
     SET_TOKEN();
@@ -180,6 +181,7 @@ PP_EXPR    [^\n]+
         printf("[Line %-3d]  ERROR: Identifier exceeds 63 chars\n", yylineno);
         lexical_errors++;
     } else {
+        yylval.text = strdup(yytext);
         return IDENTIFIER;
     }
 }
