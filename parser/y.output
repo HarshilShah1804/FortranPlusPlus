@@ -10,6 +10,7 @@ Terminals unused in grammar
     ERROR
     CONCAT
     PP_ELIF
+    LOWER_THAN_ELSE
 
 
 Grammar
@@ -37,218 +38,248 @@ Grammar
 
    13 module_body: preamble declarations executables contains_block
 
-   14 contains_block: CONTAINS subprogram_list
-   15               | %empty
+   14 $@1: %empty
 
-   16 declarations: %empty
-   17             | declaration declarations
+   15 contains_block: CONTAINS $@1 subprogram_list
+   16               | %empty
 
-   18 preamble: %empty
-   19         | preamble pp_item
+   17 declarations: %empty
+   18             | declaration declarations
 
-   20 pp_item: pp_define_undef
-   21        | pp_if_block
+   19 preamble: %empty
+   20         | preamble pp_item
 
-   22 declaration: type_spec declaration_attributes DECL_SEP declarator_list
-   23            | IMPLICIT NONE
-   24            | USE identifier
-   25            | type_def
+   21 pp_item: pp_define_undef
+   22        | pp_if_block
 
-   26 type_spec: INTEGER
-   27          | REAL
-   28          | LOGICAL
-   29          | char_type_spec
-   30          | TYPE LPAREN identifier RPAREN
-   31          | CLASS identifier
-   32          | COMPLEX
+   23 declaration: type_spec declaration_attributes DECL_SEP declarator_list
+   24            | IMPLICIT NONE
+   25            | USE identifier
+   26            | type_def
 
-   33 char_type_spec: CHARACTER char_len_opt
+   27 type_spec: INTEGER
+   28          | REAL
+   29          | LOGICAL
+   30          | char_type_spec
+   31          | TYPE LPAREN identifier RPAREN
+   32          | CLASS identifier
+   33          | COMPLEX
 
-   34 char_len_opt: %empty
-   35             | LPAREN LENGTH_SPECIFIER ASSIGN char_len_value RPAREN
+   34 char_type_spec: CHARACTER char_len_opt
 
-   36 char_len_value: COLON
-   37               | INT_CONST
-   38               | identifier
+   35 char_len_opt: %empty
+   36             | LPAREN LENGTH_SPECIFIER ASSIGN char_len_value RPAREN
 
-   39 attributes: attribute
-   40           | attribute COMMA attributes
+   37 char_len_value: COLON
+   38               | INT_CONST
+   39               | identifier
 
-   41 attribute: ALLOCATABLE
-   42          | POINTER
-   43          | TARGET
-   44          | INTENT LPAREN IN RPAREN
-   45          | INTENT LPAREN OUT RPAREN
-   46          | INTENT LPAREN INOUT RPAREN
+   40 attributes: attribute
+   41           | attribute COMMA attributes
 
-   47 declaration_attributes: %empty
-   48                       | COMMA attributes
+   42 attribute: ALLOCATABLE
+   43          | POINTER
+   44          | TARGET
+   45          | INTENT LPAREN IN RPAREN
+   46          | INTENT LPAREN OUT RPAREN
+   47          | INTENT LPAREN INOUT RPAREN
 
-   49 identifier_list: identifier
-   50                | identifier COMMA identifier_list
+   48 declaration_attributes: %empty
+   49                       | COMMA attributes
 
-   51 declarator_list: declarator
-   52                | declarator COMMA declarator_list
+   50 identifier_list: identifier
+   51                | identifier COMMA identifier_list
 
-   53 declarator: identifier array_spec_opt init_opt
+   52 declarator_list: declarator
+   53                | declarator COMMA declarator_list
 
-   54 array_spec_opt: %empty
-   55               | array_spec
+   54 $@2: %empty
 
-   56 array_spec: LPAREN array_spec_list RPAREN
+   55 declarator: identifier array_spec_opt $@2 init_opt
 
-   57 array_spec_list: array_spec_item
-   58                | array_spec_list COMMA array_spec_item
+   56 array_spec_opt: %empty
+   57               | array_spec
 
-   59 array_spec_item: ASSUMED_RANK_SPECIFIER
-   60                | COLON
-   61                | expression
-   62                | expression COLON
-   63                | COLON expression
-   64                | expression COLON expression
+   58 array_spec: LPAREN array_spec_list RPAREN
 
-   65 init_opt: %empty
-   66         | ASSIGN expression
+   59 array_spec_list: array_spec_item
+   60                | array_spec_list COMMA array_spec_item
 
-   67 executables: %empty
-   68            | executables executable
+   61 array_spec_item: ASSUMED_RANK_SPECIFIER
+   62                | COLON
+   63                | expression
+   64                | expression COLON
+   65                | COLON expression
+   66                | expression COLON expression
 
-   69 executable: assignment_stmt
-   70           | if_stmt
-   71           | print_stmt
-   72           | allocate_stmt
-   73           | deallocate_stmt
-   74           | do_stmt
-   75           | dowhile_stmt
-   76           | select_rank_stmt
-   77           | select_stmt
-   78           | call_stmt
-   79           | return_stmt
-   80           | stop_stmt
-   81           | pointer_stmt
+   67 init_opt: %empty
+   68         | ASSIGN expression
 
-   82 assignment_stmt: variable_ref ASSIGN expression
+   69 executables: %empty
+   70            | executables executable
 
-   83 if_stmt: IF LPAREN expression RPAREN THEN executables ENDIF
-   84        | IF LPAREN expression RPAREN THEN executables END IF
-   85        | IF LPAREN expression RPAREN THEN executables ELSE executables ENDIF
-   86        | IF LPAREN expression RPAREN THEN executables ELSE executables END IF
+   71 executable: assignment_stmt
+   72           | if_stmt
+   73           | print_stmt
+   74           | allocate_stmt
+   75           | deallocate_stmt
+   76           | do_stmt
+   77           | dowhile_stmt
+   78           | select_rank_stmt
+   79           | select_stmt
+   80           | call_stmt
+   81           | return_stmt
+   82           | stop_stmt
+   83           | pointer_stmt
 
-   87 do_stmt: DO IDENTIFIER ASSIGN expression COMMA expression step_opt executables END DO
+   84 assignment_stmt: variable_ref ASSIGN expression
 
-   88 dowhile_stmt: DO WHILE LPAREN expression RPAREN executables END DO
+   85 $@3: %empty
 
-   89 select_stmt: SELECT CASE LPAREN expression RPAREN case_blocks END SELECT
+   86 if_stmt: IF LPAREN expression RPAREN THEN $@3 executables if_else_opt ENDIF
 
-   90 select_rank_stmt: SELECT RANK LPAREN identifier RPAREN rank_blocks END SELECT
+   87 if_else_opt: %empty
 
-   91 rank_blocks: rank_block
-   92            | rank_blocks rank_block
+   88 $@4: %empty
 
-   93 rank_block: RANK LPAREN rank_selector RPAREN executables
-   94           | RANK DEFAULT executables
+   89 if_else_opt: ELSE $@4 executables
 
-   95 rank_selector: INT_CONST
-   96              | ARITH_OP
+   90 $@5: %empty
 
-   97 case_blocks: case_block
-   98            | case_blocks case_block
+   91 do_stmt: DO IDENTIFIER ASSIGN expression COMMA expression step_opt $@5 executables END DO
 
-   99 case_block: CASE LPAREN expression RPAREN executables
-  100           | CASE DEFAULT executables
+   92 $@6: %empty
 
-  101 call_stmt: CALL callable_name LPAREN argument_list RPAREN
+   93 $@7: %empty
 
-  102 callable_name: identifier
-  103              | INTRINSIC
+   94 dowhile_stmt: DO WHILE LPAREN $@6 expression RPAREN $@7 executables END DO
 
-  104 return_stmt: RETURN
+   95 $@8: %empty
 
-  105 stop_stmt: STOP
-  106          | STOP INT_CONST
-  107          | STOP STRING
+   96 select_stmt: SELECT CASE LPAREN expression RPAREN $@8 case_blocks END SELECT
 
-  108 pointer_stmt: variable_ref PTR_ASSIGN variable_ref
+   97 $@9: %empty
 
-  109 step_opt: %empty
-  110         | COMMA expression
+   98 select_rank_stmt: SELECT RANK LPAREN identifier RPAREN $@9 rank_blocks END SELECT
 
-  111 print_stmt: PRINT ARITH_OP COMMA print_args
+   99 rank_blocks: rank_block
+  100            | rank_blocks rank_block
 
-  112 print_args: expression
-  113           | print_args COMMA expression
+  101 $@10: %empty
 
-  114 allocate_stmt: ALLOCATE LPAREN argument_list RPAREN
+  102 rank_block: RANK LPAREN rank_selector RPAREN $@10 executables
 
-  115 deallocate_stmt: DEALLOCATE LPAREN argument_list RPAREN
+  103 $@11: %empty
 
-  116 expression: expression ARITH_OP expression
-  117           | expression EXPONENT expression
-  118           | expression REL_OP expression
-  119           | expression LOGICAL_OP expression
-  120           | factor
-  121           | ARITH_OP expression
-  122           | LOGICAL_OP expression
+  104 rank_block: RANK DEFAULT $@11 executables
 
-  123 factor: primary
+  105 rank_selector: INT_CONST
+  106              | MUL_OP
 
-  124 primary: INT_CONST
-  125        | REAL_CONST
-  126        | LOGICAL_CONST
-  127        | STRING
-  128        | complex_literal
-  129        | LPAREN expression RPAREN
-  130        | variable_ref primary_suffix_opt
+  107 case_blocks: case_block
+  108            | case_blocks case_block
 
-  131 complex_literal: LPAREN expression COMMA expression RPAREN
+  109 $@12: %empty
 
-  132 primary_suffix_opt: %empty
-  133                   | LPAREN argument_list RPAREN
+  110 case_block: CASE LPAREN expression RPAREN $@12 executables
 
-  134 variable_ref: identifier
-  135             | variable_ref DERIVED_TYPE_COMPONENT identifier
+  111 $@13: %empty
 
-  136 subprogram_list: %empty
-  137                | subprogram_list subprogram
+  112 case_block: CASE DEFAULT $@13 executables
 
-  138 subprogram: SUBROUTINE identifier LPAREN identifier_list_opt RPAREN program_body END SUBROUTINE
-  139           | SUBROUTINE identifier LPAREN identifier_list_opt RPAREN program_body END SUBROUTINE identifier
-  140           | FUNCTION identifier LPAREN identifier_list_opt RPAREN program_body END FUNCTION
-  141           | FUNCTION identifier LPAREN identifier_list_opt RPAREN program_body END FUNCTION identifier
-  142           | RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION
-  143           | RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION identifier
+  113 call_stmt: CALL callable_name LPAREN argument_values RPAREN
 
-  144 argument_list: %empty
-  145              | expression
-  146              | expression COMMA argument_list
+  114 callable_name: identifier
+  115              | INTRINSIC
 
-  147 identifier_list_opt: %empty
-  148                    | identifier_list
+  116 return_stmt: RETURN
 
-  149 identifier: IDENTIFIER
-  150           | RESULT
+  117 stop_stmt: STOP
+  118          | STOP INT_CONST
+  119          | STOP STRING
 
-  151 type_def: TYPE DECL_SEP identifier type_def_body END_TYPE identifier
+  120 pointer_stmt: variable_ref PTR_ASSIGN variable_ref
 
-  152 type_def_body: %empty
-  153              | type_def_declarations
+  121 step_opt: %empty
+  122         | COMMA expression
 
-  154 type_def_declarations: type_def_declaration
-  155                      | type_def_declarations type_def_declaration
+  123 print_stmt: PRINT MUL_OP COMMA print_args
 
-  156 type_def_declaration: type_spec declaration_attributes DECL_SEP declarator_list
+  124 print_args: expression
+  125           | print_args COMMA expression
 
-  157 pp_define_undef: PP_DEFINE identifier
-  158                | PP_DEFINE identifier INT_CONST
-  159                | PP_UNDEF identifier
+  126 allocate_stmt: ALLOCATE LPAREN argument_values RPAREN
 
-  160 pp_if_block: PP_IFDEF identifier declarations pp_else_opt PP_ENDIF
-  161            | PP_IFNDEF identifier declarations pp_else_opt PP_ENDIF
-  162            | PP_IF identifier declarations pp_else_opt PP_ENDIF
-  163            | PP_IF INT_CONST declarations pp_else_opt PP_ENDIF
+  127 deallocate_stmt: DEALLOCATE LPAREN argument_values RPAREN
 
-  164 pp_else_opt: %empty
-  165            | PP_ELSE declarations
+  128 expression: expression ADD_OP expression
+  129           | expression MUL_OP expression
+  130           | expression EXPONENT expression
+  131           | expression REL_OP expression
+  132           | expression LOGICAL_OP expression
+  133           | factor
+  134           | ADD_OP expression
+  135           | LOGICAL_OP expression
+
+  136 factor: primary
+
+  137 primary: INT_CONST
+  138        | REAL_CONST
+  139        | LOGICAL_CONST
+  140        | STRING
+  141        | complex_literal
+  142        | LPAREN expression RPAREN
+  143        | variable_ref primary_suffix_opt
+
+  144 complex_literal: LPAREN expression COMMA expression RPAREN
+
+  145 primary_suffix_opt: %empty
+  146                   | LPAREN argument_values RPAREN
+
+  147 variable_ref: identifier
+  148             | variable_ref DERIVED_TYPE_COMPONENT identifier
+
+  149 subprogram_list: %empty
+  150                | subprogram_list subprogram
+
+  151 subprogram: SUBROUTINE identifier LPAREN identifier_list_opt RPAREN program_body END SUBROUTINE
+  152           | SUBROUTINE identifier LPAREN identifier_list_opt RPAREN program_body END SUBROUTINE identifier
+  153           | FUNCTION identifier LPAREN identifier_list_opt RPAREN program_body END FUNCTION
+  154           | FUNCTION identifier LPAREN identifier_list_opt RPAREN program_body END FUNCTION identifier
+  155           | RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION
+  156           | RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION identifier
+
+  157 argument_values: %empty
+  158                | expression
+  159                | expression COMMA argument_values
+
+  160 identifier_list_opt: %empty
+  161                    | identifier_list
+
+  162 identifier: IDENTIFIER
+  163           | RESULT
+
+  164 type_def: TYPE DECL_SEP identifier type_def_body END_TYPE identifier
+
+  165 type_def_body: %empty
+  166              | type_def_declarations
+
+  167 type_def_declarations: type_def_declaration
+  168                      | type_def_declarations type_def_declaration
+
+  169 type_def_declaration: type_spec declaration_attributes DECL_SEP declarator_list
+
+  170 pp_define_undef: PP_DEFINE identifier
+  171                | PP_DEFINE identifier INT_CONST
+  172                | PP_UNDEF identifier
+
+  173 pp_if_block: PP_IFDEF identifier declarations pp_else_opt PP_ENDIF
+  174            | PP_IFNDEF identifier declarations pp_else_opt PP_ENDIF
+  175            | PP_IF identifier declarations pp_else_opt PP_ENDIF
+  176            | PP_IF INT_CONST declarations pp_else_opt PP_ENDIF
+
+  177 pp_else_opt: %empty
+  178            | PP_ELSE declarations
 
 
 Terminals, with rules where they appear
@@ -257,298 +288,341 @@ Terminals, with rules where they appear
     error (256)
     PROGRAM (258) 8 9
     MODULE (259) 10 11
-    END (260) 8 9 10 11 84 86 87 88 89 90 138 139 140 141 142 143
-    CONTAINS (261) 14
-    USE (262) 24
-    NONE (263) 23
-    IMPLICIT (264) 23
-    INTEGER (265) 26
-    REAL (266) 27
-    LOGICAL (267) 28
-    CHARACTER (268) 33
-    TYPE (269) 30 151
-    CLASS (270) 31
-    END_TYPE (271) 151
-    COMPLEX (272) 32
-    IF (273) 83 84 85 86
-    THEN (274) 83 84 85 86
-    ELSE (275) 85 86
-    DO (276) 87 88
-    ENDIF (277) 83 85
+    END (260) 8 9 10 11 91 94 96 98 151 152 153 154 155 156
+    CONTAINS (261) 15
+    USE (262) 25
+    NONE (263) 24
+    IMPLICIT (264) 24
+    INTEGER (265) 27
+    REAL (266) 28
+    LOGICAL (267) 29
+    CHARACTER (268) 34
+    TYPE (269) 31 164
+    CLASS (270) 32
+    END_TYPE (271) 164
+    COMPLEX (272) 33
+    IF (273) 86
+    THEN (274) 86
+    ELSE (275) 89
+    DO (276) 91 94
+    ENDIF (277) 86
     LEN (278)
-    INTRINSIC (279) 103
-    WHILE (280) 88
-    SELECT (281) 89 90
-    CASE (282) 89 99 100
-    DEFAULT (283) 94 100
-    RANK (284) 90 93 94
-    STOP (285) 105 106 107
-    PRINT (286) 111
-    CALL (287) 101
-    SUBROUTINE (288) 138 139
-    FUNCTION (289) 140 141 142 143
-    RETURN (290) 104
-    RECURSIVE (291) 142 143
-    RESULT (292) 142 143 150
-    ALLOCATE (293) 114
-    DEALLOCATE (294) 115
-    ALLOCATED (295)
-    POINTER (296) 42
-    TARGET (297) 43
-    ALLOCATABLE (298) 41
-    INTENT (299) 44 45 46
-    IN (300) 44
-    OUT (301) 45
-    INOUT (302) 46
-    OPEN (303)
-    CLOSE (304)
-    INQUIRE (305)
-    WRITE (306)
-    READ (307)
-    ERROR (308)
-    LPAREN (309) 30 35 44 45 46 56 83 84 85 86 88 89 90 93 99 101 114 115 129 131 133 138 139 140 141 142 143
-    RPAREN (310) 30 35 44 45 46 56 83 84 85 86 88 89 90 93 99 101 114 115 129 131 133 138 139 140 141 142 143
-    COMMA (311) 40 48 50 52 58 87 110 111 113 131 146
-    COLON (312) 36 60 62 63 64
-    ASSUMED_RANK_SPECIFIER (313) 59
-    CONCAT (314)
-    PTR_ASSIGN (315) 108
-    PP_DEFINE (316) 157 158
-    PP_UNDEF (317) 159
-    PP_IFDEF (318) 160
-    PP_IFNDEF (319) 161
-    PP_IF (320) 162 163
-    PP_ELIF (321)
-    PP_ELSE (322) 165
-    PP_ENDIF (323) 160 161 162 163
-    LENGTH_SPECIFIER (324) 35
-    IDENTIFIER (325) 8 9 10 11 87 149
-    INT_CONST (326) 37 95 106 124 158 163
-    REAL_CONST (327) 125
-    STRING (328) 107 127
-    LOGICAL_CONST (329) 126
-    ARITH_OP (330) 96 111 116 121
-    REL_OP (331) 118
-    LOGICAL_OP (332) 119 122
-    ASSIGN (333) 35 66 82 87
-    EXPONENT (334) 117
-    DECL_SEP (335) 22 151 156
-    DERIVED_TYPE_COMPONENT (336) 135
-    UNARY (337)
-    LOWER_THAN_ELSE (338)
+    WHILE (279) 94
+    SELECT (280) 96 98
+    CASE (281) 96 110 112
+    DEFAULT (282) 104 112
+    RANK (283) 98 102 104
+    STOP (284) 117 118 119
+    PRINT (285) 123
+    CALL (286) 113
+    SUBROUTINE (287) 151 152
+    FUNCTION (288) 153 154 155 156
+    RETURN (289) 116
+    RECURSIVE (290) 155 156
+    RESULT (291) 155 156 163
+    ALLOCATE (292) 126
+    DEALLOCATE (293) 127
+    ALLOCATED (294)
+    POINTER (295) 43
+    TARGET (296) 44
+    ALLOCATABLE (297) 42
+    INTENT (298) 45 46 47
+    IN (299) 45
+    OUT (300) 46
+    INOUT (301) 47
+    OPEN (302)
+    CLOSE (303)
+    INQUIRE (304)
+    WRITE (305)
+    READ (306)
+    ERROR (307)
+    LPAREN (308) 31 36 45 46 47 58 86 94 96 98 102 110 113 126 127 142 144 146 151 152 153 154 155 156
+    RPAREN (309) 31 36 45 46 47 58 86 94 96 98 102 110 113 126 127 142 144 146 151 152 153 154 155 156
+    COMMA (310) 41 49 51 53 60 91 122 123 125 144 159
+    COLON (311) 37 62 64 65 66
+    ASSUMED_RANK_SPECIFIER (312) 61
+    CONCAT (313)
+    PTR_ASSIGN (314) 120
+    PP_DEFINE (315) 170 171
+    PP_UNDEF (316) 172
+    PP_IFDEF (317) 173
+    PP_IFNDEF (318) 174
+    PP_IF (319) 175 176
+    PP_ELIF (320)
+    PP_ELSE (321) 178
+    PP_ENDIF (322) 173 174 175 176
+    LENGTH_SPECIFIER (323) 36
+    IDENTIFIER <text> (324) 8 9 10 11 91 162
+    INT_CONST <text> (325) 38 105 118 137 171 176
+    REAL_CONST <text> (326) 138
+    STRING <text> (327) 119 140
+    LOGICAL_CONST <text> (328) 139
+    INTRINSIC <text> (329) 115
+    ADD_OP <text> (330) 128 134
+    MUL_OP <text> (331) 106 123 129
+    REL_OP <text> (332) 131
+    LOGICAL_OP <text> (333) 132 135
+    EXPONENT <text> (334) 130
+    ASSIGN (335) 36 68 84 91
+    DECL_SEP (336) 23 164 169
+    DERIVED_TYPE_COMPONENT (337) 148
+    UNARY (338)
+    LOWER_THAN_ELSE (339)
 
 
 Nonterminals, with rules where they appear
 
-    $accept (84)
+    $accept (85)
         on left: 0
-    start <node> (85)
+    start <node> (86)
         on left: 1 2
         on right: 0
-    compilation_units <node> (86)
+    compilation_units <node> (87)
         on left: 3 4
         on right: 1 4
-    compilation_unit <node> (87)
+    compilation_unit <node> (88)
         on left: 5 6
         on right: 3 4
-    free_form <node> (88)
+    free_form <node> (89)
         on left: 7
         on right: 2
-    program_unit <node> (89)
+    program_unit <node> (90)
         on left: 8 9
         on right: 5
-    module_unit <node> (90)
+    module_unit <node> (91)
         on left: 10 11
         on right: 6
-    program_body <node> (91)
+    program_body <node> (92)
         on left: 12
-        on right: 8 9 138 139 140 141 142 143
-    module_body <node> (92)
+        on right: 8 9 151 152 153 154 155 156
+    module_body <node> (93)
         on left: 13
         on right: 10 11
-    contains_block <node> (93)
-        on left: 14 15
+    contains_block <node> (94)
+        on left: 15 16
         on right: 12 13
-    declarations <node> (94)
-        on left: 16 17
-        on right: 7 12 13 17 160 161 162 163 165
-    preamble <node> (95)
-        on left: 18 19
-        on right: 7 12 13 19
-    pp_item <node> (96)
-        on left: 20 21
-        on right: 19
-    declaration <node> (97)
-        on left: 22 23 24 25
-        on right: 17
-    type_spec <node> (98)
-        on left: 26 27 28 29 30 31 32
-        on right: 22 156
-    char_type_spec <node> (99)
-        on left: 33
-        on right: 29
-    char_len_opt <node> (100)
-        on left: 34 35
-        on right: 33
-    char_len_value <node> (101)
-        on left: 36 37 38
-        on right: 35
-    attributes <node> (102)
-        on left: 39 40
-        on right: 40 48
-    attribute <node> (103)
-        on left: 41 42 43 44 45 46
-        on right: 39 40
-    declaration_attributes <node> (104)
-        on left: 47 48
-        on right: 22 156
-    identifier_list <node> (105)
-        on left: 49 50
-        on right: 50 148
-    declarator_list <node> (106)
-        on left: 51 52
-        on right: 22 52 156
-    declarator <node> (107)
-        on left: 53
-        on right: 51 52
-    array_spec_opt <node> (108)
-        on left: 54 55
-        on right: 53
-    array_spec <node> (109)
-        on left: 56
-        on right: 55
-    array_spec_list <node> (110)
-        on left: 57 58
-        on right: 56 58
-    array_spec_item <node> (111)
-        on left: 59 60 61 62 63 64
-        on right: 57 58
-    init_opt <node> (112)
-        on left: 65 66
-        on right: 53
-    executables <node> (113)
-        on left: 67 68
-        on right: 7 12 13 68 83 84 85 86 87 88 93 94 99 100
-    executable <node> (114)
-        on left: 69 70 71 72 73 74 75 76 77 78 79 80 81
-        on right: 68
-    assignment_stmt <node> (115)
-        on left: 82
-        on right: 69
-    if_stmt <node> (116)
-        on left: 83 84 85 86
-        on right: 70
-    do_stmt <node> (117)
-        on left: 87
-        on right: 74
-    dowhile_stmt <node> (118)
-        on left: 88
-        on right: 75
-    select_stmt <node> (119)
-        on left: 89
-        on right: 77
-    select_rank_stmt <node> (120)
-        on left: 90
-        on right: 76
-    rank_blocks <node> (121)
-        on left: 91 92
-        on right: 90 92
-    rank_block <node> (122)
-        on left: 93 94
-        on right: 91 92
-    rank_selector <node> (123)
-        on left: 95 96
-        on right: 93
-    case_blocks <node> (124)
-        on left: 97 98
-        on right: 89 98
-    case_block <node> (125)
-        on left: 99 100
-        on right: 97 98
-    call_stmt <node> (126)
-        on left: 101
-        on right: 78
-    callable_name <node> (127)
-        on left: 102 103
-        on right: 101
-    return_stmt <node> (128)
-        on left: 104
-        on right: 79
-    stop_stmt <node> (129)
-        on left: 105 106 107
-        on right: 80
-    pointer_stmt <node> (130)
-        on left: 108
-        on right: 81
-    step_opt <node> (131)
-        on left: 109 110
-        on right: 87
-    print_stmt <node> (132)
-        on left: 111
-        on right: 71
-    print_args <node> (133)
-        on left: 112 113
-        on right: 111 113
-    allocate_stmt <node> (134)
-        on left: 114
-        on right: 72
-    deallocate_stmt <node> (135)
-        on left: 115
-        on right: 73
-    expression <node> (136)
-        on left: 116 117 118 119 120 121 122
-        on right: 61 62 63 64 66 82 83 84 85 86 87 88 89 99 110 112 113 116 117 118 119 121 122 129 131 145 146
-    factor <node> (137)
-        on left: 123
-        on right: 120
-    primary <node> (138)
-        on left: 124 125 126 127 128 129 130
-        on right: 123
-    complex_literal <node> (139)
-        on left: 131
-        on right: 128
-    primary_suffix_opt <node> (140)
-        on left: 132 133
-        on right: 130
-    variable_ref <node> (141)
-        on left: 134 135
-        on right: 82 108 130 135
-    subprogram_list <node> (142)
-        on left: 136 137
-        on right: 14 137
-    subprogram <node> (143)
-        on left: 138 139 140 141 142 143
-        on right: 137
-    argument_list <node> (144)
-        on left: 144 145 146
-        on right: 101 114 115 133 146
-    identifier_list_opt <node> (145)
-        on left: 147 148
-        on right: 138 139 140 141 142 143
-    identifier <node> (146)
-        on left: 149 150
-        on right: 24 30 31 38 49 50 53 90 102 134 135 138 139 140 141 142 143 151 157 158 159 160 161 162
-    type_def <node> (147)
-        on left: 151
-        on right: 25
-    type_def_body <node> (148)
-        on left: 152 153
-        on right: 151
-    type_def_declarations <node> (149)
-        on left: 154 155
-        on right: 153 155
-    type_def_declaration <node> (150)
-        on left: 156
-        on right: 154 155
-    pp_define_undef <node> (151)
-        on left: 157 158 159
+    $@1 (95)
+        on left: 14
+        on right: 15
+    declarations <node> (96)
+        on left: 17 18
+        on right: 7 12 13 18 173 174 175 176 178
+    preamble <node> (97)
+        on left: 19 20
+        on right: 7 12 13 20
+    pp_item <node> (98)
+        on left: 21 22
         on right: 20
-    pp_if_block <node> (152)
-        on left: 160 161 162 163
+    declaration <node> (99)
+        on left: 23 24 25 26
+        on right: 18
+    type_spec <node> (100)
+        on left: 27 28 29 30 31 32 33
+        on right: 23 169
+    char_type_spec <node> (101)
+        on left: 34
+        on right: 30
+    char_len_opt <node> (102)
+        on left: 35 36
+        on right: 34
+    char_len_value <node> (103)
+        on left: 37 38 39
+        on right: 36
+    attributes <node> (104)
+        on left: 40 41
+        on right: 41 49
+    attribute <node> (105)
+        on left: 42 43 44 45 46 47
+        on right: 40 41
+    declaration_attributes <node> (106)
+        on left: 48 49
+        on right: 23 169
+    identifier_list <node> (107)
+        on left: 50 51
+        on right: 51 161
+    declarator_list <node> (108)
+        on left: 52 53
+        on right: 23 53 169
+    declarator <node> (109)
+        on left: 55
+        on right: 52 53
+    $@2 (110)
+        on left: 54
+        on right: 55
+    array_spec_opt <node> (111)
+        on left: 56 57
+        on right: 55
+    array_spec <node> (112)
+        on left: 58
+        on right: 57
+    array_spec_list <node> (113)
+        on left: 59 60
+        on right: 58 60
+    array_spec_item <node> (114)
+        on left: 61 62 63 64 65 66
+        on right: 59 60
+    init_opt <node> (115)
+        on left: 67 68
+        on right: 55
+    executables <node> (116)
+        on left: 69 70
+        on right: 7 12 13 70 86 89 91 94 102 104 110 112
+    executable <node> (117)
+        on left: 71 72 73 74 75 76 77 78 79 80 81 82 83
+        on right: 70
+    assignment_stmt <tac> (118)
+        on left: 84
+        on right: 71
+    if_stmt <node> (119)
+        on left: 86
+        on right: 72
+    $@3 (120)
+        on left: 85
+        on right: 86
+    if_else_opt <node> (121)
+        on left: 87 89
+        on right: 86
+    $@4 (122)
+        on left: 88
+        on right: 89
+    do_stmt <node> (123)
+        on left: 91
+        on right: 76
+    $@5 (124)
+        on left: 90
+        on right: 91
+    dowhile_stmt <node> (125)
+        on left: 94
+        on right: 77
+    $@6 (126)
+        on left: 92
+        on right: 94
+    $@7 (127)
+        on left: 93
+        on right: 94
+    select_stmt <node> (128)
+        on left: 96
+        on right: 79
+    $@8 (129)
+        on left: 95
+        on right: 96
+    select_rank_stmt <node> (130)
+        on left: 98
+        on right: 78
+    $@9 (131)
+        on left: 97
+        on right: 98
+    rank_blocks <node> (132)
+        on left: 99 100
+        on right: 98 100
+    rank_block <node> (133)
+        on left: 102 104
+        on right: 99 100
+    $@10 (134)
+        on left: 101
+        on right: 102
+    $@11 (135)
+        on left: 103
+        on right: 104
+    rank_selector <node> (136)
+        on left: 105 106
+        on right: 102
+    case_blocks <node> (137)
+        on left: 107 108
+        on right: 96 108
+    case_block <node> (138)
+        on left: 110 112
+        on right: 107 108
+    $@12 (139)
+        on left: 109
+        on right: 110
+    $@13 (140)
+        on left: 111
+        on right: 112
+    call_stmt <node> (141)
+        on left: 113
+        on right: 80
+    callable_name <text> (142)
+        on left: 114 115
+        on right: 113
+    return_stmt <node> (143)
+        on left: 116
+        on right: 81
+    stop_stmt <node> (144)
+        on left: 117 118 119
+        on right: 82
+    pointer_stmt <node> (145)
+        on left: 120
+        on right: 83
+    step_opt <tac> (146)
+        on left: 121 122
+        on right: 91
+    print_stmt <node> (147)
+        on left: 123
+        on right: 73
+    print_args <args> (148)
+        on left: 124 125
+        on right: 123 125
+    allocate_stmt <node> (149)
+        on left: 126
+        on right: 74
+    deallocate_stmt <node> (150)
+        on left: 127
+        on right: 75
+    expression <tac> (151)
+        on left: 128 129 130 131 132 133 134 135
+        on right: 63 64 65 66 68 84 86 91 94 96 110 122 124 125 128 129 130 131 132 134 135 142 144 158 159
+    factor <tac> (152)
+        on left: 136
+        on right: 133
+    primary <tac> (153)
+        on left: 137 138 139 140 141 142 143
+        on right: 136
+    complex_literal <tac> (154)
+        on left: 144
+        on right: 141
+    primary_suffix_opt <args> (155)
+        on left: 145 146
+        on right: 143
+    variable_ref <tac> (156)
+        on left: 147 148
+        on right: 84 120 143 148
+    subprogram_list <node> (157)
+        on left: 149 150
+        on right: 15 150
+    subprogram <node> (158)
+        on left: 151 152 153 154 155 156
+        on right: 150
+    argument_values <args> (159)
+        on left: 157 158 159
+        on right: 113 126 127 146 159
+    identifier_list_opt <node> (160)
+        on left: 160 161
+        on right: 151 152 153 154 155 156
+    identifier <text> (161)
+        on left: 162 163
+        on right: 25 31 32 39 50 51 55 98 114 147 148 151 152 153 154 155 156 164 170 171 172 173 174 175
+    type_def <node> (162)
+        on left: 164
+        on right: 26
+    type_def_body <node> (163)
+        on left: 165 166
+        on right: 164
+    type_def_declarations <node> (164)
+        on left: 167 168
+        on right: 166 168
+    type_def_declaration <node> (165)
+        on left: 169
+        on right: 167 168
+    pp_define_undef <node> (166)
+        on left: 170 171 172
         on right: 21
-    pp_else_opt <node> (153)
-        on left: 164 165
-        on right: 160 161 162 163
+    pp_if_block <node> (167)
+        on left: 173 174 175 176
+        on right: 22
+    pp_else_opt <node> (168)
+        on left: 177 178
+        on right: 173 174 175 176
 
 
 State 0
@@ -558,7 +632,7 @@ State 0
     PROGRAM  shift, and go to state 1
     MODULE   shift, and go to state 2
 
-    $default  reduce using rule 18 (preamble)
+    $default  reduce using rule 19 (preamble)
 
     start              go to state 3
     compilation_units  go to state 4
@@ -638,7 +712,7 @@ State 8
 State 9
 
     7 free_form: preamble • declarations executables
-   19 preamble: preamble • pp_item
+   20 preamble: preamble • pp_item
 
     USE        shift, and go to state 14
     IMPLICIT   shift, and go to state 15
@@ -655,7 +729,7 @@ State 9
     PP_IFNDEF  shift, and go to state 26
     PP_IF      shift, and go to state 27
 
-    $default  reduce using rule 16 (declarations)
+    $default  reduce using rule 17 (declarations)
 
     declarations     go to state 28
     pp_item          go to state 29
@@ -672,7 +746,7 @@ State 10
     8 program_unit: PROGRAM IDENTIFIER • program_body END PROGRAM IDENTIFIER
     9             | PROGRAM IDENTIFIER • program_body END PROGRAM
 
-    $default  reduce using rule 18 (preamble)
+    $default  reduce using rule 19 (preamble)
 
     program_body  go to state 36
     preamble      go to state 37
@@ -683,7 +757,7 @@ State 11
    10 module_unit: MODULE IDENTIFIER • module_body END MODULE IDENTIFIER
    11            | MODULE IDENTIFIER • module_body END MODULE
 
-    $default  reduce using rule 18 (preamble)
+    $default  reduce using rule 19 (preamble)
 
     module_body  go to state 38
     preamble     go to state 39
@@ -705,7 +779,7 @@ State 13
 
 State 14
 
-   24 declaration: USE • identifier
+   25 declaration: USE • identifier
 
     RESULT      shift, and go to state 40
     IDENTIFIER  shift, and go to state 41
@@ -715,47 +789,47 @@ State 14
 
 State 15
 
-   23 declaration: IMPLICIT • NONE
+   24 declaration: IMPLICIT • NONE
 
     NONE  shift, and go to state 43
 
 
 State 16
 
-   26 type_spec: INTEGER •
-
-    $default  reduce using rule 26 (type_spec)
-
-
-State 17
-
-   27 type_spec: REAL •
+   27 type_spec: INTEGER •
 
     $default  reduce using rule 27 (type_spec)
 
 
-State 18
+State 17
 
-   28 type_spec: LOGICAL •
+   28 type_spec: REAL •
 
     $default  reduce using rule 28 (type_spec)
 
 
+State 18
+
+   29 type_spec: LOGICAL •
+
+    $default  reduce using rule 29 (type_spec)
+
+
 State 19
 
-   33 char_type_spec: CHARACTER • char_len_opt
+   34 char_type_spec: CHARACTER • char_len_opt
 
     LPAREN  shift, and go to state 44
 
-    $default  reduce using rule 34 (char_len_opt)
+    $default  reduce using rule 35 (char_len_opt)
 
     char_len_opt  go to state 45
 
 
 State 20
 
-   30 type_spec: TYPE • LPAREN identifier RPAREN
-  151 type_def: TYPE • DECL_SEP identifier type_def_body END_TYPE identifier
+   31 type_spec: TYPE • LPAREN identifier RPAREN
+  164 type_def: TYPE • DECL_SEP identifier type_def_body END_TYPE identifier
 
     LPAREN    shift, and go to state 46
     DECL_SEP  shift, and go to state 47
@@ -763,7 +837,7 @@ State 20
 
 State 21
 
-   31 type_spec: CLASS • identifier
+   32 type_spec: CLASS • identifier
 
     RESULT      shift, and go to state 40
     IDENTIFIER  shift, and go to state 41
@@ -773,15 +847,15 @@ State 21
 
 State 22
 
-   32 type_spec: COMPLEX •
+   33 type_spec: COMPLEX •
 
-    $default  reduce using rule 32 (type_spec)
+    $default  reduce using rule 33 (type_spec)
 
 
 State 23
 
-  157 pp_define_undef: PP_DEFINE • identifier
-  158                | PP_DEFINE • identifier INT_CONST
+  170 pp_define_undef: PP_DEFINE • identifier
+  171                | PP_DEFINE • identifier INT_CONST
 
     RESULT      shift, and go to state 40
     IDENTIFIER  shift, and go to state 41
@@ -791,7 +865,7 @@ State 23
 
 State 24
 
-  159 pp_define_undef: PP_UNDEF • identifier
+  172 pp_define_undef: PP_UNDEF • identifier
 
     RESULT      shift, and go to state 40
     IDENTIFIER  shift, and go to state 41
@@ -801,7 +875,7 @@ State 24
 
 State 25
 
-  160 pp_if_block: PP_IFDEF • identifier declarations pp_else_opt PP_ENDIF
+  173 pp_if_block: PP_IFDEF • identifier declarations pp_else_opt PP_ENDIF
 
     RESULT      shift, and go to state 40
     IDENTIFIER  shift, and go to state 41
@@ -811,7 +885,7 @@ State 25
 
 State 26
 
-  161 pp_if_block: PP_IFNDEF • identifier declarations pp_else_opt PP_ENDIF
+  174 pp_if_block: PP_IFNDEF • identifier declarations pp_else_opt PP_ENDIF
 
     RESULT      shift, and go to state 40
     IDENTIFIER  shift, and go to state 41
@@ -821,8 +895,8 @@ State 26
 
 State 27
 
-  162 pp_if_block: PP_IF • identifier declarations pp_else_opt PP_ENDIF
-  163            | PP_IF • INT_CONST declarations pp_else_opt PP_ENDIF
+  175 pp_if_block: PP_IF • identifier declarations pp_else_opt PP_ENDIF
+  176            | PP_IF • INT_CONST declarations pp_else_opt PP_ENDIF
 
     RESULT      shift, and go to state 40
     IDENTIFIER  shift, and go to state 41
@@ -835,21 +909,21 @@ State 28
 
     7 free_form: preamble declarations • executables
 
-    $default  reduce using rule 67 (executables)
+    $default  reduce using rule 69 (executables)
 
     executables  go to state 55
 
 
 State 29
 
-   19 preamble: preamble pp_item •
+   20 preamble: preamble pp_item •
 
-    $default  reduce using rule 19 (preamble)
+    $default  reduce using rule 20 (preamble)
 
 
 State 30
 
-   17 declarations: declaration • declarations
+   18 declarations: declaration • declarations
 
     USE        shift, and go to state 14
     IMPLICIT   shift, and go to state 15
@@ -861,7 +935,7 @@ State 30
     CLASS      shift, and go to state 21
     COMPLEX    shift, and go to state 22
 
-    $default  reduce using rule 16 (declarations)
+    $default  reduce using rule 17 (declarations)
 
     declarations    go to state 56
     declaration     go to state 30
@@ -872,41 +946,41 @@ State 30
 
 State 31
 
-   22 declaration: type_spec • declaration_attributes DECL_SEP declarator_list
+   23 declaration: type_spec • declaration_attributes DECL_SEP declarator_list
 
     COMMA  shift, and go to state 57
 
-    $default  reduce using rule 47 (declaration_attributes)
+    $default  reduce using rule 48 (declaration_attributes)
 
     declaration_attributes  go to state 58
 
 
 State 32
 
-   29 type_spec: char_type_spec •
+   30 type_spec: char_type_spec •
 
-    $default  reduce using rule 29 (type_spec)
+    $default  reduce using rule 30 (type_spec)
 
 
 State 33
 
-   25 declaration: type_def •
+   26 declaration: type_def •
 
-    $default  reduce using rule 25 (declaration)
+    $default  reduce using rule 26 (declaration)
 
 
 State 34
 
-   20 pp_item: pp_define_undef •
+   21 pp_item: pp_define_undef •
 
-    $default  reduce using rule 20 (pp_item)
+    $default  reduce using rule 21 (pp_item)
 
 
 State 35
 
-   21 pp_item: pp_if_block •
+   22 pp_item: pp_if_block •
 
-    $default  reduce using rule 21 (pp_item)
+    $default  reduce using rule 22 (pp_item)
 
 
 State 36
@@ -920,7 +994,7 @@ State 36
 State 37
 
    12 program_body: preamble • declarations executables contains_block
-   19 preamble: preamble • pp_item
+   20 preamble: preamble • pp_item
 
     USE        shift, and go to state 14
     IMPLICIT   shift, and go to state 15
@@ -937,7 +1011,7 @@ State 37
     PP_IFNDEF  shift, and go to state 26
     PP_IF      shift, and go to state 27
 
-    $default  reduce using rule 16 (declarations)
+    $default  reduce using rule 17 (declarations)
 
     declarations     go to state 60
     pp_item          go to state 29
@@ -960,7 +1034,7 @@ State 38
 State 39
 
    13 module_body: preamble • declarations executables contains_block
-   19 preamble: preamble • pp_item
+   20 preamble: preamble • pp_item
 
     USE        shift, and go to state 14
     IMPLICIT   shift, and go to state 15
@@ -977,7 +1051,7 @@ State 39
     PP_IFNDEF  shift, and go to state 26
     PP_IF      shift, and go to state 27
 
-    $default  reduce using rule 16 (declarations)
+    $default  reduce using rule 17 (declarations)
 
     declarations     go to state 62
     pp_item          go to state 29
@@ -991,49 +1065,49 @@ State 39
 
 State 40
 
-  150 identifier: RESULT •
+  163 identifier: RESULT •
 
-    $default  reduce using rule 150 (identifier)
+    $default  reduce using rule 163 (identifier)
 
 
 State 41
 
-  149 identifier: IDENTIFIER •
+  162 identifier: IDENTIFIER •
 
-    $default  reduce using rule 149 (identifier)
+    $default  reduce using rule 162 (identifier)
 
 
 State 42
 
-   24 declaration: USE identifier •
+   25 declaration: USE identifier •
 
-    $default  reduce using rule 24 (declaration)
+    $default  reduce using rule 25 (declaration)
 
 
 State 43
 
-   23 declaration: IMPLICIT NONE •
+   24 declaration: IMPLICIT NONE •
 
-    $default  reduce using rule 23 (declaration)
+    $default  reduce using rule 24 (declaration)
 
 
 State 44
 
-   35 char_len_opt: LPAREN • LENGTH_SPECIFIER ASSIGN char_len_value RPAREN
+   36 char_len_opt: LPAREN • LENGTH_SPECIFIER ASSIGN char_len_value RPAREN
 
     LENGTH_SPECIFIER  shift, and go to state 63
 
 
 State 45
 
-   33 char_type_spec: CHARACTER char_len_opt •
+   34 char_type_spec: CHARACTER char_len_opt •
 
-    $default  reduce using rule 33 (char_type_spec)
+    $default  reduce using rule 34 (char_type_spec)
 
 
 State 46
 
-   30 type_spec: TYPE LPAREN • identifier RPAREN
+   31 type_spec: TYPE LPAREN • identifier RPAREN
 
     RESULT      shift, and go to state 40
     IDENTIFIER  shift, and go to state 41
@@ -1043,7 +1117,7 @@ State 46
 
 State 47
 
-  151 type_def: TYPE DECL_SEP • identifier type_def_body END_TYPE identifier
+  164 type_def: TYPE DECL_SEP • identifier type_def_body END_TYPE identifier
 
     RESULT      shift, and go to state 40
     IDENTIFIER  shift, and go to state 41
@@ -1053,31 +1127,31 @@ State 47
 
 State 48
 
-   31 type_spec: CLASS identifier •
+   32 type_spec: CLASS identifier •
 
-    $default  reduce using rule 31 (type_spec)
+    $default  reduce using rule 32 (type_spec)
 
 
 State 49
 
-  157 pp_define_undef: PP_DEFINE identifier •
-  158                | PP_DEFINE identifier • INT_CONST
+  170 pp_define_undef: PP_DEFINE identifier •
+  171                | PP_DEFINE identifier • INT_CONST
 
     INT_CONST  shift, and go to state 66
 
-    $default  reduce using rule 157 (pp_define_undef)
+    $default  reduce using rule 170 (pp_define_undef)
 
 
 State 50
 
-  159 pp_define_undef: PP_UNDEF identifier •
+  172 pp_define_undef: PP_UNDEF identifier •
 
-    $default  reduce using rule 159 (pp_define_undef)
+    $default  reduce using rule 172 (pp_define_undef)
 
 
 State 51
 
-  160 pp_if_block: PP_IFDEF identifier • declarations pp_else_opt PP_ENDIF
+  173 pp_if_block: PP_IFDEF identifier • declarations pp_else_opt PP_ENDIF
 
     USE        shift, and go to state 14
     IMPLICIT   shift, and go to state 15
@@ -1089,7 +1163,7 @@ State 51
     CLASS      shift, and go to state 21
     COMPLEX    shift, and go to state 22
 
-    $default  reduce using rule 16 (declarations)
+    $default  reduce using rule 17 (declarations)
 
     declarations    go to state 67
     declaration     go to state 30
@@ -1100,7 +1174,7 @@ State 51
 
 State 52
 
-  161 pp_if_block: PP_IFNDEF identifier • declarations pp_else_opt PP_ENDIF
+  174 pp_if_block: PP_IFNDEF identifier • declarations pp_else_opt PP_ENDIF
 
     USE        shift, and go to state 14
     IMPLICIT   shift, and go to state 15
@@ -1112,7 +1186,7 @@ State 52
     CLASS      shift, and go to state 21
     COMPLEX    shift, and go to state 22
 
-    $default  reduce using rule 16 (declarations)
+    $default  reduce using rule 17 (declarations)
 
     declarations    go to state 68
     declaration     go to state 30
@@ -1123,7 +1197,7 @@ State 52
 
 State 53
 
-  163 pp_if_block: PP_IF INT_CONST • declarations pp_else_opt PP_ENDIF
+  176 pp_if_block: PP_IF INT_CONST • declarations pp_else_opt PP_ENDIF
 
     USE        shift, and go to state 14
     IMPLICIT   shift, and go to state 15
@@ -1135,7 +1209,7 @@ State 53
     CLASS      shift, and go to state 21
     COMPLEX    shift, and go to state 22
 
-    $default  reduce using rule 16 (declarations)
+    $default  reduce using rule 17 (declarations)
 
     declarations    go to state 69
     declaration     go to state 30
@@ -1146,7 +1220,7 @@ State 53
 
 State 54
 
-  162 pp_if_block: PP_IF identifier • declarations pp_else_opt PP_ENDIF
+  175 pp_if_block: PP_IF identifier • declarations pp_else_opt PP_ENDIF
 
     USE        shift, and go to state 14
     IMPLICIT   shift, and go to state 15
@@ -1158,7 +1232,7 @@ State 54
     CLASS      shift, and go to state 21
     COMPLEX    shift, and go to state 22
 
-    $default  reduce using rule 16 (declarations)
+    $default  reduce using rule 17 (declarations)
 
     declarations    go to state 70
     declaration     go to state 30
@@ -1170,7 +1244,7 @@ State 54
 State 55
 
     7 free_form: preamble declarations executables •
-   68 executables: executables • executable
+   70 executables: executables • executable
 
     IF          shift, and go to state 71
     DO          shift, and go to state 72
@@ -1206,14 +1280,14 @@ State 55
 
 State 56
 
-   17 declarations: declaration declarations •
+   18 declarations: declaration declarations •
 
-    $default  reduce using rule 17 (declarations)
+    $default  reduce using rule 18 (declarations)
 
 
 State 57
 
-   48 declaration_attributes: COMMA • attributes
+   49 declaration_attributes: COMMA • attributes
 
     POINTER      shift, and go to state 96
     TARGET       shift, and go to state 97
@@ -1226,7 +1300,7 @@ State 57
 
 State 58
 
-   22 declaration: type_spec declaration_attributes • DECL_SEP declarator_list
+   23 declaration: type_spec declaration_attributes • DECL_SEP declarator_list
 
     DECL_SEP  shift, and go to state 102
 
@@ -1243,7 +1317,7 @@ State 60
 
    12 program_body: preamble declarations • executables contains_block
 
-    $default  reduce using rule 67 (executables)
+    $default  reduce using rule 69 (executables)
 
     executables  go to state 104
 
@@ -1260,28 +1334,28 @@ State 62
 
    13 module_body: preamble declarations • executables contains_block
 
-    $default  reduce using rule 67 (executables)
+    $default  reduce using rule 69 (executables)
 
     executables  go to state 106
 
 
 State 63
 
-   35 char_len_opt: LPAREN LENGTH_SPECIFIER • ASSIGN char_len_value RPAREN
+   36 char_len_opt: LPAREN LENGTH_SPECIFIER • ASSIGN char_len_value RPAREN
 
     ASSIGN  shift, and go to state 107
 
 
 State 64
 
-   30 type_spec: TYPE LPAREN identifier • RPAREN
+   31 type_spec: TYPE LPAREN identifier • RPAREN
 
     RPAREN  shift, and go to state 108
 
 
 State 65
 
-  151 type_def: TYPE DECL_SEP identifier • type_def_body END_TYPE identifier
+  164 type_def: TYPE DECL_SEP identifier • type_def_body END_TYPE identifier
 
     INTEGER    shift, and go to state 16
     REAL       shift, and go to state 17
@@ -1291,7 +1365,7 @@ State 65
     CLASS      shift, and go to state 21
     COMPLEX    shift, and go to state 22
 
-    $default  reduce using rule 152 (type_def_body)
+    $default  reduce using rule 165 (type_def_body)
 
     type_spec              go to state 110
     char_type_spec         go to state 32
@@ -1302,69 +1376,66 @@ State 65
 
 State 66
 
-  158 pp_define_undef: PP_DEFINE identifier INT_CONST •
+  171 pp_define_undef: PP_DEFINE identifier INT_CONST •
 
-    $default  reduce using rule 158 (pp_define_undef)
+    $default  reduce using rule 171 (pp_define_undef)
 
 
 State 67
 
-  160 pp_if_block: PP_IFDEF identifier declarations • pp_else_opt PP_ENDIF
+  173 pp_if_block: PP_IFDEF identifier declarations • pp_else_opt PP_ENDIF
 
     PP_ELSE  shift, and go to state 114
 
-    $default  reduce using rule 164 (pp_else_opt)
+    $default  reduce using rule 177 (pp_else_opt)
 
     pp_else_opt  go to state 115
 
 
 State 68
 
-  161 pp_if_block: PP_IFNDEF identifier declarations • pp_else_opt PP_ENDIF
+  174 pp_if_block: PP_IFNDEF identifier declarations • pp_else_opt PP_ENDIF
 
     PP_ELSE  shift, and go to state 114
 
-    $default  reduce using rule 164 (pp_else_opt)
+    $default  reduce using rule 177 (pp_else_opt)
 
     pp_else_opt  go to state 116
 
 
 State 69
 
-  163 pp_if_block: PP_IF INT_CONST declarations • pp_else_opt PP_ENDIF
+  176 pp_if_block: PP_IF INT_CONST declarations • pp_else_opt PP_ENDIF
 
     PP_ELSE  shift, and go to state 114
 
-    $default  reduce using rule 164 (pp_else_opt)
+    $default  reduce using rule 177 (pp_else_opt)
 
     pp_else_opt  go to state 117
 
 
 State 70
 
-  162 pp_if_block: PP_IF identifier declarations • pp_else_opt PP_ENDIF
+  175 pp_if_block: PP_IF identifier declarations • pp_else_opt PP_ENDIF
 
     PP_ELSE  shift, and go to state 114
 
-    $default  reduce using rule 164 (pp_else_opt)
+    $default  reduce using rule 177 (pp_else_opt)
 
     pp_else_opt  go to state 118
 
 
 State 71
 
-   83 if_stmt: IF • LPAREN expression RPAREN THEN executables ENDIF
-   84        | IF • LPAREN expression RPAREN THEN executables END IF
-   85        | IF • LPAREN expression RPAREN THEN executables ELSE executables ENDIF
-   86        | IF • LPAREN expression RPAREN THEN executables ELSE executables END IF
+   86 if_stmt: IF • LPAREN expression RPAREN THEN $@3 executables if_else_opt ENDIF
 
     LPAREN  shift, and go to state 119
 
 
 State 72
 
-   87 do_stmt: DO • IDENTIFIER ASSIGN expression COMMA expression step_opt executables END DO
-   88 dowhile_stmt: DO • WHILE LPAREN expression RPAREN executables END DO
+   91 do_stmt: DO • IDENTIFIER ASSIGN expression COMMA expression step_opt $@5 executables END DO
+   94 dowhile_stmt: DO • WHILE LPAREN $@6 expression RPAREN $@7 executables END DO
 
     WHILE       shift, and go to state 120
     IDENTIFIER  shift, and go to state 121
@@ -1372,8 +1443,8 @@ State 72
 
 State 73
 
-   89 select_stmt: SELECT • CASE LPAREN expression RPAREN case_blocks END SELECT
-   90 select_rank_stmt: SELECT • RANK LPAREN identifier RPAREN rank_blocks END SELECT
+   96 select_stmt: SELECT • CASE LPAREN expression RPAREN $@8 case_blocks END SELECT
+   98 select_rank_stmt: SELECT • RANK LPAREN identifier RPAREN $@9 rank_blocks END SELECT
 
     CASE  shift, and go to state 122
     RANK  shift, and go to state 123
@@ -1381,30 +1452,30 @@ State 73
 
 State 74
 
-  105 stop_stmt: STOP •
-  106          | STOP • INT_CONST
-  107          | STOP • STRING
+  117 stop_stmt: STOP •
+  118          | STOP • INT_CONST
+  119          | STOP • STRING
 
     INT_CONST  shift, and go to state 124
     STRING     shift, and go to state 125
 
-    $default  reduce using rule 105 (stop_stmt)
+    $default  reduce using rule 117 (stop_stmt)
 
 
 State 75
 
-  111 print_stmt: PRINT • ARITH_OP COMMA print_args
+  123 print_stmt: PRINT • MUL_OP COMMA print_args
 
-    ARITH_OP  shift, and go to state 126
+    MUL_OP  shift, and go to state 126
 
 
 State 76
 
-  101 call_stmt: CALL • callable_name LPAREN argument_list RPAREN
+  113 call_stmt: CALL • callable_name LPAREN argument_values RPAREN
 
-    INTRINSIC   shift, and go to state 127
     RESULT      shift, and go to state 40
     IDENTIFIER  shift, and go to state 41
+    INTRINSIC   shift, and go to state 127
 
     callable_name  go to state 128
     identifier     go to state 129
@@ -1412,128 +1483,128 @@ State 76
 
 State 77
 
-  104 return_stmt: RETURN •
+  116 return_stmt: RETURN •
 
-    $default  reduce using rule 104 (return_stmt)
+    $default  reduce using rule 116 (return_stmt)
 
 
 State 78
 
-  114 allocate_stmt: ALLOCATE • LPAREN argument_list RPAREN
+  126 allocate_stmt: ALLOCATE • LPAREN argument_values RPAREN
 
     LPAREN  shift, and go to state 130
 
 
 State 79
 
-  115 deallocate_stmt: DEALLOCATE • LPAREN argument_list RPAREN
+  127 deallocate_stmt: DEALLOCATE • LPAREN argument_values RPAREN
 
     LPAREN  shift, and go to state 131
 
 
 State 80
 
-   68 executables: executables executable •
+   70 executables: executables executable •
 
-    $default  reduce using rule 68 (executables)
+    $default  reduce using rule 70 (executables)
 
 
 State 81
 
-   69 executable: assignment_stmt •
-
-    $default  reduce using rule 69 (executable)
-
-
-State 82
-
-   70 executable: if_stmt •
-
-    $default  reduce using rule 70 (executable)
-
-
-State 83
-
-   74 executable: do_stmt •
-
-    $default  reduce using rule 74 (executable)
-
-
-State 84
-
-   75 executable: dowhile_stmt •
-
-    $default  reduce using rule 75 (executable)
-
-
-State 85
-
-   77 executable: select_stmt •
-
-    $default  reduce using rule 77 (executable)
-
-
-State 86
-
-   76 executable: select_rank_stmt •
-
-    $default  reduce using rule 76 (executable)
-
-
-State 87
-
-   78 executable: call_stmt •
-
-    $default  reduce using rule 78 (executable)
-
-
-State 88
-
-   79 executable: return_stmt •
-
-    $default  reduce using rule 79 (executable)
-
-
-State 89
-
-   80 executable: stop_stmt •
-
-    $default  reduce using rule 80 (executable)
-
-
-State 90
-
-   81 executable: pointer_stmt •
-
-    $default  reduce using rule 81 (executable)
-
-
-State 91
-
-   71 executable: print_stmt •
+   71 executable: assignment_stmt •
 
     $default  reduce using rule 71 (executable)
 
 
-State 92
+State 82
 
-   72 executable: allocate_stmt •
+   72 executable: if_stmt •
 
     $default  reduce using rule 72 (executable)
 
 
-State 93
+State 83
 
-   73 executable: deallocate_stmt •
+   76 executable: do_stmt •
+
+    $default  reduce using rule 76 (executable)
+
+
+State 84
+
+   77 executable: dowhile_stmt •
+
+    $default  reduce using rule 77 (executable)
+
+
+State 85
+
+   79 executable: select_stmt •
+
+    $default  reduce using rule 79 (executable)
+
+
+State 86
+
+   78 executable: select_rank_stmt •
+
+    $default  reduce using rule 78 (executable)
+
+
+State 87
+
+   80 executable: call_stmt •
+
+    $default  reduce using rule 80 (executable)
+
+
+State 88
+
+   81 executable: return_stmt •
+
+    $default  reduce using rule 81 (executable)
+
+
+State 89
+
+   82 executable: stop_stmt •
+
+    $default  reduce using rule 82 (executable)
+
+
+State 90
+
+   83 executable: pointer_stmt •
+
+    $default  reduce using rule 83 (executable)
+
+
+State 91
+
+   73 executable: print_stmt •
 
     $default  reduce using rule 73 (executable)
 
 
+State 92
+
+   74 executable: allocate_stmt •
+
+    $default  reduce using rule 74 (executable)
+
+
+State 93
+
+   75 executable: deallocate_stmt •
+
+    $default  reduce using rule 75 (executable)
+
+
 State 94
 
-   82 assignment_stmt: variable_ref • ASSIGN expression
-  108 pointer_stmt: variable_ref • PTR_ASSIGN variable_ref
-  135 variable_ref: variable_ref • DERIVED_TYPE_COMPONENT identifier
+   84 assignment_stmt: variable_ref • ASSIGN expression
+  120 pointer_stmt: variable_ref • PTR_ASSIGN variable_ref
+  148 variable_ref: variable_ref • DERIVED_TYPE_COMPONENT identifier
 
     PTR_ASSIGN              shift, and go to state 132
     ASSIGN                  shift, and go to state 133
@@ -1542,61 +1613,61 @@ State 94
 
 State 95
 
-  134 variable_ref: identifier •
+  147 variable_ref: identifier •
 
-    $default  reduce using rule 134 (variable_ref)
+    $default  reduce using rule 147 (variable_ref)
 
 
 State 96
 
-   42 attribute: POINTER •
-
-    $default  reduce using rule 42 (attribute)
-
-
-State 97
-
-   43 attribute: TARGET •
+   43 attribute: POINTER •
 
     $default  reduce using rule 43 (attribute)
 
 
+State 97
+
+   44 attribute: TARGET •
+
+    $default  reduce using rule 44 (attribute)
+
+
 State 98
 
-   41 attribute: ALLOCATABLE •
+   42 attribute: ALLOCATABLE •
 
-    $default  reduce using rule 41 (attribute)
+    $default  reduce using rule 42 (attribute)
 
 
 State 99
 
-   44 attribute: INTENT • LPAREN IN RPAREN
-   45          | INTENT • LPAREN OUT RPAREN
-   46          | INTENT • LPAREN INOUT RPAREN
+   45 attribute: INTENT • LPAREN IN RPAREN
+   46          | INTENT • LPAREN OUT RPAREN
+   47          | INTENT • LPAREN INOUT RPAREN
 
     LPAREN  shift, and go to state 135
 
 
 State 100
 
-   48 declaration_attributes: COMMA attributes •
+   49 declaration_attributes: COMMA attributes •
 
-    $default  reduce using rule 48 (declaration_attributes)
+    $default  reduce using rule 49 (declaration_attributes)
 
 
 State 101
 
-   39 attributes: attribute •
-   40           | attribute • COMMA attributes
+   40 attributes: attribute •
+   41           | attribute • COMMA attributes
 
     COMMA  shift, and go to state 136
 
-    $default  reduce using rule 39 (attributes)
+    $default  reduce using rule 40 (attributes)
 
 
 State 102
 
-   22 declaration: type_spec declaration_attributes DECL_SEP • declarator_list
+   23 declaration: type_spec declaration_attributes DECL_SEP • declarator_list
 
     RESULT      shift, and go to state 40
     IDENTIFIER  shift, and go to state 41
@@ -1619,7 +1690,7 @@ State 103
 State 104
 
    12 program_body: preamble declarations executables • contains_block
-   68 executables: executables • executable
+   70 executables: executables • executable
 
     CONTAINS    shift, and go to state 141
     IF          shift, and go to state 71
@@ -1634,7 +1705,7 @@ State 104
     DEALLOCATE  shift, and go to state 79
     IDENTIFIER  shift, and go to state 41
 
-    $default  reduce using rule 15 (contains_block)
+    $default  reduce using rule 16 (contains_block)
 
     contains_block    go to state 142
     executable        go to state 80
@@ -1668,7 +1739,7 @@ State 105
 State 106
 
    13 module_body: preamble declarations executables • contains_block
-   68 executables: executables • executable
+   70 executables: executables • executable
 
     CONTAINS    shift, and go to state 141
     IF          shift, and go to state 71
@@ -1683,7 +1754,7 @@ State 106
     DEALLOCATE  shift, and go to state 79
     IDENTIFIER  shift, and go to state 41
 
-    $default  reduce using rule 15 (contains_block)
+    $default  reduce using rule 16 (contains_block)
 
     contains_block    go to state 144
     executable        go to state 80
@@ -1706,7 +1777,7 @@ State 106
 
 State 107
 
-   35 char_len_opt: LPAREN LENGTH_SPECIFIER ASSIGN • char_len_value RPAREN
+   36 char_len_opt: LPAREN LENGTH_SPECIFIER ASSIGN • char_len_value RPAREN
 
     RESULT      shift, and go to state 40
     COLON       shift, and go to state 145
@@ -1719,40 +1790,40 @@ State 107
 
 State 108
 
-   30 type_spec: TYPE LPAREN identifier RPAREN •
+   31 type_spec: TYPE LPAREN identifier RPAREN •
 
-    $default  reduce using rule 30 (type_spec)
+    $default  reduce using rule 31 (type_spec)
 
 
 State 109
 
-   30 type_spec: TYPE • LPAREN identifier RPAREN
+   31 type_spec: TYPE • LPAREN identifier RPAREN
 
     LPAREN  shift, and go to state 46
 
 
 State 110
 
-  156 type_def_declaration: type_spec • declaration_attributes DECL_SEP declarator_list
+  169 type_def_declaration: type_spec • declaration_attributes DECL_SEP declarator_list
 
     COMMA  shift, and go to state 57
 
-    $default  reduce using rule 47 (declaration_attributes)
+    $default  reduce using rule 48 (declaration_attributes)
 
     declaration_attributes  go to state 149
 
 
 State 111
 
-  151 type_def: TYPE DECL_SEP identifier type_def_body • END_TYPE identifier
+  164 type_def: TYPE DECL_SEP identifier type_def_body • END_TYPE identifier
 
     END_TYPE  shift, and go to state 150
 
 
 State 112
 
-  153 type_def_body: type_def_declarations •
-  155 type_def_declarations: type_def_declarations • type_def_declaration
+  166 type_def_body: type_def_declarations •
+  168 type_def_declarations: type_def_declarations • type_def_declaration
 
     INTEGER    shift, and go to state 16
     REAL       shift, and go to state 17
@@ -1762,7 +1833,7 @@ State 112
     CLASS      shift, and go to state 21
     COMPLEX    shift, and go to state 22
 
-    $default  reduce using rule 153 (type_def_body)
+    $default  reduce using rule 166 (type_def_body)
 
     type_spec             go to state 110
     char_type_spec        go to state 32
@@ -1771,14 +1842,14 @@ State 112
 
 State 113
 
-  154 type_def_declarations: type_def_declaration •
+  167 type_def_declarations: type_def_declaration •
 
-    $default  reduce using rule 154 (type_def_declarations)
+    $default  reduce using rule 167 (type_def_declarations)
 
 
 State 114
 
-  165 pp_else_opt: PP_ELSE • declarations
+  178 pp_else_opt: PP_ELSE • declarations
 
     USE        shift, and go to state 14
     IMPLICIT   shift, and go to state 15
@@ -1790,7 +1861,7 @@ State 114
     CLASS      shift, and go to state 21
     COMPLEX    shift, and go to state 22
 
-    $default  reduce using rule 16 (declarations)
+    $default  reduce using rule 17 (declarations)
 
     declarations    go to state 152
     declaration     go to state 30
@@ -1801,38 +1872,35 @@ State 114
 
 State 115
 
-  160 pp_if_block: PP_IFDEF identifier declarations pp_else_opt • PP_ENDIF
+  173 pp_if_block: PP_IFDEF identifier declarations pp_else_opt • PP_ENDIF
 
     PP_ENDIF  shift, and go to state 153
 
 
 State 116
 
-  161 pp_if_block: PP_IFNDEF identifier declarations pp_else_opt • PP_ENDIF
+  174 pp_if_block: PP_IFNDEF identifier declarations pp_else_opt • PP_ENDIF
 
     PP_ENDIF  shift, and go to state 154
 
 
 State 117
 
-  163 pp_if_block: PP_IF INT_CONST declarations pp_else_opt • PP_ENDIF
+  176 pp_if_block: PP_IF INT_CONST declarations pp_else_opt • PP_ENDIF
 
     PP_ENDIF  shift, and go to state 155
 
 
 State 118
 
-  162 pp_if_block: PP_IF identifier declarations pp_else_opt • PP_ENDIF
+  175 pp_if_block: PP_IF identifier declarations pp_else_opt • PP_ENDIF
 
     PP_ENDIF  shift, and go to state 156
 
 
 State 119
 
-   83 if_stmt: IF LPAREN • expression RPAREN THEN executables ENDIF
-   84        | IF LPAREN • expression RPAREN THEN executables END IF
-   85        | IF LPAREN • expression RPAREN THEN executables ELSE executables ENDIF
-   86        | IF LPAREN • expression RPAREN THEN executables ELSE executables END IF
+   86 if_stmt: IF LPAREN • expression RPAREN THEN $@3 executables if_else_opt ENDIF
 
     RESULT         shift, and go to state 40
     LPAREN         shift, and go to state 157
@@ -1841,7 +1909,7 @@ State 119
     REAL_CONST     shift, and go to state 159
     STRING         shift, and go to state 160
     LOGICAL_CONST  shift, and go to state 161
-    ARITH_OP       shift, and go to state 162
+    ADD_OP         shift, and go to state 162
     LOGICAL_OP     shift, and go to state 163
 
     expression       go to state 164
@@ -1854,77 +1922,77 @@ State 119
 
 State 120
 
-   88 dowhile_stmt: DO WHILE • LPAREN expression RPAREN executables END DO
+   94 dowhile_stmt: DO WHILE • LPAREN $@6 expression RPAREN $@7 executables END DO
 
     LPAREN  shift, and go to state 169
 
 
 State 121
 
-   87 do_stmt: DO IDENTIFIER • ASSIGN expression COMMA expression step_opt executables END DO
+   91 do_stmt: DO IDENTIFIER • ASSIGN expression COMMA expression step_opt $@5 executables END DO
 
     ASSIGN  shift, and go to state 170
 
 
 State 122
 
-   89 select_stmt: SELECT CASE • LPAREN expression RPAREN case_blocks END SELECT
+   96 select_stmt: SELECT CASE • LPAREN expression RPAREN $@8 case_blocks END SELECT
 
     LPAREN  shift, and go to state 171
 
 
 State 123
 
-   90 select_rank_stmt: SELECT RANK • LPAREN identifier RPAREN rank_blocks END SELECT
+   98 select_rank_stmt: SELECT RANK • LPAREN identifier RPAREN $@9 rank_blocks END SELECT
 
     LPAREN  shift, and go to state 172
 
 
 State 124
 
-  106 stop_stmt: STOP INT_CONST •
+  118 stop_stmt: STOP INT_CONST •
 
-    $default  reduce using rule 106 (stop_stmt)
+    $default  reduce using rule 118 (stop_stmt)
 
 
 State 125
 
-  107 stop_stmt: STOP STRING •
+  119 stop_stmt: STOP STRING •
 
-    $default  reduce using rule 107 (stop_stmt)
+    $default  reduce using rule 119 (stop_stmt)
 
 
 State 126
 
-  111 print_stmt: PRINT ARITH_OP • COMMA print_args
+  123 print_stmt: PRINT MUL_OP • COMMA print_args
 
     COMMA  shift, and go to state 173
 
 
 State 127
 
-  103 callable_name: INTRINSIC •
+  115 callable_name: INTRINSIC •
 
-    $default  reduce using rule 103 (callable_name)
+    $default  reduce using rule 115 (callable_name)
 
 
 State 128
 
-  101 call_stmt: CALL callable_name • LPAREN argument_list RPAREN
+  113 call_stmt: CALL callable_name • LPAREN argument_values RPAREN
 
     LPAREN  shift, and go to state 174
 
 
 State 129
 
-  102 callable_name: identifier •
+  114 callable_name: identifier •
 
-    $default  reduce using rule 102 (callable_name)
+    $default  reduce using rule 114 (callable_name)
 
 
 State 130
 
-  114 allocate_stmt: ALLOCATE LPAREN • argument_list RPAREN
+  126 allocate_stmt: ALLOCATE LPAREN • argument_values RPAREN
 
     RESULT         shift, and go to state 40
     LPAREN         shift, and go to state 157
@@ -1933,23 +2001,23 @@ State 130
     REAL_CONST     shift, and go to state 159
     STRING         shift, and go to state 160
     LOGICAL_CONST  shift, and go to state 161
-    ARITH_OP       shift, and go to state 162
+    ADD_OP         shift, and go to state 162
     LOGICAL_OP     shift, and go to state 163
 
-    $default  reduce using rule 144 (argument_list)
+    $default  reduce using rule 157 (argument_values)
 
     expression       go to state 175
     factor           go to state 165
     primary          go to state 166
     complex_literal  go to state 167
     variable_ref     go to state 168
-    argument_list    go to state 176
+    argument_values  go to state 176
     identifier       go to state 95
 
 
 State 131
 
-  115 deallocate_stmt: DEALLOCATE LPAREN • argument_list RPAREN
+  127 deallocate_stmt: DEALLOCATE LPAREN • argument_values RPAREN
 
     RESULT         shift, and go to state 40
     LPAREN         shift, and go to state 157
@@ -1958,23 +2026,23 @@ State 131
     REAL_CONST     shift, and go to state 159
     STRING         shift, and go to state 160
     LOGICAL_CONST  shift, and go to state 161
-    ARITH_OP       shift, and go to state 162
+    ADD_OP         shift, and go to state 162
     LOGICAL_OP     shift, and go to state 163
 
-    $default  reduce using rule 144 (argument_list)
+    $default  reduce using rule 157 (argument_values)
 
     expression       go to state 175
     factor           go to state 165
     primary          go to state 166
     complex_literal  go to state 167
     variable_ref     go to state 168
-    argument_list    go to state 177
+    argument_values  go to state 177
     identifier       go to state 95
 
 
 State 132
 
-  108 pointer_stmt: variable_ref PTR_ASSIGN • variable_ref
+  120 pointer_stmt: variable_ref PTR_ASSIGN • variable_ref
 
     RESULT      shift, and go to state 40
     IDENTIFIER  shift, and go to state 41
@@ -1985,7 +2053,7 @@ State 132
 
 State 133
 
-   82 assignment_stmt: variable_ref ASSIGN • expression
+   84 assignment_stmt: variable_ref ASSIGN • expression
 
     RESULT         shift, and go to state 40
     LPAREN         shift, and go to state 157
@@ -1994,7 +2062,7 @@ State 133
     REAL_CONST     shift, and go to state 159
     STRING         shift, and go to state 160
     LOGICAL_CONST  shift, and go to state 161
-    ARITH_OP       shift, and go to state 162
+    ADD_OP         shift, and go to state 162
     LOGICAL_OP     shift, and go to state 163
 
     expression       go to state 179
@@ -2007,7 +2075,7 @@ State 133
 
 State 134
 
-  135 variable_ref: variable_ref DERIVED_TYPE_COMPONENT • identifier
+  148 variable_ref: variable_ref DERIVED_TYPE_COMPONENT • identifier
 
     RESULT      shift, and go to state 40
     IDENTIFIER  shift, and go to state 41
@@ -2017,9 +2085,9 @@ State 134
 
 State 135
 
-   44 attribute: INTENT LPAREN • IN RPAREN
-   45          | INTENT LPAREN • OUT RPAREN
-   46          | INTENT LPAREN • INOUT RPAREN
+   45 attribute: INTENT LPAREN • IN RPAREN
+   46          | INTENT LPAREN • OUT RPAREN
+   47          | INTENT LPAREN • INOUT RPAREN
 
     IN     shift, and go to state 181
     OUT    shift, and go to state 182
@@ -2028,7 +2096,7 @@ State 135
 
 State 136
 
-   40 attributes: attribute COMMA • attributes
+   41 attributes: attribute COMMA • attributes
 
     POINTER      shift, and go to state 96
     TARGET       shift, and go to state 97
@@ -2041,28 +2109,28 @@ State 136
 
 State 137
 
-   22 declaration: type_spec declaration_attributes DECL_SEP declarator_list •
+   23 declaration: type_spec declaration_attributes DECL_SEP declarator_list •
 
-    $default  reduce using rule 22 (declaration)
+    $default  reduce using rule 23 (declaration)
 
 
 State 138
 
-   51 declarator_list: declarator •
-   52                | declarator • COMMA declarator_list
+   52 declarator_list: declarator •
+   53                | declarator • COMMA declarator_list
 
     COMMA  shift, and go to state 185
 
-    $default  reduce using rule 51 (declarator_list)
+    $default  reduce using rule 52 (declarator_list)
 
 
 State 139
 
-   53 declarator: identifier • array_spec_opt init_opt
+   55 declarator: identifier • array_spec_opt $@2 init_opt
 
     LPAREN  shift, and go to state 186
 
-    $default  reduce using rule 54 (array_spec_opt)
+    $default  reduce using rule 56 (array_spec_opt)
 
     array_spec_opt  go to state 187
     array_spec      go to state 188
@@ -2077,11 +2145,11 @@ State 140
 
 State 141
 
-   14 contains_block: CONTAINS • subprogram_list
+   15 contains_block: CONTAINS • $@1 subprogram_list
 
-    $default  reduce using rule 136 (subprogram_list)
+    $default  reduce using rule 14 ($@1)
 
-    subprogram_list  go to state 189
+    $@1  go to state 189
 
 
 State 142
@@ -2107,42 +2175,42 @@ State 144
 
 State 145
 
-   36 char_len_value: COLON •
-
-    $default  reduce using rule 36 (char_len_value)
-
-
-State 146
-
-   37 char_len_value: INT_CONST •
+   37 char_len_value: COLON •
 
     $default  reduce using rule 37 (char_len_value)
 
 
+State 146
+
+   38 char_len_value: INT_CONST •
+
+    $default  reduce using rule 38 (char_len_value)
+
+
 State 147
 
-   35 char_len_opt: LPAREN LENGTH_SPECIFIER ASSIGN char_len_value • RPAREN
+   36 char_len_opt: LPAREN LENGTH_SPECIFIER ASSIGN char_len_value • RPAREN
 
     RPAREN  shift, and go to state 190
 
 
 State 148
 
-   38 char_len_value: identifier •
+   39 char_len_value: identifier •
 
-    $default  reduce using rule 38 (char_len_value)
+    $default  reduce using rule 39 (char_len_value)
 
 
 State 149
 
-  156 type_def_declaration: type_spec declaration_attributes • DECL_SEP declarator_list
+  169 type_def_declaration: type_spec declaration_attributes • DECL_SEP declarator_list
 
     DECL_SEP  shift, and go to state 191
 
 
 State 150
 
-  151 type_def: TYPE DECL_SEP identifier type_def_body END_TYPE • identifier
+  164 type_def: TYPE DECL_SEP identifier type_def_body END_TYPE • identifier
 
     RESULT      shift, and go to state 40
     IDENTIFIER  shift, and go to state 41
@@ -2152,50 +2220,50 @@ State 150
 
 State 151
 
-  155 type_def_declarations: type_def_declarations type_def_declaration •
+  168 type_def_declarations: type_def_declarations type_def_declaration •
 
-    $default  reduce using rule 155 (type_def_declarations)
+    $default  reduce using rule 168 (type_def_declarations)
 
 
 State 152
 
-  165 pp_else_opt: PP_ELSE declarations •
+  178 pp_else_opt: PP_ELSE declarations •
 
-    $default  reduce using rule 165 (pp_else_opt)
+    $default  reduce using rule 178 (pp_else_opt)
 
 
 State 153
 
-  160 pp_if_block: PP_IFDEF identifier declarations pp_else_opt PP_ENDIF •
+  173 pp_if_block: PP_IFDEF identifier declarations pp_else_opt PP_ENDIF •
 
-    $default  reduce using rule 160 (pp_if_block)
+    $default  reduce using rule 173 (pp_if_block)
 
 
 State 154
 
-  161 pp_if_block: PP_IFNDEF identifier declarations pp_else_opt PP_ENDIF •
+  174 pp_if_block: PP_IFNDEF identifier declarations pp_else_opt PP_ENDIF •
 
-    $default  reduce using rule 161 (pp_if_block)
+    $default  reduce using rule 174 (pp_if_block)
 
 
 State 155
 
-  163 pp_if_block: PP_IF INT_CONST declarations pp_else_opt PP_ENDIF •
+  176 pp_if_block: PP_IF INT_CONST declarations pp_else_opt PP_ENDIF •
 
-    $default  reduce using rule 163 (pp_if_block)
+    $default  reduce using rule 176 (pp_if_block)
 
 
 State 156
 
-  162 pp_if_block: PP_IF identifier declarations pp_else_opt PP_ENDIF •
+  175 pp_if_block: PP_IF identifier declarations pp_else_opt PP_ENDIF •
 
-    $default  reduce using rule 162 (pp_if_block)
+    $default  reduce using rule 175 (pp_if_block)
 
 
 State 157
 
-  129 primary: LPAREN • expression RPAREN
-  131 complex_literal: LPAREN • expression COMMA expression RPAREN
+  142 primary: LPAREN • expression RPAREN
+  144 complex_literal: LPAREN • expression COMMA expression RPAREN
 
     RESULT         shift, and go to state 40
     LPAREN         shift, and go to state 157
@@ -2204,7 +2272,7 @@ State 157
     REAL_CONST     shift, and go to state 159
     STRING         shift, and go to state 160
     LOGICAL_CONST  shift, and go to state 161
-    ARITH_OP       shift, and go to state 162
+    ADD_OP         shift, and go to state 162
     LOGICAL_OP     shift, and go to state 163
 
     expression       go to state 193
@@ -2217,35 +2285,35 @@ State 157
 
 State 158
 
-  124 primary: INT_CONST •
+  137 primary: INT_CONST •
 
-    $default  reduce using rule 124 (primary)
+    $default  reduce using rule 137 (primary)
 
 
 State 159
 
-  125 primary: REAL_CONST •
+  138 primary: REAL_CONST •
 
-    $default  reduce using rule 125 (primary)
+    $default  reduce using rule 138 (primary)
 
 
 State 160
 
-  127 primary: STRING •
+  140 primary: STRING •
 
-    $default  reduce using rule 127 (primary)
+    $default  reduce using rule 140 (primary)
 
 
 State 161
 
-  126 primary: LOGICAL_CONST •
+  139 primary: LOGICAL_CONST •
 
-    $default  reduce using rule 126 (primary)
+    $default  reduce using rule 139 (primary)
 
 
 State 162
 
-  121 expression: ARITH_OP • expression
+  134 expression: ADD_OP • expression
 
     RESULT         shift, and go to state 40
     LPAREN         shift, and go to state 157
@@ -2254,7 +2322,7 @@ State 162
     REAL_CONST     shift, and go to state 159
     STRING         shift, and go to state 160
     LOGICAL_CONST  shift, and go to state 161
-    ARITH_OP       shift, and go to state 162
+    ADD_OP         shift, and go to state 162
     LOGICAL_OP     shift, and go to state 163
 
     expression       go to state 194
@@ -2267,7 +2335,7 @@ State 162
 
 State 163
 
-  122 expression: LOGICAL_OP • expression
+  135 expression: LOGICAL_OP • expression
 
     RESULT         shift, and go to state 40
     LPAREN         shift, and go to state 157
@@ -2276,7 +2344,7 @@ State 163
     REAL_CONST     shift, and go to state 159
     STRING         shift, and go to state 160
     LOGICAL_CONST  shift, and go to state 161
-    ARITH_OP       shift, and go to state 162
+    ADD_OP         shift, and go to state 162
     LOGICAL_OP     shift, and go to state 163
 
     expression       go to state 195
@@ -2289,81 +2357,67 @@ State 163
 
 State 164
 
-   83 if_stmt: IF LPAREN expression • RPAREN THEN executables ENDIF
-   84        | IF LPAREN expression • RPAREN THEN executables END IF
-   85        | IF LPAREN expression • RPAREN THEN executables ELSE executables ENDIF
-   86        | IF LPAREN expression • RPAREN THEN executables ELSE executables END IF
-  116 expression: expression • ARITH_OP expression
-  117           | expression • EXPONENT expression
-  118           | expression • REL_OP expression
-  119           | expression • LOGICAL_OP expression
+   86 if_stmt: IF LPAREN expression • RPAREN THEN $@3 executables if_else_opt ENDIF
+  128 expression: expression • ADD_OP expression
+  129           | expression • MUL_OP expression
+  130           | expression • EXPONENT expression
+  131           | expression • REL_OP expression
+  132           | expression • LOGICAL_OP expression
 
     RPAREN      shift, and go to state 196
-    ARITH_OP    shift, and go to state 197
-    REL_OP      shift, and go to state 198
-    LOGICAL_OP  shift, and go to state 199
-    EXPONENT    shift, and go to state 200
+    ADD_OP      shift, and go to state 197
+    MUL_OP      shift, and go to state 198
+    REL_OP      shift, and go to state 199
+    LOGICAL_OP  shift, and go to state 200
+    EXPONENT    shift, and go to state 201
 
 
 State 165
 
-  120 expression: factor •
+  133 expression: factor •
 
-    $default  reduce using rule 120 (expression)
+    $default  reduce using rule 133 (expression)
 
 
 State 166
 
-  123 factor: primary •
+  136 factor: primary •
 
-    $default  reduce using rule 123 (factor)
+    $default  reduce using rule 136 (factor)
 
 
 State 167
 
-  128 primary: complex_literal •
+  141 primary: complex_literal •
 
-    $default  reduce using rule 128 (primary)
+    $default  reduce using rule 141 (primary)
 
 
 State 168
 
-  130 primary: variable_ref • primary_suffix_opt
-  135 variable_ref: variable_ref • DERIVED_TYPE_COMPONENT identifier
+  143 primary: variable_ref • primary_suffix_opt
+  148 variable_ref: variable_ref • DERIVED_TYPE_COMPONENT identifier
 
-    LPAREN                  shift, and go to state 201
+    LPAREN                  shift, and go to state 202
     DERIVED_TYPE_COMPONENT  shift, and go to state 134
 
-    $default  reduce using rule 132 (primary_suffix_opt)
+    $default  reduce using rule 145 (primary_suffix_opt)
 
-    primary_suffix_opt  go to state 202
+    primary_suffix_opt  go to state 203
 
 
 State 169
 
-   88 dowhile_stmt: DO WHILE LPAREN • expression RPAREN executables END DO
+   94 dowhile_stmt: DO WHILE LPAREN • $@6 expression RPAREN $@7 executables END DO
 
-    RESULT         shift, and go to state 40
-    LPAREN         shift, and go to state 157
-    IDENTIFIER     shift, and go to state 41
-    INT_CONST      shift, and go to state 158
-    REAL_CONST     shift, and go to state 159
-    STRING         shift, and go to state 160
-    LOGICAL_CONST  shift, and go to state 161
-    ARITH_OP       shift, and go to state 162
-    LOGICAL_OP     shift, and go to state 163
+    $default  reduce using rule 92 ($@6)
 
-    expression       go to state 203
-    factor           go to state 165
-    primary          go to state 166
-    complex_literal  go to state 167
-    variable_ref     go to state 168
-    identifier       go to state 95
+    $@6  go to state 204
 
 
 State 170
 
-   87 do_stmt: DO IDENTIFIER ASSIGN • expression COMMA expression step_opt executables END DO
+   91 do_stmt: DO IDENTIFIER ASSIGN • expression COMMA expression step_opt $@5 executables END DO
 
     RESULT         shift, and go to state 40
     LPAREN         shift, and go to state 157
@@ -2372,29 +2426,7 @@ State 170
     REAL_CONST     shift, and go to state 159
     STRING         shift, and go to state 160
     LOGICAL_CONST  shift, and go to state 161
-    ARITH_OP       shift, and go to state 162
-    LOGICAL_OP     shift, and go to state 163
-
-    expression       go to state 204
-    factor           go to state 165
-    primary          go to state 166
-    complex_literal  go to state 167
-    variable_ref     go to state 168
-    identifier       go to state 95
-
-
-State 171
-
-   89 select_stmt: SELECT CASE LPAREN • expression RPAREN case_blocks END SELECT
-
-    RESULT         shift, and go to state 40
-    LPAREN         shift, and go to state 157
-    IDENTIFIER     shift, and go to state 41
-    INT_CONST      shift, and go to state 158
-    REAL_CONST     shift, and go to state 159
-    STRING         shift, and go to state 160
-    LOGICAL_CONST  shift, and go to state 161
-    ARITH_OP       shift, and go to state 162
+    ADD_OP         shift, and go to state 162
     LOGICAL_OP     shift, and go to state 163
 
     expression       go to state 205
@@ -2405,19 +2437,9 @@ State 171
     identifier       go to state 95
 
 
-State 172
+State 171
 
-   90 select_rank_stmt: SELECT RANK LPAREN • identifier RPAREN rank_blocks END SELECT
-
-    RESULT      shift, and go to state 40
-    IDENTIFIER  shift, and go to state 41
-
-    identifier  go to state 206
-
-
-State 173
-
-  111 print_stmt: PRINT ARITH_OP COMMA • print_args
+   96 select_stmt: SELECT CASE LPAREN • expression RPAREN $@8 case_blocks END SELECT
 
     RESULT         shift, and go to state 40
     LPAREN         shift, and go to state 157
@@ -2426,11 +2448,43 @@ State 173
     REAL_CONST     shift, and go to state 159
     STRING         shift, and go to state 160
     LOGICAL_CONST  shift, and go to state 161
-    ARITH_OP       shift, and go to state 162
+    ADD_OP         shift, and go to state 162
     LOGICAL_OP     shift, and go to state 163
 
-    print_args       go to state 207
-    expression       go to state 208
+    expression       go to state 206
+    factor           go to state 165
+    primary          go to state 166
+    complex_literal  go to state 167
+    variable_ref     go to state 168
+    identifier       go to state 95
+
+
+State 172
+
+   98 select_rank_stmt: SELECT RANK LPAREN • identifier RPAREN $@9 rank_blocks END SELECT
+
+    RESULT      shift, and go to state 40
+    IDENTIFIER  shift, and go to state 41
+
+    identifier  go to state 207
+
+
+State 173
+
+  123 print_stmt: PRINT MUL_OP COMMA • print_args
+
+    RESULT         shift, and go to state 40
+    LPAREN         shift, and go to state 157
+    IDENTIFIER     shift, and go to state 41
+    INT_CONST      shift, and go to state 158
+    REAL_CONST     shift, and go to state 159
+    STRING         shift, and go to state 160
+    LOGICAL_CONST  shift, and go to state 161
+    ADD_OP         shift, and go to state 162
+    LOGICAL_OP     shift, and go to state 163
+
+    print_args       go to state 208
+    expression       go to state 209
     factor           go to state 165
     primary          go to state 166
     complex_literal  go to state 167
@@ -2440,7 +2494,7 @@ State 173
 
 State 174
 
-  101 call_stmt: CALL callable_name LPAREN • argument_list RPAREN
+  113 call_stmt: CALL callable_name LPAREN • argument_values RPAREN
 
     RESULT         shift, and go to state 40
     LPAREN         shift, and go to state 157
@@ -2449,144 +2503,148 @@ State 174
     REAL_CONST     shift, and go to state 159
     STRING         shift, and go to state 160
     LOGICAL_CONST  shift, and go to state 161
-    ARITH_OP       shift, and go to state 162
+    ADD_OP         shift, and go to state 162
     LOGICAL_OP     shift, and go to state 163
 
-    $default  reduce using rule 144 (argument_list)
+    $default  reduce using rule 157 (argument_values)
 
     expression       go to state 175
     factor           go to state 165
     primary          go to state 166
     complex_literal  go to state 167
     variable_ref     go to state 168
-    argument_list    go to state 209
+    argument_values  go to state 210
     identifier       go to state 95
 
 
 State 175
 
-  116 expression: expression • ARITH_OP expression
-  117           | expression • EXPONENT expression
-  118           | expression • REL_OP expression
-  119           | expression • LOGICAL_OP expression
-  145 argument_list: expression •
-  146              | expression • COMMA argument_list
+  128 expression: expression • ADD_OP expression
+  129           | expression • MUL_OP expression
+  130           | expression • EXPONENT expression
+  131           | expression • REL_OP expression
+  132           | expression • LOGICAL_OP expression
+  158 argument_values: expression •
+  159                | expression • COMMA argument_values
 
-    COMMA       shift, and go to state 210
-    ARITH_OP    shift, and go to state 197
-    REL_OP      shift, and go to state 198
-    LOGICAL_OP  shift, and go to state 199
-    EXPONENT    shift, and go to state 200
+    COMMA       shift, and go to state 211
+    ADD_OP      shift, and go to state 197
+    MUL_OP      shift, and go to state 198
+    REL_OP      shift, and go to state 199
+    LOGICAL_OP  shift, and go to state 200
+    EXPONENT    shift, and go to state 201
 
-    $default  reduce using rule 145 (argument_list)
+    $default  reduce using rule 158 (argument_values)
 
 
 State 176
 
-  114 allocate_stmt: ALLOCATE LPAREN argument_list • RPAREN
-
-    RPAREN  shift, and go to state 211
-
-
-State 177
-
-  115 deallocate_stmt: DEALLOCATE LPAREN argument_list • RPAREN
+  126 allocate_stmt: ALLOCATE LPAREN argument_values • RPAREN
 
     RPAREN  shift, and go to state 212
 
 
-State 178
+State 177
 
-  108 pointer_stmt: variable_ref PTR_ASSIGN variable_ref •
-  135 variable_ref: variable_ref • DERIVED_TYPE_COMPONENT identifier
-
-    DERIVED_TYPE_COMPONENT  shift, and go to state 134
-
-    $default  reduce using rule 108 (pointer_stmt)
-
-
-State 179
-
-   82 assignment_stmt: variable_ref ASSIGN expression •
-  116 expression: expression • ARITH_OP expression
-  117           | expression • EXPONENT expression
-  118           | expression • REL_OP expression
-  119           | expression • LOGICAL_OP expression
-
-    ARITH_OP    shift, and go to state 197
-    REL_OP      shift, and go to state 198
-    LOGICAL_OP  shift, and go to state 199
-    EXPONENT    shift, and go to state 200
-
-    $default  reduce using rule 82 (assignment_stmt)
-
-
-State 180
-
-  135 variable_ref: variable_ref DERIVED_TYPE_COMPONENT identifier •
-
-    $default  reduce using rule 135 (variable_ref)
-
-
-State 181
-
-   44 attribute: INTENT LPAREN IN • RPAREN
+  127 deallocate_stmt: DEALLOCATE LPAREN argument_values • RPAREN
 
     RPAREN  shift, and go to state 213
 
 
-State 182
+State 178
 
-   45 attribute: INTENT LPAREN OUT • RPAREN
+  120 pointer_stmt: variable_ref PTR_ASSIGN variable_ref •
+  148 variable_ref: variable_ref • DERIVED_TYPE_COMPONENT identifier
+
+    DERIVED_TYPE_COMPONENT  shift, and go to state 134
+
+    $default  reduce using rule 120 (pointer_stmt)
+
+
+State 179
+
+   84 assignment_stmt: variable_ref ASSIGN expression •
+  128 expression: expression • ADD_OP expression
+  129           | expression • MUL_OP expression
+  130           | expression • EXPONENT expression
+  131           | expression • REL_OP expression
+  132           | expression • LOGICAL_OP expression
+
+    ADD_OP      shift, and go to state 197
+    MUL_OP      shift, and go to state 198
+    REL_OP      shift, and go to state 199
+    LOGICAL_OP  shift, and go to state 200
+    EXPONENT    shift, and go to state 201
+
+    $default  reduce using rule 84 (assignment_stmt)
+
+
+State 180
+
+  148 variable_ref: variable_ref DERIVED_TYPE_COMPONENT identifier •
+
+    $default  reduce using rule 148 (variable_ref)
+
+
+State 181
+
+   45 attribute: INTENT LPAREN IN • RPAREN
 
     RPAREN  shift, and go to state 214
 
 
-State 183
+State 182
 
-   46 attribute: INTENT LPAREN INOUT • RPAREN
+   46 attribute: INTENT LPAREN OUT • RPAREN
 
     RPAREN  shift, and go to state 215
 
 
+State 183
+
+   47 attribute: INTENT LPAREN INOUT • RPAREN
+
+    RPAREN  shift, and go to state 216
+
+
 State 184
 
-   40 attributes: attribute COMMA attributes •
+   41 attributes: attribute COMMA attributes •
 
-    $default  reduce using rule 40 (attributes)
+    $default  reduce using rule 41 (attributes)
 
 
 State 185
 
-   52 declarator_list: declarator COMMA • declarator_list
+   53 declarator_list: declarator COMMA • declarator_list
 
     RESULT      shift, and go to state 40
     IDENTIFIER  shift, and go to state 41
 
-    declarator_list  go to state 216
+    declarator_list  go to state 217
     declarator       go to state 138
     identifier       go to state 139
 
 
 State 186
 
-   56 array_spec: LPAREN • array_spec_list RPAREN
+   58 array_spec: LPAREN • array_spec_list RPAREN
 
     RESULT                  shift, and go to state 40
     LPAREN                  shift, and go to state 157
-    COLON                   shift, and go to state 217
-    ASSUMED_RANK_SPECIFIER  shift, and go to state 218
+    COLON                   shift, and go to state 218
+    ASSUMED_RANK_SPECIFIER  shift, and go to state 219
     IDENTIFIER              shift, and go to state 41
     INT_CONST               shift, and go to state 158
     REAL_CONST              shift, and go to state 159
     STRING                  shift, and go to state 160
     LOGICAL_CONST           shift, and go to state 161
-    ARITH_OP                shift, and go to state 162
+    ADD_OP                  shift, and go to state 162
     LOGICAL_OP              shift, and go to state 163
 
-    array_spec_list  go to state 219
-    array_spec_item  go to state 220
-    expression       go to state 221
+    array_spec_list  go to state 220
+    array_spec_item  go to state 221
+    expression       go to state 222
     factor           go to state 165
     primary          go to state 166
     complex_literal  go to state 167
@@ -2596,114 +2654,108 @@ State 186
 
 State 187
 
-   53 declarator: identifier array_spec_opt • init_opt
+   55 declarator: identifier array_spec_opt • $@2 init_opt
 
-    ASSIGN  shift, and go to state 222
+    $default  reduce using rule 54 ($@2)
 
-    $default  reduce using rule 65 (init_opt)
-
-    init_opt  go to state 223
+    $@2  go to state 223
 
 
 State 188
 
-   55 array_spec_opt: array_spec •
+   57 array_spec_opt: array_spec •
 
-    $default  reduce using rule 55 (array_spec_opt)
+    $default  reduce using rule 57 (array_spec_opt)
 
 
 State 189
 
-   14 contains_block: CONTAINS subprogram_list •
-  137 subprogram_list: subprogram_list • subprogram
+   15 contains_block: CONTAINS $@1 • subprogram_list
 
-    SUBROUTINE  shift, and go to state 224
-    FUNCTION    shift, and go to state 225
-    RECURSIVE   shift, and go to state 226
+    $default  reduce using rule 149 (subprogram_list)
 
-    $default  reduce using rule 14 (contains_block)
-
-    subprogram  go to state 227
+    subprogram_list  go to state 224
 
 
 State 190
 
-   35 char_len_opt: LPAREN LENGTH_SPECIFIER ASSIGN char_len_value RPAREN •
+   36 char_len_opt: LPAREN LENGTH_SPECIFIER ASSIGN char_len_value RPAREN •
 
-    $default  reduce using rule 35 (char_len_opt)
+    $default  reduce using rule 36 (char_len_opt)
 
 
 State 191
 
-  156 type_def_declaration: type_spec declaration_attributes DECL_SEP • declarator_list
+  169 type_def_declaration: type_spec declaration_attributes DECL_SEP • declarator_list
 
     RESULT      shift, and go to state 40
     IDENTIFIER  shift, and go to state 41
 
-    declarator_list  go to state 228
+    declarator_list  go to state 225
     declarator       go to state 138
     identifier       go to state 139
 
 
 State 192
 
-  151 type_def: TYPE DECL_SEP identifier type_def_body END_TYPE identifier •
+  164 type_def: TYPE DECL_SEP identifier type_def_body END_TYPE identifier •
 
-    $default  reduce using rule 151 (type_def)
+    $default  reduce using rule 164 (type_def)
 
 
 State 193
 
-  116 expression: expression • ARITH_OP expression
-  117           | expression • EXPONENT expression
-  118           | expression • REL_OP expression
-  119           | expression • LOGICAL_OP expression
-  129 primary: LPAREN expression • RPAREN
-  131 complex_literal: LPAREN expression • COMMA expression RPAREN
+  128 expression: expression • ADD_OP expression
+  129           | expression • MUL_OP expression
+  130           | expression • EXPONENT expression
+  131           | expression • REL_OP expression
+  132           | expression • LOGICAL_OP expression
+  142 primary: LPAREN expression • RPAREN
+  144 complex_literal: LPAREN expression • COMMA expression RPAREN
 
-    RPAREN      shift, and go to state 229
-    COMMA       shift, and go to state 230
-    ARITH_OP    shift, and go to state 197
-    REL_OP      shift, and go to state 198
-    LOGICAL_OP  shift, and go to state 199
-    EXPONENT    shift, and go to state 200
+    RPAREN      shift, and go to state 226
+    COMMA       shift, and go to state 227
+    ADD_OP      shift, and go to state 197
+    MUL_OP      shift, and go to state 198
+    REL_OP      shift, and go to state 199
+    LOGICAL_OP  shift, and go to state 200
+    EXPONENT    shift, and go to state 201
 
 
 State 194
 
-  116 expression: expression • ARITH_OP expression
-  117           | expression • EXPONENT expression
-  118           | expression • REL_OP expression
-  119           | expression • LOGICAL_OP expression
-  121           | ARITH_OP expression •
+  128 expression: expression • ADD_OP expression
+  129           | expression • MUL_OP expression
+  130           | expression • EXPONENT expression
+  131           | expression • REL_OP expression
+  132           | expression • LOGICAL_OP expression
+  134           | ADD_OP expression •
 
-    $default  reduce using rule 121 (expression)
+    $default  reduce using rule 134 (expression)
 
 
 State 195
 
-  116 expression: expression • ARITH_OP expression
-  117           | expression • EXPONENT expression
-  118           | expression • REL_OP expression
-  119           | expression • LOGICAL_OP expression
-  122           | LOGICAL_OP expression •
+  128 expression: expression • ADD_OP expression
+  129           | expression • MUL_OP expression
+  130           | expression • EXPONENT expression
+  131           | expression • REL_OP expression
+  132           | expression • LOGICAL_OP expression
+  135           | LOGICAL_OP expression •
 
-    $default  reduce using rule 122 (expression)
+    $default  reduce using rule 135 (expression)
 
 
 State 196
 
-   83 if_stmt: IF LPAREN expression RPAREN • THEN executables ENDIF
-   84        | IF LPAREN expression RPAREN • THEN executables END IF
-   85        | IF LPAREN expression RPAREN • THEN executables ELSE executables ENDIF
-   86        | IF LPAREN expression RPAREN • THEN executables ELSE executables END IF
+   86 if_stmt: IF LPAREN expression RPAREN • THEN $@3 executables if_else_opt ENDIF
 
-    THEN  shift, and go to state 231
+    THEN  shift, and go to state 228
 
 
 State 197
 
-  116 expression: expression ARITH_OP • expression
+  128 expression: expression ADD_OP • expression
 
     RESULT         shift, and go to state 40
     LPAREN         shift, and go to state 157
@@ -2712,7 +2764,73 @@ State 197
     REAL_CONST     shift, and go to state 159
     STRING         shift, and go to state 160
     LOGICAL_CONST  shift, and go to state 161
-    ARITH_OP       shift, and go to state 162
+    ADD_OP         shift, and go to state 162
+    LOGICAL_OP     shift, and go to state 163
+
+    expression       go to state 229
+    factor           go to state 165
+    primary          go to state 166
+    complex_literal  go to state 167
+    variable_ref     go to state 168
+    identifier       go to state 95
+
+
+State 198
+
+  129 expression: expression MUL_OP • expression
+
+    RESULT         shift, and go to state 40
+    LPAREN         shift, and go to state 157
+    IDENTIFIER     shift, and go to state 41
+    INT_CONST      shift, and go to state 158
+    REAL_CONST     shift, and go to state 159
+    STRING         shift, and go to state 160
+    LOGICAL_CONST  shift, and go to state 161
+    ADD_OP         shift, and go to state 162
+    LOGICAL_OP     shift, and go to state 163
+
+    expression       go to state 230
+    factor           go to state 165
+    primary          go to state 166
+    complex_literal  go to state 167
+    variable_ref     go to state 168
+    identifier       go to state 95
+
+
+State 199
+
+  131 expression: expression REL_OP • expression
+
+    RESULT         shift, and go to state 40
+    LPAREN         shift, and go to state 157
+    IDENTIFIER     shift, and go to state 41
+    INT_CONST      shift, and go to state 158
+    REAL_CONST     shift, and go to state 159
+    STRING         shift, and go to state 160
+    LOGICAL_CONST  shift, and go to state 161
+    ADD_OP         shift, and go to state 162
+    LOGICAL_OP     shift, and go to state 163
+
+    expression       go to state 231
+    factor           go to state 165
+    primary          go to state 166
+    complex_literal  go to state 167
+    variable_ref     go to state 168
+    identifier       go to state 95
+
+
+State 200
+
+  132 expression: expression LOGICAL_OP • expression
+
+    RESULT         shift, and go to state 40
+    LPAREN         shift, and go to state 157
+    IDENTIFIER     shift, and go to state 41
+    INT_CONST      shift, and go to state 158
+    REAL_CONST     shift, and go to state 159
+    STRING         shift, and go to state 160
+    LOGICAL_CONST  shift, and go to state 161
+    ADD_OP         shift, and go to state 162
     LOGICAL_OP     shift, and go to state 163
 
     expression       go to state 232
@@ -2723,9 +2841,9 @@ State 197
     identifier       go to state 95
 
 
-State 198
+State 201
 
-  118 expression: expression REL_OP • expression
+  130 expression: expression EXPONENT • expression
 
     RESULT         shift, and go to state 40
     LPAREN         shift, and go to state 157
@@ -2734,7 +2852,7 @@ State 198
     REAL_CONST     shift, and go to state 159
     STRING         shift, and go to state 160
     LOGICAL_CONST  shift, and go to state 161
-    ARITH_OP       shift, and go to state 162
+    ADD_OP         shift, and go to state 162
     LOGICAL_OP     shift, and go to state 163
 
     expression       go to state 233
@@ -2745,9 +2863,9 @@ State 198
     identifier       go to state 95
 
 
-State 199
+State 202
 
-  119 expression: expression LOGICAL_OP • expression
+  146 primary_suffix_opt: LPAREN • argument_values RPAREN
 
     RESULT         shift, and go to state 40
     LPAREN         shift, and go to state 157
@@ -2756,20 +2874,30 @@ State 199
     REAL_CONST     shift, and go to state 159
     STRING         shift, and go to state 160
     LOGICAL_CONST  shift, and go to state 161
-    ARITH_OP       shift, and go to state 162
+    ADD_OP         shift, and go to state 162
     LOGICAL_OP     shift, and go to state 163
 
-    expression       go to state 234
+    $default  reduce using rule 157 (argument_values)
+
+    expression       go to state 175
     factor           go to state 165
     primary          go to state 166
     complex_literal  go to state 167
     variable_ref     go to state 168
+    argument_values  go to state 234
     identifier       go to state 95
 
 
-State 200
+State 203
 
-  117 expression: expression EXPONENT • expression
+  143 primary: variable_ref primary_suffix_opt •
+
+    $default  reduce using rule 143 (primary)
+
+
+State 204
+
+   94 dowhile_stmt: DO WHILE LPAREN $@6 • expression RPAREN $@7 executables END DO
 
     RESULT         shift, and go to state 40
     LPAREN         shift, and go to state 157
@@ -2778,7 +2906,7 @@ State 200
     REAL_CONST     shift, and go to state 159
     STRING         shift, and go to state 160
     LOGICAL_CONST  shift, and go to state 161
-    ARITH_OP       shift, and go to state 162
+    ADD_OP         shift, and go to state 162
     LOGICAL_OP     shift, and go to state 163
 
     expression       go to state 235
@@ -2789,126 +2917,85 @@ State 200
     identifier       go to state 95
 
 
-State 201
-
-  133 primary_suffix_opt: LPAREN • argument_list RPAREN
-
-    RESULT         shift, and go to state 40
-    LPAREN         shift, and go to state 157
-    IDENTIFIER     shift, and go to state 41
-    INT_CONST      shift, and go to state 158
-    REAL_CONST     shift, and go to state 159
-    STRING         shift, and go to state 160
-    LOGICAL_CONST  shift, and go to state 161
-    ARITH_OP       shift, and go to state 162
-    LOGICAL_OP     shift, and go to state 163
-
-    $default  reduce using rule 144 (argument_list)
-
-    expression       go to state 175
-    factor           go to state 165
-    primary          go to state 166
-    complex_literal  go to state 167
-    variable_ref     go to state 168
-    argument_list    go to state 236
-    identifier       go to state 95
-
-
-State 202
-
-  130 primary: variable_ref primary_suffix_opt •
-
-    $default  reduce using rule 130 (primary)
-
-
-State 203
-
-   88 dowhile_stmt: DO WHILE LPAREN expression • RPAREN executables END DO
-  116 expression: expression • ARITH_OP expression
-  117           | expression • EXPONENT expression
-  118           | expression • REL_OP expression
-  119           | expression • LOGICAL_OP expression
-
-    RPAREN      shift, and go to state 237
-    ARITH_OP    shift, and go to state 197
-    REL_OP      shift, and go to state 198
-    LOGICAL_OP  shift, and go to state 199
-    EXPONENT    shift, and go to state 200
-
-
-State 204
-
-   87 do_stmt: DO IDENTIFIER ASSIGN expression • COMMA expression step_opt executables END DO
-  116 expression: expression • ARITH_OP expression
-  117           | expression • EXPONENT expression
-  118           | expression • REL_OP expression
-  119           | expression • LOGICAL_OP expression
-
-    COMMA       shift, and go to state 238
-    ARITH_OP    shift, and go to state 197
-    REL_OP      shift, and go to state 198
-    LOGICAL_OP  shift, and go to state 199
-    EXPONENT    shift, and go to state 200
-
-
 State 205
 
-   89 select_stmt: SELECT CASE LPAREN expression • RPAREN case_blocks END SELECT
-  116 expression: expression • ARITH_OP expression
-  117           | expression • EXPONENT expression
-  118           | expression • REL_OP expression
-  119           | expression • LOGICAL_OP expression
+   91 do_stmt: DO IDENTIFIER ASSIGN expression • COMMA expression step_opt $@5 executables END DO
+  128 expression: expression • ADD_OP expression
+  129           | expression • MUL_OP expression
+  130           | expression • EXPONENT expression
+  131           | expression • REL_OP expression
+  132           | expression • LOGICAL_OP expression
 
-    RPAREN      shift, and go to state 239
-    ARITH_OP    shift, and go to state 197
-    REL_OP      shift, and go to state 198
-    LOGICAL_OP  shift, and go to state 199
-    EXPONENT    shift, and go to state 200
+    COMMA       shift, and go to state 236
+    ADD_OP      shift, and go to state 197
+    MUL_OP      shift, and go to state 198
+    REL_OP      shift, and go to state 199
+    LOGICAL_OP  shift, and go to state 200
+    EXPONENT    shift, and go to state 201
 
 
 State 206
 
-   90 select_rank_stmt: SELECT RANK LPAREN identifier • RPAREN rank_blocks END SELECT
+   96 select_stmt: SELECT CASE LPAREN expression • RPAREN $@8 case_blocks END SELECT
+  128 expression: expression • ADD_OP expression
+  129           | expression • MUL_OP expression
+  130           | expression • EXPONENT expression
+  131           | expression • REL_OP expression
+  132           | expression • LOGICAL_OP expression
 
-    RPAREN  shift, and go to state 240
+    RPAREN      shift, and go to state 237
+    ADD_OP      shift, and go to state 197
+    MUL_OP      shift, and go to state 198
+    REL_OP      shift, and go to state 199
+    LOGICAL_OP  shift, and go to state 200
+    EXPONENT    shift, and go to state 201
 
 
 State 207
 
-  111 print_stmt: PRINT ARITH_OP COMMA print_args •
-  113 print_args: print_args • COMMA expression
+   98 select_rank_stmt: SELECT RANK LPAREN identifier • RPAREN $@9 rank_blocks END SELECT
 
-    COMMA  shift, and go to state 241
-
-    $default  reduce using rule 111 (print_stmt)
+    RPAREN  shift, and go to state 238
 
 
 State 208
 
-  112 print_args: expression •
-  116 expression: expression • ARITH_OP expression
-  117           | expression • EXPONENT expression
-  118           | expression • REL_OP expression
-  119           | expression • LOGICAL_OP expression
+  123 print_stmt: PRINT MUL_OP COMMA print_args •
+  125 print_args: print_args • COMMA expression
 
-    ARITH_OP    shift, and go to state 197
-    REL_OP      shift, and go to state 198
-    LOGICAL_OP  shift, and go to state 199
-    EXPONENT    shift, and go to state 200
+    COMMA  shift, and go to state 239
 
-    $default  reduce using rule 112 (print_args)
+    $default  reduce using rule 123 (print_stmt)
 
 
 State 209
 
-  101 call_stmt: CALL callable_name LPAREN argument_list • RPAREN
+  124 print_args: expression •
+  128 expression: expression • ADD_OP expression
+  129           | expression • MUL_OP expression
+  130           | expression • EXPONENT expression
+  131           | expression • REL_OP expression
+  132           | expression • LOGICAL_OP expression
 
-    RPAREN  shift, and go to state 242
+    ADD_OP      shift, and go to state 197
+    MUL_OP      shift, and go to state 198
+    REL_OP      shift, and go to state 199
+    LOGICAL_OP  shift, and go to state 200
+    EXPONENT    shift, and go to state 201
+
+    $default  reduce using rule 124 (print_args)
 
 
 State 210
 
-  146 argument_list: expression COMMA • argument_list
+  113 call_stmt: CALL callable_name LPAREN argument_values • RPAREN
+
+    RPAREN  shift, and go to state 240
+
+
+State 211
+
+  159 argument_values: expression COMMA • argument_values
 
     RESULT         shift, and go to state 40
     LPAREN         shift, and go to state 157
@@ -2917,132 +3004,66 @@ State 210
     REAL_CONST     shift, and go to state 159
     STRING         shift, and go to state 160
     LOGICAL_CONST  shift, and go to state 161
-    ARITH_OP       shift, and go to state 162
+    ADD_OP         shift, and go to state 162
     LOGICAL_OP     shift, and go to state 163
 
-    $default  reduce using rule 144 (argument_list)
+    $default  reduce using rule 157 (argument_values)
 
     expression       go to state 175
     factor           go to state 165
     primary          go to state 166
     complex_literal  go to state 167
     variable_ref     go to state 168
-    argument_list    go to state 243
+    argument_values  go to state 241
     identifier       go to state 95
-
-
-State 211
-
-  114 allocate_stmt: ALLOCATE LPAREN argument_list RPAREN •
-
-    $default  reduce using rule 114 (allocate_stmt)
 
 
 State 212
 
-  115 deallocate_stmt: DEALLOCATE LPAREN argument_list RPAREN •
+  126 allocate_stmt: ALLOCATE LPAREN argument_values RPAREN •
 
-    $default  reduce using rule 115 (deallocate_stmt)
+    $default  reduce using rule 126 (allocate_stmt)
 
 
 State 213
 
-   44 attribute: INTENT LPAREN IN RPAREN •
+  127 deallocate_stmt: DEALLOCATE LPAREN argument_values RPAREN •
 
-    $default  reduce using rule 44 (attribute)
+    $default  reduce using rule 127 (deallocate_stmt)
 
 
 State 214
 
-   45 attribute: INTENT LPAREN OUT RPAREN •
+   45 attribute: INTENT LPAREN IN RPAREN •
 
     $default  reduce using rule 45 (attribute)
 
 
 State 215
 
-   46 attribute: INTENT LPAREN INOUT RPAREN •
+   46 attribute: INTENT LPAREN OUT RPAREN •
 
     $default  reduce using rule 46 (attribute)
 
 
 State 216
 
-   52 declarator_list: declarator COMMA declarator_list •
+   47 attribute: INTENT LPAREN INOUT RPAREN •
 
-    $default  reduce using rule 52 (declarator_list)
+    $default  reduce using rule 47 (attribute)
 
 
 State 217
 
-   60 array_spec_item: COLON •
-   63                | COLON • expression
+   53 declarator_list: declarator COMMA declarator_list •
 
-    RESULT         shift, and go to state 40
-    LPAREN         shift, and go to state 157
-    IDENTIFIER     shift, and go to state 41
-    INT_CONST      shift, and go to state 158
-    REAL_CONST     shift, and go to state 159
-    STRING         shift, and go to state 160
-    LOGICAL_CONST  shift, and go to state 161
-    ARITH_OP       shift, and go to state 162
-    LOGICAL_OP     shift, and go to state 163
-
-    $default  reduce using rule 60 (array_spec_item)
-
-    expression       go to state 244
-    factor           go to state 165
-    primary          go to state 166
-    complex_literal  go to state 167
-    variable_ref     go to state 168
-    identifier       go to state 95
+    $default  reduce using rule 53 (declarator_list)
 
 
 State 218
 
-   59 array_spec_item: ASSUMED_RANK_SPECIFIER •
-
-    $default  reduce using rule 59 (array_spec_item)
-
-
-State 219
-
-   56 array_spec: LPAREN array_spec_list • RPAREN
-   58 array_spec_list: array_spec_list • COMMA array_spec_item
-
-    RPAREN  shift, and go to state 245
-    COMMA   shift, and go to state 246
-
-
-State 220
-
-   57 array_spec_list: array_spec_item •
-
-    $default  reduce using rule 57 (array_spec_list)
-
-
-State 221
-
-   61 array_spec_item: expression •
-   62                | expression • COLON
-   64                | expression • COLON expression
-  116 expression: expression • ARITH_OP expression
-  117           | expression • EXPONENT expression
-  118           | expression • REL_OP expression
-  119           | expression • LOGICAL_OP expression
-
-    COLON       shift, and go to state 247
-    ARITH_OP    shift, and go to state 197
-    REL_OP      shift, and go to state 198
-    LOGICAL_OP  shift, and go to state 199
-    EXPONENT    shift, and go to state 200
-
-    $default  reduce using rule 61 (array_spec_item)
-
-
-State 222
-
-   66 init_opt: ASSIGN • expression
+   62 array_spec_item: COLON •
+   65                | COLON • expression
 
     RESULT         shift, and go to state 40
     LPAREN         shift, and go to state 157
@@ -3051,10 +3072,12 @@ State 222
     REAL_CONST     shift, and go to state 159
     STRING         shift, and go to state 160
     LOGICAL_CONST  shift, and go to state 161
-    ARITH_OP       shift, and go to state 162
+    ADD_OP         shift, and go to state 162
     LOGICAL_OP     shift, and go to state 163
 
-    expression       go to state 248
+    $default  reduce using rule 62 (array_spec_item)
+
+    expression       go to state 242
     factor           go to state 165
     primary          go to state 166
     complex_literal  go to state 167
@@ -3062,67 +3085,92 @@ State 222
     identifier       go to state 95
 
 
+State 219
+
+   61 array_spec_item: ASSUMED_RANK_SPECIFIER •
+
+    $default  reduce using rule 61 (array_spec_item)
+
+
+State 220
+
+   58 array_spec: LPAREN array_spec_list • RPAREN
+   60 array_spec_list: array_spec_list • COMMA array_spec_item
+
+    RPAREN  shift, and go to state 243
+    COMMA   shift, and go to state 244
+
+
+State 221
+
+   59 array_spec_list: array_spec_item •
+
+    $default  reduce using rule 59 (array_spec_list)
+
+
+State 222
+
+   63 array_spec_item: expression •
+   64                | expression • COLON
+   66                | expression • COLON expression
+  128 expression: expression • ADD_OP expression
+  129           | expression • MUL_OP expression
+  130           | expression • EXPONENT expression
+  131           | expression • REL_OP expression
+  132           | expression • LOGICAL_OP expression
+
+    COLON       shift, and go to state 245
+    ADD_OP      shift, and go to state 197
+    MUL_OP      shift, and go to state 198
+    REL_OP      shift, and go to state 199
+    LOGICAL_OP  shift, and go to state 200
+    EXPONENT    shift, and go to state 201
+
+    $default  reduce using rule 63 (array_spec_item)
+
+
 State 223
 
-   53 declarator: identifier array_spec_opt init_opt •
+   55 declarator: identifier array_spec_opt $@2 • init_opt
 
-    $default  reduce using rule 53 (declarator)
+    ASSIGN  shift, and go to state 246
+
+    $default  reduce using rule 67 (init_opt)
+
+    init_opt  go to state 247
 
 
 State 224
 
-  138 subprogram: SUBROUTINE • identifier LPAREN identifier_list_opt RPAREN program_body END SUBROUTINE
-  139           | SUBROUTINE • identifier LPAREN identifier_list_opt RPAREN program_body END SUBROUTINE identifier
+   15 contains_block: CONTAINS $@1 subprogram_list •
+  150 subprogram_list: subprogram_list • subprogram
 
-    RESULT      shift, and go to state 40
-    IDENTIFIER  shift, and go to state 41
+    SUBROUTINE  shift, and go to state 248
+    FUNCTION    shift, and go to state 249
+    RECURSIVE   shift, and go to state 250
 
-    identifier  go to state 249
+    $default  reduce using rule 15 (contains_block)
+
+    subprogram  go to state 251
 
 
 State 225
 
-  140 subprogram: FUNCTION • identifier LPAREN identifier_list_opt RPAREN program_body END FUNCTION
-  141           | FUNCTION • identifier LPAREN identifier_list_opt RPAREN program_body END FUNCTION identifier
+  169 type_def_declaration: type_spec declaration_attributes DECL_SEP declarator_list •
 
-    RESULT      shift, and go to state 40
-    IDENTIFIER  shift, and go to state 41
-
-    identifier  go to state 250
+    $default  reduce using rule 169 (type_def_declaration)
 
 
 State 226
 
-  142 subprogram: RECURSIVE • FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION
-  143           | RECURSIVE • FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION identifier
+  142 primary: LPAREN expression RPAREN •
 
-    FUNCTION  shift, and go to state 251
+    $default  reduce using rule 142 (primary)
 
 
 State 227
 
-  137 subprogram_list: subprogram_list subprogram •
-
-    $default  reduce using rule 137 (subprogram_list)
-
-
-State 228
-
-  156 type_def_declaration: type_spec declaration_attributes DECL_SEP declarator_list •
-
-    $default  reduce using rule 156 (type_def_declaration)
-
-
-State 229
-
-  129 primary: LPAREN expression RPAREN •
-
-    $default  reduce using rule 129 (primary)
-
-
-State 230
-
-  131 complex_literal: LPAREN expression COMMA • expression RPAREN
+  144 complex_literal: LPAREN expression COMMA • expression RPAREN
 
     RESULT         shift, and go to state 40
     LPAREN         shift, and go to state 157
@@ -3131,7 +3179,7 @@ State 230
     REAL_CONST     shift, and go to state 159
     STRING         shift, and go to state 160
     LOGICAL_CONST  shift, and go to state 161
-    ARITH_OP       shift, and go to state 162
+    ADD_OP         shift, and go to state 162
     LOGICAL_OP     shift, and go to state 163
 
     expression       go to state 252
@@ -3142,94 +3190,120 @@ State 230
     identifier       go to state 95
 
 
+State 228
+
+   86 if_stmt: IF LPAREN expression RPAREN THEN • $@3 executables if_else_opt ENDIF
+
+    $default  reduce using rule 85 ($@3)
+
+    $@3  go to state 253
+
+
+State 229
+
+  128 expression: expression • ADD_OP expression
+  128           | expression ADD_OP expression •
+  129           | expression • MUL_OP expression
+  130           | expression • EXPONENT expression
+  131           | expression • REL_OP expression
+  132           | expression • LOGICAL_OP expression
+
+    MUL_OP    shift, and go to state 198
+    EXPONENT  shift, and go to state 201
+
+    $default  reduce using rule 128 (expression)
+
+
+State 230
+
+  128 expression: expression • ADD_OP expression
+  129           | expression • MUL_OP expression
+  129           | expression MUL_OP expression •
+  130           | expression • EXPONENT expression
+  131           | expression • REL_OP expression
+  132           | expression • LOGICAL_OP expression
+
+    EXPONENT  shift, and go to state 201
+
+    $default  reduce using rule 129 (expression)
+
+
 State 231
 
-   83 if_stmt: IF LPAREN expression RPAREN THEN • executables ENDIF
-   84        | IF LPAREN expression RPAREN THEN • executables END IF
-   85        | IF LPAREN expression RPAREN THEN • executables ELSE executables ENDIF
-   86        | IF LPAREN expression RPAREN THEN • executables ELSE executables END IF
+  128 expression: expression • ADD_OP expression
+  129           | expression • MUL_OP expression
+  130           | expression • EXPONENT expression
+  131           | expression • REL_OP expression
+  131           | expression REL_OP expression •
+  132           | expression • LOGICAL_OP expression
 
-    $default  reduce using rule 67 (executables)
+    ADD_OP    shift, and go to state 197
+    MUL_OP    shift, and go to state 198
+    EXPONENT  shift, and go to state 201
 
-    executables  go to state 253
+    REL_OP  error (nonassociative)
+
+    $default  reduce using rule 131 (expression)
 
 
 State 232
 
-  116 expression: expression • ARITH_OP expression
-  116           | expression ARITH_OP expression •
-  117           | expression • EXPONENT expression
-  118           | expression • REL_OP expression
-  119           | expression • LOGICAL_OP expression
+  128 expression: expression • ADD_OP expression
+  129           | expression • MUL_OP expression
+  130           | expression • EXPONENT expression
+  131           | expression • REL_OP expression
+  132           | expression • LOGICAL_OP expression
+  132           | expression LOGICAL_OP expression •
 
-    EXPONENT  shift, and go to state 200
+    ADD_OP    shift, and go to state 197
+    MUL_OP    shift, and go to state 198
+    REL_OP    shift, and go to state 199
+    EXPONENT  shift, and go to state 201
 
-    $default  reduce using rule 116 (expression)
+    $default  reduce using rule 132 (expression)
 
 
 State 233
 
-  116 expression: expression • ARITH_OP expression
-  117           | expression • EXPONENT expression
-  118           | expression • REL_OP expression
-  118           | expression REL_OP expression •
-  119           | expression • LOGICAL_OP expression
+  128 expression: expression • ADD_OP expression
+  129           | expression • MUL_OP expression
+  130           | expression • EXPONENT expression
+  130           | expression EXPONENT expression •
+  131           | expression • REL_OP expression
+  132           | expression • LOGICAL_OP expression
 
-    ARITH_OP  shift, and go to state 197
-    EXPONENT  shift, and go to state 200
+    EXPONENT  shift, and go to state 201
 
-    REL_OP  error (nonassociative)
-
-    $default  reduce using rule 118 (expression)
+    $default  reduce using rule 130 (expression)
 
 
 State 234
 
-  116 expression: expression • ARITH_OP expression
-  117           | expression • EXPONENT expression
-  118           | expression • REL_OP expression
-  119           | expression • LOGICAL_OP expression
-  119           | expression LOGICAL_OP expression •
-
-    ARITH_OP  shift, and go to state 197
-    REL_OP    shift, and go to state 198
-    EXPONENT  shift, and go to state 200
-
-    $default  reduce using rule 119 (expression)
-
-
-State 235
-
-  116 expression: expression • ARITH_OP expression
-  117           | expression • EXPONENT expression
-  117           | expression EXPONENT expression •
-  118           | expression • REL_OP expression
-  119           | expression • LOGICAL_OP expression
-
-    EXPONENT  shift, and go to state 200
-
-    $default  reduce using rule 117 (expression)
-
-
-State 236
-
-  133 primary_suffix_opt: LPAREN argument_list • RPAREN
+  146 primary_suffix_opt: LPAREN argument_values • RPAREN
 
     RPAREN  shift, and go to state 254
 
 
-State 237
+State 235
 
-   88 dowhile_stmt: DO WHILE LPAREN expression RPAREN • executables END DO
+   94 dowhile_stmt: DO WHILE LPAREN $@6 expression • RPAREN $@7 executables END DO
+  128 expression: expression • ADD_OP expression
+  129           | expression • MUL_OP expression
+  130           | expression • EXPONENT expression
+  131           | expression • REL_OP expression
+  132           | expression • LOGICAL_OP expression
 
-    $default  reduce using rule 67 (executables)
+    RPAREN      shift, and go to state 255
+    ADD_OP      shift, and go to state 197
+    MUL_OP      shift, and go to state 198
+    REL_OP      shift, and go to state 199
+    LOGICAL_OP  shift, and go to state 200
+    EXPONENT    shift, and go to state 201
 
-    executables  go to state 255
 
+State 236
 
-State 238
-
-   87 do_stmt: DO IDENTIFIER ASSIGN expression COMMA • expression step_opt executables END DO
+   91 do_stmt: DO IDENTIFIER ASSIGN expression COMMA • expression step_opt $@5 executables END DO
 
     RESULT         shift, and go to state 40
     LPAREN         shift, and go to state 157
@@ -3238,7 +3312,7 @@ State 238
     REAL_CONST     shift, and go to state 159
     STRING         shift, and go to state 160
     LOGICAL_CONST  shift, and go to state 161
-    ARITH_OP       shift, and go to state 162
+    ADD_OP         shift, and go to state 162
     LOGICAL_OP     shift, and go to state 163
 
     expression       go to state 256
@@ -3249,29 +3323,27 @@ State 238
     identifier       go to state 95
 
 
+State 237
+
+   96 select_stmt: SELECT CASE LPAREN expression RPAREN • $@8 case_blocks END SELECT
+
+    $default  reduce using rule 95 ($@8)
+
+    $@8  go to state 257
+
+
+State 238
+
+   98 select_rank_stmt: SELECT RANK LPAREN identifier RPAREN • $@9 rank_blocks END SELECT
+
+    $default  reduce using rule 97 ($@9)
+
+    $@9  go to state 258
+
+
 State 239
 
-   89 select_stmt: SELECT CASE LPAREN expression RPAREN • case_blocks END SELECT
-
-    CASE  shift, and go to state 257
-
-    case_blocks  go to state 258
-    case_block   go to state 259
-
-
-State 240
-
-   90 select_rank_stmt: SELECT RANK LPAREN identifier RPAREN • rank_blocks END SELECT
-
-    RANK  shift, and go to state 260
-
-    rank_blocks  go to state 261
-    rank_block   go to state 262
-
-
-State 241
-
-  113 print_args: print_args COMMA • expression
+  125 print_args: print_args COMMA • expression
 
     RESULT         shift, and go to state 40
     LPAREN         shift, and go to state 157
@@ -3280,10 +3352,10 @@ State 241
     REAL_CONST     shift, and go to state 159
     STRING         shift, and go to state 160
     LOGICAL_CONST  shift, and go to state 161
-    ARITH_OP       shift, and go to state 162
+    ADD_OP         shift, and go to state 162
     LOGICAL_OP     shift, and go to state 163
 
-    expression       go to state 263
+    expression       go to state 259
     factor           go to state 165
     primary          go to state 166
     complex_literal  go to state 167
@@ -3291,61 +3363,110 @@ State 241
     identifier       go to state 95
 
 
+State 240
+
+  113 call_stmt: CALL callable_name LPAREN argument_values RPAREN •
+
+    $default  reduce using rule 113 (call_stmt)
+
+
+State 241
+
+  159 argument_values: expression COMMA argument_values •
+
+    $default  reduce using rule 159 (argument_values)
+
+
 State 242
 
-  101 call_stmt: CALL callable_name LPAREN argument_list RPAREN •
+   65 array_spec_item: COLON expression •
+  128 expression: expression • ADD_OP expression
+  129           | expression • MUL_OP expression
+  130           | expression • EXPONENT expression
+  131           | expression • REL_OP expression
+  132           | expression • LOGICAL_OP expression
 
-    $default  reduce using rule 101 (call_stmt)
+    ADD_OP      shift, and go to state 197
+    MUL_OP      shift, and go to state 198
+    REL_OP      shift, and go to state 199
+    LOGICAL_OP  shift, and go to state 200
+    EXPONENT    shift, and go to state 201
+
+    $default  reduce using rule 65 (array_spec_item)
 
 
 State 243
 
-  146 argument_list: expression COMMA argument_list •
+   58 array_spec: LPAREN array_spec_list RPAREN •
 
-    $default  reduce using rule 146 (argument_list)
+    $default  reduce using rule 58 (array_spec)
 
 
 State 244
 
-   63 array_spec_item: COLON expression •
-  116 expression: expression • ARITH_OP expression
-  117           | expression • EXPONENT expression
-  118           | expression • REL_OP expression
-  119           | expression • LOGICAL_OP expression
-
-    ARITH_OP    shift, and go to state 197
-    REL_OP      shift, and go to state 198
-    LOGICAL_OP  shift, and go to state 199
-    EXPONENT    shift, and go to state 200
-
-    $default  reduce using rule 63 (array_spec_item)
-
-
-State 245
-
-   56 array_spec: LPAREN array_spec_list RPAREN •
-
-    $default  reduce using rule 56 (array_spec)
-
-
-State 246
-
-   58 array_spec_list: array_spec_list COMMA • array_spec_item
+   60 array_spec_list: array_spec_list COMMA • array_spec_item
 
     RESULT                  shift, and go to state 40
     LPAREN                  shift, and go to state 157
-    COLON                   shift, and go to state 217
-    ASSUMED_RANK_SPECIFIER  shift, and go to state 218
+    COLON                   shift, and go to state 218
+    ASSUMED_RANK_SPECIFIER  shift, and go to state 219
     IDENTIFIER              shift, and go to state 41
     INT_CONST               shift, and go to state 158
     REAL_CONST              shift, and go to state 159
     STRING                  shift, and go to state 160
     LOGICAL_CONST           shift, and go to state 161
-    ARITH_OP                shift, and go to state 162
+    ADD_OP                  shift, and go to state 162
     LOGICAL_OP              shift, and go to state 163
 
-    array_spec_item  go to state 264
-    expression       go to state 221
+    array_spec_item  go to state 260
+    expression       go to state 222
+    factor           go to state 165
+    primary          go to state 166
+    complex_literal  go to state 167
+    variable_ref     go to state 168
+    identifier       go to state 95
+
+
+State 245
+
+   64 array_spec_item: expression COLON •
+   66                | expression COLON • expression
+
+    RESULT         shift, and go to state 40
+    LPAREN         shift, and go to state 157
+    IDENTIFIER     shift, and go to state 41
+    INT_CONST      shift, and go to state 158
+    REAL_CONST     shift, and go to state 159
+    STRING         shift, and go to state 160
+    LOGICAL_CONST  shift, and go to state 161
+    ADD_OP         shift, and go to state 162
+    LOGICAL_OP     shift, and go to state 163
+
+    $default  reduce using rule 64 (array_spec_item)
+
+    expression       go to state 261
+    factor           go to state 165
+    primary          go to state 166
+    complex_literal  go to state 167
+    variable_ref     go to state 168
+    identifier       go to state 95
+
+
+State 246
+
+   68 init_opt: ASSIGN • expression
+
+    RESULT         shift, and go to state 40
+    LPAREN         shift, and go to state 157
+    IDENTIFIER     shift, and go to state 41
+    INT_CONST      shift, and go to state 158
+    REAL_CONST     shift, and go to state 159
+    STRING         shift, and go to state 160
+    LOGICAL_CONST  shift, and go to state 161
+    ADD_OP         shift, and go to state 162
+    LOGICAL_OP     shift, and go to state 163
+
+    expression       go to state 262
     factor           go to state 165
     primary          go to state 166
     complex_literal  go to state 167
@@ -3355,402 +3476,488 @@ State 246
 
 State 247
 
-   62 array_spec_item: expression COLON •
-   64                | expression COLON • expression
+   55 declarator: identifier array_spec_opt $@2 init_opt •
 
-    RESULT         shift, and go to state 40
-    LPAREN         shift, and go to state 157
-    IDENTIFIER     shift, and go to state 41
-    INT_CONST      shift, and go to state 158
-    REAL_CONST     shift, and go to state 159
-    STRING         shift, and go to state 160
-    LOGICAL_CONST  shift, and go to state 161
-    ARITH_OP       shift, and go to state 162
-    LOGICAL_OP     shift, and go to state 163
-
-    $default  reduce using rule 62 (array_spec_item)
-
-    expression       go to state 265
-    factor           go to state 165
-    primary          go to state 166
-    complex_literal  go to state 167
-    variable_ref     go to state 168
-    identifier       go to state 95
+    $default  reduce using rule 55 (declarator)
 
 
 State 248
 
-   66 init_opt: ASSIGN expression •
-  116 expression: expression • ARITH_OP expression
-  117           | expression • EXPONENT expression
-  118           | expression • REL_OP expression
-  119           | expression • LOGICAL_OP expression
+  151 subprogram: SUBROUTINE • identifier LPAREN identifier_list_opt RPAREN program_body END SUBROUTINE
+  152           | SUBROUTINE • identifier LPAREN identifier_list_opt RPAREN program_body END SUBROUTINE identifier
 
-    ARITH_OP    shift, and go to state 197
-    REL_OP      shift, and go to state 198
-    LOGICAL_OP  shift, and go to state 199
-    EXPONENT    shift, and go to state 200
+    RESULT      shift, and go to state 40
+    IDENTIFIER  shift, and go to state 41
 
-    $default  reduce using rule 66 (init_opt)
+    identifier  go to state 263
 
 
 State 249
 
-  138 subprogram: SUBROUTINE identifier • LPAREN identifier_list_opt RPAREN program_body END SUBROUTINE
-  139           | SUBROUTINE identifier • LPAREN identifier_list_opt RPAREN program_body END SUBROUTINE identifier
+  153 subprogram: FUNCTION • identifier LPAREN identifier_list_opt RPAREN program_body END FUNCTION
+  154           | FUNCTION • identifier LPAREN identifier_list_opt RPAREN program_body END FUNCTION identifier
 
-    LPAREN  shift, and go to state 266
+    RESULT      shift, and go to state 40
+    IDENTIFIER  shift, and go to state 41
+
+    identifier  go to state 264
 
 
 State 250
 
-  140 subprogram: FUNCTION identifier • LPAREN identifier_list_opt RPAREN program_body END FUNCTION
-  141           | FUNCTION identifier • LPAREN identifier_list_opt RPAREN program_body END FUNCTION identifier
+  155 subprogram: RECURSIVE • FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION
+  156           | RECURSIVE • FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION identifier
 
-    LPAREN  shift, and go to state 267
+    FUNCTION  shift, and go to state 265
 
 
 State 251
 
-  142 subprogram: RECURSIVE FUNCTION • identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION
-  143           | RECURSIVE FUNCTION • identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION identifier
+  150 subprogram_list: subprogram_list subprogram •
 
-    RESULT      shift, and go to state 40
-    IDENTIFIER  shift, and go to state 41
-
-    identifier  go to state 268
+    $default  reduce using rule 150 (subprogram_list)
 
 
 State 252
 
-  116 expression: expression • ARITH_OP expression
-  117           | expression • EXPONENT expression
-  118           | expression • REL_OP expression
-  119           | expression • LOGICAL_OP expression
-  131 complex_literal: LPAREN expression COMMA expression • RPAREN
+  128 expression: expression • ADD_OP expression
+  129           | expression • MUL_OP expression
+  130           | expression • EXPONENT expression
+  131           | expression • REL_OP expression
+  132           | expression • LOGICAL_OP expression
+  144 complex_literal: LPAREN expression COMMA expression • RPAREN
 
-    RPAREN      shift, and go to state 269
-    ARITH_OP    shift, and go to state 197
-    REL_OP      shift, and go to state 198
-    LOGICAL_OP  shift, and go to state 199
-    EXPONENT    shift, and go to state 200
+    RPAREN      shift, and go to state 266
+    ADD_OP      shift, and go to state 197
+    MUL_OP      shift, and go to state 198
+    REL_OP      shift, and go to state 199
+    LOGICAL_OP  shift, and go to state 200
+    EXPONENT    shift, and go to state 201
 
 
 State 253
 
-   68 executables: executables • executable
-   83 if_stmt: IF LPAREN expression RPAREN THEN executables • ENDIF
-   84        | IF LPAREN expression RPAREN THEN executables • END IF
-   85        | IF LPAREN expression RPAREN THEN executables • ELSE executables ENDIF
-   86        | IF LPAREN expression RPAREN THEN executables • ELSE executables END IF
+   86 if_stmt: IF LPAREN expression RPAREN THEN $@3 • executables if_else_opt ENDIF
 
-    END         shift, and go to state 270
-    IF          shift, and go to state 71
-    ELSE        shift, and go to state 271
-    DO          shift, and go to state 72
-    ENDIF       shift, and go to state 272
-    SELECT      shift, and go to state 73
-    STOP        shift, and go to state 74
-    PRINT       shift, and go to state 75
-    CALL        shift, and go to state 76
-    RETURN      shift, and go to state 77
-    RESULT      shift, and go to state 40
-    ALLOCATE    shift, and go to state 78
-    DEALLOCATE  shift, and go to state 79
-    IDENTIFIER  shift, and go to state 41
+    $default  reduce using rule 69 (executables)
 
-    executable        go to state 80
-    assignment_stmt   go to state 81
-    if_stmt           go to state 82
-    do_stmt           go to state 83
-    dowhile_stmt      go to state 84
-    select_stmt       go to state 85
-    select_rank_stmt  go to state 86
-    call_stmt         go to state 87
-    return_stmt       go to state 88
-    stop_stmt         go to state 89
-    pointer_stmt      go to state 90
-    print_stmt        go to state 91
-    allocate_stmt     go to state 92
-    deallocate_stmt   go to state 93
-    variable_ref      go to state 94
-    identifier        go to state 95
+    executables  go to state 267
 
 
 State 254
 
-  133 primary_suffix_opt: LPAREN argument_list RPAREN •
+  146 primary_suffix_opt: LPAREN argument_values RPAREN •
 
-    $default  reduce using rule 133 (primary_suffix_opt)
+    $default  reduce using rule 146 (primary_suffix_opt)
 
 
 State 255
 
-   68 executables: executables • executable
-   88 dowhile_stmt: DO WHILE LPAREN expression RPAREN executables • END DO
+   94 dowhile_stmt: DO WHILE LPAREN $@6 expression RPAREN • $@7 executables END DO
 
-    END         shift, and go to state 273
-    IF          shift, and go to state 71
-    DO          shift, and go to state 72
-    SELECT      shift, and go to state 73
-    STOP        shift, and go to state 74
-    PRINT       shift, and go to state 75
-    CALL        shift, and go to state 76
-    RETURN      shift, and go to state 77
-    RESULT      shift, and go to state 40
-    ALLOCATE    shift, and go to state 78
-    DEALLOCATE  shift, and go to state 79
-    IDENTIFIER  shift, and go to state 41
+    $default  reduce using rule 93 ($@7)
 
-    executable        go to state 80
-    assignment_stmt   go to state 81
-    if_stmt           go to state 82
-    do_stmt           go to state 83
-    dowhile_stmt      go to state 84
-    select_stmt       go to state 85
-    select_rank_stmt  go to state 86
-    call_stmt         go to state 87
-    return_stmt       go to state 88
-    stop_stmt         go to state 89
-    pointer_stmt      go to state 90
-    print_stmt        go to state 91
-    allocate_stmt     go to state 92
-    deallocate_stmt   go to state 93
-    variable_ref      go to state 94
-    identifier        go to state 95
+    $@7  go to state 268
 
 
 State 256
 
-   87 do_stmt: DO IDENTIFIER ASSIGN expression COMMA expression • step_opt executables END DO
-  116 expression: expression • ARITH_OP expression
-  117           | expression • EXPONENT expression
-  118           | expression • REL_OP expression
-  119           | expression • LOGICAL_OP expression
+   91 do_stmt: DO IDENTIFIER ASSIGN expression COMMA expression • step_opt $@5 executables END DO
+  128 expression: expression • ADD_OP expression
+  129           | expression • MUL_OP expression
+  130           | expression • EXPONENT expression
+  131           | expression • REL_OP expression
+  132           | expression • LOGICAL_OP expression
 
-    COMMA       shift, and go to state 274
-    ARITH_OP    shift, and go to state 197
-    REL_OP      shift, and go to state 198
-    LOGICAL_OP  shift, and go to state 199
-    EXPONENT    shift, and go to state 200
+    COMMA       shift, and go to state 269
+    ADD_OP      shift, and go to state 197
+    MUL_OP      shift, and go to state 198
+    REL_OP      shift, and go to state 199
+    LOGICAL_OP  shift, and go to state 200
+    EXPONENT    shift, and go to state 201
 
-    $default  reduce using rule 109 (step_opt)
+    $default  reduce using rule 121 (step_opt)
 
-    step_opt  go to state 275
+    step_opt  go to state 270
 
 
 State 257
 
-   99 case_block: CASE • LPAREN expression RPAREN executables
-  100           | CASE • DEFAULT executables
+   96 select_stmt: SELECT CASE LPAREN expression RPAREN $@8 • case_blocks END SELECT
 
-    DEFAULT  shift, and go to state 276
-    LPAREN   shift, and go to state 277
+    CASE  shift, and go to state 271
+
+    case_blocks  go to state 272
+    case_block   go to state 273
 
 
 State 258
 
-   89 select_stmt: SELECT CASE LPAREN expression RPAREN case_blocks • END SELECT
-   98 case_blocks: case_blocks • case_block
+   98 select_rank_stmt: SELECT RANK LPAREN identifier RPAREN $@9 • rank_blocks END SELECT
 
-    END   shift, and go to state 278
-    CASE  shift, and go to state 257
+    RANK  shift, and go to state 274
 
-    case_block  go to state 279
+    rank_blocks  go to state 275
+    rank_block   go to state 276
 
 
 State 259
 
-   97 case_blocks: case_block •
+  125 print_args: print_args COMMA expression •
+  128 expression: expression • ADD_OP expression
+  129           | expression • MUL_OP expression
+  130           | expression • EXPONENT expression
+  131           | expression • REL_OP expression
+  132           | expression • LOGICAL_OP expression
 
-    $default  reduce using rule 97 (case_blocks)
+    ADD_OP      shift, and go to state 197
+    MUL_OP      shift, and go to state 198
+    REL_OP      shift, and go to state 199
+    LOGICAL_OP  shift, and go to state 200
+    EXPONENT    shift, and go to state 201
+
+    $default  reduce using rule 125 (print_args)
 
 
 State 260
 
-   93 rank_block: RANK • LPAREN rank_selector RPAREN executables
-   94           | RANK • DEFAULT executables
+   60 array_spec_list: array_spec_list COMMA array_spec_item •
 
-    DEFAULT  shift, and go to state 280
-    LPAREN   shift, and go to state 281
+    $default  reduce using rule 60 (array_spec_list)
 
 
 State 261
 
-   90 select_rank_stmt: SELECT RANK LPAREN identifier RPAREN rank_blocks • END SELECT
-   92 rank_blocks: rank_blocks • rank_block
+   66 array_spec_item: expression COLON expression •
+  128 expression: expression • ADD_OP expression
+  129           | expression • MUL_OP expression
+  130           | expression • EXPONENT expression
+  131           | expression • REL_OP expression
+  132           | expression • LOGICAL_OP expression
 
-    END   shift, and go to state 282
-    RANK  shift, and go to state 260
+    ADD_OP      shift, and go to state 197
+    MUL_OP      shift, and go to state 198
+    REL_OP      shift, and go to state 199
+    LOGICAL_OP  shift, and go to state 200
+    EXPONENT    shift, and go to state 201
 
-    rank_block  go to state 283
+    $default  reduce using rule 66 (array_spec_item)
 
 
 State 262
 
-   91 rank_blocks: rank_block •
+   68 init_opt: ASSIGN expression •
+  128 expression: expression • ADD_OP expression
+  129           | expression • MUL_OP expression
+  130           | expression • EXPONENT expression
+  131           | expression • REL_OP expression
+  132           | expression • LOGICAL_OP expression
 
-    $default  reduce using rule 91 (rank_blocks)
+    ADD_OP      shift, and go to state 197
+    MUL_OP      shift, and go to state 198
+    REL_OP      shift, and go to state 199
+    LOGICAL_OP  shift, and go to state 200
+    EXPONENT    shift, and go to state 201
+
+    $default  reduce using rule 68 (init_opt)
 
 
 State 263
 
-  113 print_args: print_args COMMA expression •
-  116 expression: expression • ARITH_OP expression
-  117           | expression • EXPONENT expression
-  118           | expression • REL_OP expression
-  119           | expression • LOGICAL_OP expression
+  151 subprogram: SUBROUTINE identifier • LPAREN identifier_list_opt RPAREN program_body END SUBROUTINE
+  152           | SUBROUTINE identifier • LPAREN identifier_list_opt RPAREN program_body END SUBROUTINE identifier
 
-    ARITH_OP    shift, and go to state 197
-    REL_OP      shift, and go to state 198
-    LOGICAL_OP  shift, and go to state 199
-    EXPONENT    shift, and go to state 200
-
-    $default  reduce using rule 113 (print_args)
+    LPAREN  shift, and go to state 277
 
 
 State 264
 
-   58 array_spec_list: array_spec_list COMMA array_spec_item •
+  153 subprogram: FUNCTION identifier • LPAREN identifier_list_opt RPAREN program_body END FUNCTION
+  154           | FUNCTION identifier • LPAREN identifier_list_opt RPAREN program_body END FUNCTION identifier
 
-    $default  reduce using rule 58 (array_spec_list)
+    LPAREN  shift, and go to state 278
 
 
 State 265
 
-   64 array_spec_item: expression COLON expression •
-  116 expression: expression • ARITH_OP expression
-  117           | expression • EXPONENT expression
-  118           | expression • REL_OP expression
-  119           | expression • LOGICAL_OP expression
+  155 subprogram: RECURSIVE FUNCTION • identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION
+  156           | RECURSIVE FUNCTION • identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION identifier
 
-    ARITH_OP    shift, and go to state 197
-    REL_OP      shift, and go to state 198
-    LOGICAL_OP  shift, and go to state 199
-    EXPONENT    shift, and go to state 200
+    RESULT      shift, and go to state 40
+    IDENTIFIER  shift, and go to state 41
 
-    $default  reduce using rule 64 (array_spec_item)
+    identifier  go to state 279
 
 
 State 266
 
-  138 subprogram: SUBROUTINE identifier LPAREN • identifier_list_opt RPAREN program_body END SUBROUTINE
-  139           | SUBROUTINE identifier LPAREN • identifier_list_opt RPAREN program_body END SUBROUTINE identifier
+  144 complex_literal: LPAREN expression COMMA expression RPAREN •
 
-    RESULT      shift, and go to state 40
-    IDENTIFIER  shift, and go to state 41
-
-    $default  reduce using rule 147 (identifier_list_opt)
-
-    identifier_list      go to state 284
-    identifier_list_opt  go to state 285
-    identifier           go to state 286
+    $default  reduce using rule 144 (complex_literal)
 
 
 State 267
 
-  140 subprogram: FUNCTION identifier LPAREN • identifier_list_opt RPAREN program_body END FUNCTION
-  141           | FUNCTION identifier LPAREN • identifier_list_opt RPAREN program_body END FUNCTION identifier
+   70 executables: executables • executable
+   86 if_stmt: IF LPAREN expression RPAREN THEN $@3 executables • if_else_opt ENDIF
 
+    IF          shift, and go to state 71
+    ELSE        shift, and go to state 280
+    DO          shift, and go to state 72
+    SELECT      shift, and go to state 73
+    STOP        shift, and go to state 74
+    PRINT       shift, and go to state 75
+    CALL        shift, and go to state 76
+    RETURN      shift, and go to state 77
     RESULT      shift, and go to state 40
+    ALLOCATE    shift, and go to state 78
+    DEALLOCATE  shift, and go to state 79
     IDENTIFIER  shift, and go to state 41
 
-    $default  reduce using rule 147 (identifier_list_opt)
+    $default  reduce using rule 87 (if_else_opt)
 
-    identifier_list      go to state 284
-    identifier_list_opt  go to state 287
-    identifier           go to state 286
+    executable        go to state 80
+    assignment_stmt   go to state 81
+    if_stmt           go to state 82
+    if_else_opt       go to state 281
+    do_stmt           go to state 83
+    dowhile_stmt      go to state 84
+    select_stmt       go to state 85
+    select_rank_stmt  go to state 86
+    call_stmt         go to state 87
+    return_stmt       go to state 88
+    stop_stmt         go to state 89
+    pointer_stmt      go to state 90
+    print_stmt        go to state 91
+    allocate_stmt     go to state 92
+    deallocate_stmt   go to state 93
+    variable_ref      go to state 94
+    identifier        go to state 95
 
 
 State 268
 
-  142 subprogram: RECURSIVE FUNCTION identifier • LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION
-  143           | RECURSIVE FUNCTION identifier • LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION identifier
+   94 dowhile_stmt: DO WHILE LPAREN $@6 expression RPAREN $@7 • executables END DO
 
-    LPAREN  shift, and go to state 288
+    $default  reduce using rule 69 (executables)
+
+    executables  go to state 282
 
 
 State 269
 
-  131 complex_literal: LPAREN expression COMMA expression RPAREN •
+  122 step_opt: COMMA • expression
 
-    $default  reduce using rule 131 (complex_literal)
+    RESULT         shift, and go to state 40
+    LPAREN         shift, and go to state 157
+    IDENTIFIER     shift, and go to state 41
+    INT_CONST      shift, and go to state 158
+    REAL_CONST     shift, and go to state 159
+    STRING         shift, and go to state 160
+    LOGICAL_CONST  shift, and go to state 161
+    ADD_OP         shift, and go to state 162
+    LOGICAL_OP     shift, and go to state 163
+
+    expression       go to state 283
+    factor           go to state 165
+    primary          go to state 166
+    complex_literal  go to state 167
+    variable_ref     go to state 168
+    identifier       go to state 95
 
 
 State 270
 
-   84 if_stmt: IF LPAREN expression RPAREN THEN executables END • IF
+   91 do_stmt: DO IDENTIFIER ASSIGN expression COMMA expression step_opt • $@5 executables END DO
 
-    IF  shift, and go to state 289
+    $default  reduce using rule 90 ($@5)
+
+    $@5  go to state 284
 
 
 State 271
 
-   85 if_stmt: IF LPAREN expression RPAREN THEN executables ELSE • executables ENDIF
-   86        | IF LPAREN expression RPAREN THEN executables ELSE • executables END IF
+  110 case_block: CASE • LPAREN expression RPAREN $@12 executables
+  112           | CASE • DEFAULT $@13 executables
 
-    $default  reduce using rule 67 (executables)
-
-    executables  go to state 290
+    DEFAULT  shift, and go to state 285
+    LPAREN   shift, and go to state 286
 
 
 State 272
 
-   83 if_stmt: IF LPAREN expression RPAREN THEN executables ENDIF •
+   96 select_stmt: SELECT CASE LPAREN expression RPAREN $@8 case_blocks • END SELECT
+  108 case_blocks: case_blocks • case_block
 
-    $default  reduce using rule 83 (if_stmt)
+    END   shift, and go to state 287
+    CASE  shift, and go to state 271
+
+    case_block  go to state 288
 
 
 State 273
 
-   88 dowhile_stmt: DO WHILE LPAREN expression RPAREN executables END • DO
+  107 case_blocks: case_block •
 
-    DO  shift, and go to state 291
+    $default  reduce using rule 107 (case_blocks)
 
 
 State 274
 
-  110 step_opt: COMMA • expression
+  102 rank_block: RANK • LPAREN rank_selector RPAREN $@10 executables
+  104           | RANK • DEFAULT $@11 executables
 
-    RESULT         shift, and go to state 40
-    LPAREN         shift, and go to state 157
-    IDENTIFIER     shift, and go to state 41
-    INT_CONST      shift, and go to state 158
-    REAL_CONST     shift, and go to state 159
-    STRING         shift, and go to state 160
-    LOGICAL_CONST  shift, and go to state 161
-    ARITH_OP       shift, and go to state 162
-    LOGICAL_OP     shift, and go to state 163
-
-    expression       go to state 292
-    factor           go to state 165
-    primary          go to state 166
-    complex_literal  go to state 167
-    variable_ref     go to state 168
-    identifier       go to state 95
+    DEFAULT  shift, and go to state 289
+    LPAREN   shift, and go to state 290
 
 
 State 275
 
-   87 do_stmt: DO IDENTIFIER ASSIGN expression COMMA expression step_opt • executables END DO
+   98 select_rank_stmt: SELECT RANK LPAREN identifier RPAREN $@9 rank_blocks • END SELECT
+  100 rank_blocks: rank_blocks • rank_block
 
-    $default  reduce using rule 67 (executables)
+    END   shift, and go to state 291
+    RANK  shift, and go to state 274
 
-    executables  go to state 293
+    rank_block  go to state 292
 
 
 State 276
 
-  100 case_block: CASE DEFAULT • executables
+   99 rank_blocks: rank_block •
 
-    $default  reduce using rule 67 (executables)
-
-    executables  go to state 294
+    $default  reduce using rule 99 (rank_blocks)
 
 
 State 277
 
-   99 case_block: CASE LPAREN • expression RPAREN executables
+  151 subprogram: SUBROUTINE identifier LPAREN • identifier_list_opt RPAREN program_body END SUBROUTINE
+  152           | SUBROUTINE identifier LPAREN • identifier_list_opt RPAREN program_body END SUBROUTINE identifier
+
+    RESULT      shift, and go to state 40
+    IDENTIFIER  shift, and go to state 41
+
+    $default  reduce using rule 160 (identifier_list_opt)
+
+    identifier_list      go to state 293
+    identifier_list_opt  go to state 294
+    identifier           go to state 295
+
+
+State 278
+
+  153 subprogram: FUNCTION identifier LPAREN • identifier_list_opt RPAREN program_body END FUNCTION
+  154           | FUNCTION identifier LPAREN • identifier_list_opt RPAREN program_body END FUNCTION identifier
+
+    RESULT      shift, and go to state 40
+    IDENTIFIER  shift, and go to state 41
+
+    $default  reduce using rule 160 (identifier_list_opt)
+
+    identifier_list      go to state 293
+    identifier_list_opt  go to state 296
+    identifier           go to state 295
+
+
+State 279
+
+  155 subprogram: RECURSIVE FUNCTION identifier • LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION
+  156           | RECURSIVE FUNCTION identifier • LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION identifier
+
+    LPAREN  shift, and go to state 297
+
+
+State 280
+
+   89 if_else_opt: ELSE • $@4 executables
+
+    $default  reduce using rule 88 ($@4)
+
+    $@4  go to state 298
+
+
+State 281
+
+   86 if_stmt: IF LPAREN expression RPAREN THEN $@3 executables if_else_opt • ENDIF
+
+    ENDIF  shift, and go to state 299
+
+
+State 282
+
+   70 executables: executables • executable
+   94 dowhile_stmt: DO WHILE LPAREN $@6 expression RPAREN $@7 executables • END DO
+
+    END         shift, and go to state 300
+    IF          shift, and go to state 71
+    DO          shift, and go to state 72
+    SELECT      shift, and go to state 73
+    STOP        shift, and go to state 74
+    PRINT       shift, and go to state 75
+    CALL        shift, and go to state 76
+    RETURN      shift, and go to state 77
+    RESULT      shift, and go to state 40
+    ALLOCATE    shift, and go to state 78
+    DEALLOCATE  shift, and go to state 79
+    IDENTIFIER  shift, and go to state 41
+
+    executable        go to state 80
+    assignment_stmt   go to state 81
+    if_stmt           go to state 82
+    do_stmt           go to state 83
+    dowhile_stmt      go to state 84
+    select_stmt       go to state 85
+    select_rank_stmt  go to state 86
+    call_stmt         go to state 87
+    return_stmt       go to state 88
+    stop_stmt         go to state 89
+    pointer_stmt      go to state 90
+    print_stmt        go to state 91
+    allocate_stmt     go to state 92
+    deallocate_stmt   go to state 93
+    variable_ref      go to state 94
+    identifier        go to state 95
+
+
+State 283
+
+  122 step_opt: COMMA expression •
+  128 expression: expression • ADD_OP expression
+  129           | expression • MUL_OP expression
+  130           | expression • EXPONENT expression
+  131           | expression • REL_OP expression
+  132           | expression • LOGICAL_OP expression
+
+    ADD_OP      shift, and go to state 197
+    MUL_OP      shift, and go to state 198
+    REL_OP      shift, and go to state 199
+    LOGICAL_OP  shift, and go to state 200
+    EXPONENT    shift, and go to state 201
+
+    $default  reduce using rule 122 (step_opt)
+
+
+State 284
+
+   91 do_stmt: DO IDENTIFIER ASSIGN expression COMMA expression step_opt $@5 • executables END DO
+
+    $default  reduce using rule 69 (executables)
+
+    executables  go to state 301
+
+
+State 285
+
+  112 case_block: CASE DEFAULT • $@13 executables
+
+    $default  reduce using rule 111 ($@13)
+
+    $@13  go to state 302
+
+
+State 286
+
+  110 case_block: CASE LPAREN • expression RPAREN $@12 executables
 
     RESULT         shift, and go to state 40
     LPAREN         shift, and go to state 157
@@ -3759,10 +3966,10 @@ State 277
     REAL_CONST     shift, and go to state 159
     STRING         shift, and go to state 160
     LOGICAL_CONST  shift, and go to state 161
-    ARITH_OP       shift, and go to state 162
+    ADD_OP         shift, and go to state 162
     LOGICAL_OP     shift, and go to state 163
 
-    expression       go to state 295
+    expression       go to state 303
     factor           go to state 165
     primary          go to state 166
     complex_literal  go to state 167
@@ -3770,458 +3977,275 @@ State 277
     identifier       go to state 95
 
 
-State 278
-
-   89 select_stmt: SELECT CASE LPAREN expression RPAREN case_blocks END • SELECT
-
-    SELECT  shift, and go to state 296
-
-
-State 279
-
-   98 case_blocks: case_blocks case_block •
-
-    $default  reduce using rule 98 (case_blocks)
-
-
-State 280
-
-   94 rank_block: RANK DEFAULT • executables
-
-    $default  reduce using rule 67 (executables)
-
-    executables  go to state 297
-
-
-State 281
-
-   93 rank_block: RANK LPAREN • rank_selector RPAREN executables
-
-    INT_CONST  shift, and go to state 298
-    ARITH_OP   shift, and go to state 299
-
-    rank_selector  go to state 300
-
-
-State 282
-
-   90 select_rank_stmt: SELECT RANK LPAREN identifier RPAREN rank_blocks END • SELECT
-
-    SELECT  shift, and go to state 301
-
-
-State 283
-
-   92 rank_blocks: rank_blocks rank_block •
-
-    $default  reduce using rule 92 (rank_blocks)
-
-
-State 284
-
-  148 identifier_list_opt: identifier_list •
-
-    $default  reduce using rule 148 (identifier_list_opt)
-
-
-State 285
-
-  138 subprogram: SUBROUTINE identifier LPAREN identifier_list_opt • RPAREN program_body END SUBROUTINE
-  139           | SUBROUTINE identifier LPAREN identifier_list_opt • RPAREN program_body END SUBROUTINE identifier
-
-    RPAREN  shift, and go to state 302
-
-
-State 286
-
-   49 identifier_list: identifier •
-   50                | identifier • COMMA identifier_list
-
-    COMMA  shift, and go to state 303
-
-    $default  reduce using rule 49 (identifier_list)
-
-
 State 287
 
-  140 subprogram: FUNCTION identifier LPAREN identifier_list_opt • RPAREN program_body END FUNCTION
-  141           | FUNCTION identifier LPAREN identifier_list_opt • RPAREN program_body END FUNCTION identifier
+   96 select_stmt: SELECT CASE LPAREN expression RPAREN $@8 case_blocks END • SELECT
 
-    RPAREN  shift, and go to state 304
+    SELECT  shift, and go to state 304
 
 
 State 288
 
-  142 subprogram: RECURSIVE FUNCTION identifier LPAREN • identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION
-  143           | RECURSIVE FUNCTION identifier LPAREN • identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION identifier
+  108 case_blocks: case_blocks case_block •
 
-    RESULT      shift, and go to state 40
-    IDENTIFIER  shift, and go to state 41
-
-    $default  reduce using rule 147 (identifier_list_opt)
-
-    identifier_list      go to state 284
-    identifier_list_opt  go to state 305
-    identifier           go to state 286
+    $default  reduce using rule 108 (case_blocks)
 
 
 State 289
 
-   84 if_stmt: IF LPAREN expression RPAREN THEN executables END IF •
+  104 rank_block: RANK DEFAULT • $@11 executables
 
-    $default  reduce using rule 84 (if_stmt)
+    $default  reduce using rule 103 ($@11)
+
+    $@11  go to state 305
 
 
 State 290
 
-   68 executables: executables • executable
-   85 if_stmt: IF LPAREN expression RPAREN THEN executables ELSE executables • ENDIF
-   86        | IF LPAREN expression RPAREN THEN executables ELSE executables • END IF
+  102 rank_block: RANK LPAREN • rank_selector RPAREN $@10 executables
 
-    END         shift, and go to state 306
-    IF          shift, and go to state 71
-    DO          shift, and go to state 72
-    ENDIF       shift, and go to state 307
-    SELECT      shift, and go to state 73
-    STOP        shift, and go to state 74
-    PRINT       shift, and go to state 75
-    CALL        shift, and go to state 76
-    RETURN      shift, and go to state 77
-    RESULT      shift, and go to state 40
-    ALLOCATE    shift, and go to state 78
-    DEALLOCATE  shift, and go to state 79
-    IDENTIFIER  shift, and go to state 41
+    INT_CONST  shift, and go to state 306
+    MUL_OP     shift, and go to state 307
 
-    executable        go to state 80
-    assignment_stmt   go to state 81
-    if_stmt           go to state 82
-    do_stmt           go to state 83
-    dowhile_stmt      go to state 84
-    select_stmt       go to state 85
-    select_rank_stmt  go to state 86
-    call_stmt         go to state 87
-    return_stmt       go to state 88
-    stop_stmt         go to state 89
-    pointer_stmt      go to state 90
-    print_stmt        go to state 91
-    allocate_stmt     go to state 92
-    deallocate_stmt   go to state 93
-    variable_ref      go to state 94
-    identifier        go to state 95
+    rank_selector  go to state 308
 
 
 State 291
 
-   88 dowhile_stmt: DO WHILE LPAREN expression RPAREN executables END DO •
+   98 select_rank_stmt: SELECT RANK LPAREN identifier RPAREN $@9 rank_blocks END • SELECT
 
-    $default  reduce using rule 88 (dowhile_stmt)
+    SELECT  shift, and go to state 309
 
 
 State 292
 
-  110 step_opt: COMMA expression •
-  116 expression: expression • ARITH_OP expression
-  117           | expression • EXPONENT expression
-  118           | expression • REL_OP expression
-  119           | expression • LOGICAL_OP expression
+  100 rank_blocks: rank_blocks rank_block •
 
-    ARITH_OP    shift, and go to state 197
-    REL_OP      shift, and go to state 198
-    LOGICAL_OP  shift, and go to state 199
-    EXPONENT    shift, and go to state 200
-
-    $default  reduce using rule 110 (step_opt)
+    $default  reduce using rule 100 (rank_blocks)
 
 
 State 293
 
-   68 executables: executables • executable
-   87 do_stmt: DO IDENTIFIER ASSIGN expression COMMA expression step_opt executables • END DO
+  161 identifier_list_opt: identifier_list •
 
-    END         shift, and go to state 308
-    IF          shift, and go to state 71
-    DO          shift, and go to state 72
-    SELECT      shift, and go to state 73
-    STOP        shift, and go to state 74
-    PRINT       shift, and go to state 75
-    CALL        shift, and go to state 76
-    RETURN      shift, and go to state 77
-    RESULT      shift, and go to state 40
-    ALLOCATE    shift, and go to state 78
-    DEALLOCATE  shift, and go to state 79
-    IDENTIFIER  shift, and go to state 41
-
-    executable        go to state 80
-    assignment_stmt   go to state 81
-    if_stmt           go to state 82
-    do_stmt           go to state 83
-    dowhile_stmt      go to state 84
-    select_stmt       go to state 85
-    select_rank_stmt  go to state 86
-    call_stmt         go to state 87
-    return_stmt       go to state 88
-    stop_stmt         go to state 89
-    pointer_stmt      go to state 90
-    print_stmt        go to state 91
-    allocate_stmt     go to state 92
-    deallocate_stmt   go to state 93
-    variable_ref      go to state 94
-    identifier        go to state 95
+    $default  reduce using rule 161 (identifier_list_opt)
 
 
 State 294
 
-   68 executables: executables • executable
-  100 case_block: CASE DEFAULT executables •
-
-    IF          shift, and go to state 71
-    DO          shift, and go to state 72
-    SELECT      shift, and go to state 73
-    STOP        shift, and go to state 74
-    PRINT       shift, and go to state 75
-    CALL        shift, and go to state 76
-    RETURN      shift, and go to state 77
-    RESULT      shift, and go to state 40
-    ALLOCATE    shift, and go to state 78
-    DEALLOCATE  shift, and go to state 79
-    IDENTIFIER  shift, and go to state 41
-
-    $default  reduce using rule 100 (case_block)
-
-    executable        go to state 80
-    assignment_stmt   go to state 81
-    if_stmt           go to state 82
-    do_stmt           go to state 83
-    dowhile_stmt      go to state 84
-    select_stmt       go to state 85
-    select_rank_stmt  go to state 86
-    call_stmt         go to state 87
-    return_stmt       go to state 88
-    stop_stmt         go to state 89
-    pointer_stmt      go to state 90
-    print_stmt        go to state 91
-    allocate_stmt     go to state 92
-    deallocate_stmt   go to state 93
-    variable_ref      go to state 94
-    identifier        go to state 95
-
-
-State 295
-
-   99 case_block: CASE LPAREN expression • RPAREN executables
-  116 expression: expression • ARITH_OP expression
-  117           | expression • EXPONENT expression
-  118           | expression • REL_OP expression
-  119           | expression • LOGICAL_OP expression
-
-    RPAREN      shift, and go to state 309
-    ARITH_OP    shift, and go to state 197
-    REL_OP      shift, and go to state 198
-    LOGICAL_OP  shift, and go to state 199
-    EXPONENT    shift, and go to state 200
-
-
-State 296
-
-   89 select_stmt: SELECT CASE LPAREN expression RPAREN case_blocks END SELECT •
-
-    $default  reduce using rule 89 (select_stmt)
-
-
-State 297
-
-   68 executables: executables • executable
-   94 rank_block: RANK DEFAULT executables •
-
-    IF          shift, and go to state 71
-    DO          shift, and go to state 72
-    SELECT      shift, and go to state 73
-    STOP        shift, and go to state 74
-    PRINT       shift, and go to state 75
-    CALL        shift, and go to state 76
-    RETURN      shift, and go to state 77
-    RESULT      shift, and go to state 40
-    ALLOCATE    shift, and go to state 78
-    DEALLOCATE  shift, and go to state 79
-    IDENTIFIER  shift, and go to state 41
-
-    $default  reduce using rule 94 (rank_block)
-
-    executable        go to state 80
-    assignment_stmt   go to state 81
-    if_stmt           go to state 82
-    do_stmt           go to state 83
-    dowhile_stmt      go to state 84
-    select_stmt       go to state 85
-    select_rank_stmt  go to state 86
-    call_stmt         go to state 87
-    return_stmt       go to state 88
-    stop_stmt         go to state 89
-    pointer_stmt      go to state 90
-    print_stmt        go to state 91
-    allocate_stmt     go to state 92
-    deallocate_stmt   go to state 93
-    variable_ref      go to state 94
-    identifier        go to state 95
-
-
-State 298
-
-   95 rank_selector: INT_CONST •
-
-    $default  reduce using rule 95 (rank_selector)
-
-
-State 299
-
-   96 rank_selector: ARITH_OP •
-
-    $default  reduce using rule 96 (rank_selector)
-
-
-State 300
-
-   93 rank_block: RANK LPAREN rank_selector • RPAREN executables
+  151 subprogram: SUBROUTINE identifier LPAREN identifier_list_opt • RPAREN program_body END SUBROUTINE
+  152           | SUBROUTINE identifier LPAREN identifier_list_opt • RPAREN program_body END SUBROUTINE identifier
 
     RPAREN  shift, and go to state 310
 
 
-State 301
+State 295
 
-   90 select_rank_stmt: SELECT RANK LPAREN identifier RPAREN rank_blocks END SELECT •
+   50 identifier_list: identifier •
+   51                | identifier • COMMA identifier_list
 
-    $default  reduce using rule 90 (select_rank_stmt)
-
-
-State 302
-
-  138 subprogram: SUBROUTINE identifier LPAREN identifier_list_opt RPAREN • program_body END SUBROUTINE
-  139           | SUBROUTINE identifier LPAREN identifier_list_opt RPAREN • program_body END SUBROUTINE identifier
-
-    $default  reduce using rule 18 (preamble)
-
-    program_body  go to state 311
-    preamble      go to state 37
-
-
-State 303
-
-   50 identifier_list: identifier COMMA • identifier_list
-
-    RESULT      shift, and go to state 40
-    IDENTIFIER  shift, and go to state 41
-
-    identifier_list  go to state 312
-    identifier       go to state 286
-
-
-State 304
-
-  140 subprogram: FUNCTION identifier LPAREN identifier_list_opt RPAREN • program_body END FUNCTION
-  141           | FUNCTION identifier LPAREN identifier_list_opt RPAREN • program_body END FUNCTION identifier
-
-    $default  reduce using rule 18 (preamble)
-
-    program_body  go to state 313
-    preamble      go to state 37
-
-
-State 305
-
-  142 subprogram: RECURSIVE FUNCTION identifier LPAREN identifier_list_opt • RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION
-  143           | RECURSIVE FUNCTION identifier LPAREN identifier_list_opt • RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION identifier
-
-    RPAREN  shift, and go to state 314
-
-
-State 306
-
-   86 if_stmt: IF LPAREN expression RPAREN THEN executables ELSE executables END • IF
-
-    IF  shift, and go to state 315
-
-
-State 307
-
-   85 if_stmt: IF LPAREN expression RPAREN THEN executables ELSE executables ENDIF •
-
-    $default  reduce using rule 85 (if_stmt)
-
-
-State 308
-
-   87 do_stmt: DO IDENTIFIER ASSIGN expression COMMA expression step_opt executables END • DO
-
-    DO  shift, and go to state 316
-
-
-State 309
-
-   99 case_block: CASE LPAREN expression RPAREN • executables
-
-    $default  reduce using rule 67 (executables)
-
-    executables  go to state 317
-
-
-State 310
-
-   93 rank_block: RANK LPAREN rank_selector RPAREN • executables
-
-    $default  reduce using rule 67 (executables)
-
-    executables  go to state 318
-
-
-State 311
-
-  138 subprogram: SUBROUTINE identifier LPAREN identifier_list_opt RPAREN program_body • END SUBROUTINE
-  139           | SUBROUTINE identifier LPAREN identifier_list_opt RPAREN program_body • END SUBROUTINE identifier
-
-    END  shift, and go to state 319
-
-
-State 312
-
-   50 identifier_list: identifier COMMA identifier_list •
+    COMMA  shift, and go to state 311
 
     $default  reduce using rule 50 (identifier_list)
 
 
-State 313
+State 296
 
-  140 subprogram: FUNCTION identifier LPAREN identifier_list_opt RPAREN program_body • END FUNCTION
-  141           | FUNCTION identifier LPAREN identifier_list_opt RPAREN program_body • END FUNCTION identifier
+  153 subprogram: FUNCTION identifier LPAREN identifier_list_opt • RPAREN program_body END FUNCTION
+  154           | FUNCTION identifier LPAREN identifier_list_opt • RPAREN program_body END FUNCTION identifier
 
-    END  shift, and go to state 320
-
-
-State 314
-
-  142 subprogram: RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN • RESULT LPAREN identifier RPAREN program_body END FUNCTION
-  143           | RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN • RESULT LPAREN identifier RPAREN program_body END FUNCTION identifier
-
-    RESULT  shift, and go to state 321
+    RPAREN  shift, and go to state 312
 
 
-State 315
+State 297
 
-   86 if_stmt: IF LPAREN expression RPAREN THEN executables ELSE executables END IF •
+  155 subprogram: RECURSIVE FUNCTION identifier LPAREN • identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION
+  156           | RECURSIVE FUNCTION identifier LPAREN • identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION identifier
+
+    RESULT      shift, and go to state 40
+    IDENTIFIER  shift, and go to state 41
+
+    $default  reduce using rule 160 (identifier_list_opt)
+
+    identifier_list      go to state 293
+    identifier_list_opt  go to state 313
+    identifier           go to state 295
+
+
+State 298
+
+   89 if_else_opt: ELSE $@4 • executables
+
+    $default  reduce using rule 69 (executables)
+
+    executables  go to state 314
+
+
+State 299
+
+   86 if_stmt: IF LPAREN expression RPAREN THEN $@3 executables if_else_opt ENDIF •
 
     $default  reduce using rule 86 (if_stmt)
 
 
-State 316
+State 300
 
-   87 do_stmt: DO IDENTIFIER ASSIGN expression COMMA expression step_opt executables END DO •
+   94 dowhile_stmt: DO WHILE LPAREN $@6 expression RPAREN $@7 executables END • DO
 
-    $default  reduce using rule 87 (do_stmt)
+    DO  shift, and go to state 315
 
 
-State 317
+State 301
 
-   68 executables: executables • executable
-   99 case_block: CASE LPAREN expression RPAREN executables •
+   70 executables: executables • executable
+   91 do_stmt: DO IDENTIFIER ASSIGN expression COMMA expression step_opt $@5 executables • END DO
+
+    END         shift, and go to state 316
+    IF          shift, and go to state 71
+    DO          shift, and go to state 72
+    SELECT      shift, and go to state 73
+    STOP        shift, and go to state 74
+    PRINT       shift, and go to state 75
+    CALL        shift, and go to state 76
+    RETURN      shift, and go to state 77
+    RESULT      shift, and go to state 40
+    ALLOCATE    shift, and go to state 78
+    DEALLOCATE  shift, and go to state 79
+    IDENTIFIER  shift, and go to state 41
+
+    executable        go to state 80
+    assignment_stmt   go to state 81
+    if_stmt           go to state 82
+    do_stmt           go to state 83
+    dowhile_stmt      go to state 84
+    select_stmt       go to state 85
+    select_rank_stmt  go to state 86
+    call_stmt         go to state 87
+    return_stmt       go to state 88
+    stop_stmt         go to state 89
+    pointer_stmt      go to state 90
+    print_stmt        go to state 91
+    allocate_stmt     go to state 92
+    deallocate_stmt   go to state 93
+    variable_ref      go to state 94
+    identifier        go to state 95
+
+
+State 302
+
+  112 case_block: CASE DEFAULT $@13 • executables
+
+    $default  reduce using rule 69 (executables)
+
+    executables  go to state 317
+
+
+State 303
+
+  110 case_block: CASE LPAREN expression • RPAREN $@12 executables
+  128 expression: expression • ADD_OP expression
+  129           | expression • MUL_OP expression
+  130           | expression • EXPONENT expression
+  131           | expression • REL_OP expression
+  132           | expression • LOGICAL_OP expression
+
+    RPAREN      shift, and go to state 318
+    ADD_OP      shift, and go to state 197
+    MUL_OP      shift, and go to state 198
+    REL_OP      shift, and go to state 199
+    LOGICAL_OP  shift, and go to state 200
+    EXPONENT    shift, and go to state 201
+
+
+State 304
+
+   96 select_stmt: SELECT CASE LPAREN expression RPAREN $@8 case_blocks END SELECT •
+
+    $default  reduce using rule 96 (select_stmt)
+
+
+State 305
+
+  104 rank_block: RANK DEFAULT $@11 • executables
+
+    $default  reduce using rule 69 (executables)
+
+    executables  go to state 319
+
+
+State 306
+
+  105 rank_selector: INT_CONST •
+
+    $default  reduce using rule 105 (rank_selector)
+
+
+State 307
+
+  106 rank_selector: MUL_OP •
+
+    $default  reduce using rule 106 (rank_selector)
+
+
+State 308
+
+  102 rank_block: RANK LPAREN rank_selector • RPAREN $@10 executables
+
+    RPAREN  shift, and go to state 320
+
+
+State 309
+
+   98 select_rank_stmt: SELECT RANK LPAREN identifier RPAREN $@9 rank_blocks END SELECT •
+
+    $default  reduce using rule 98 (select_rank_stmt)
+
+
+State 310
+
+  151 subprogram: SUBROUTINE identifier LPAREN identifier_list_opt RPAREN • program_body END SUBROUTINE
+  152           | SUBROUTINE identifier LPAREN identifier_list_opt RPAREN • program_body END SUBROUTINE identifier
+
+    $default  reduce using rule 19 (preamble)
+
+    program_body  go to state 321
+    preamble      go to state 37
+
+
+State 311
+
+   51 identifier_list: identifier COMMA • identifier_list
+
+    RESULT      shift, and go to state 40
+    IDENTIFIER  shift, and go to state 41
+
+    identifier_list  go to state 322
+    identifier       go to state 295
+
+
+State 312
+
+  153 subprogram: FUNCTION identifier LPAREN identifier_list_opt RPAREN • program_body END FUNCTION
+  154           | FUNCTION identifier LPAREN identifier_list_opt RPAREN • program_body END FUNCTION identifier
+
+    $default  reduce using rule 19 (preamble)
+
+    program_body  go to state 323
+    preamble      go to state 37
+
+
+State 313
+
+  155 subprogram: RECURSIVE FUNCTION identifier LPAREN identifier_list_opt • RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION
+  156           | RECURSIVE FUNCTION identifier LPAREN identifier_list_opt • RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION identifier
+
+    RPAREN  shift, and go to state 324
+
+
+State 314
+
+   70 executables: executables • executable
+   89 if_else_opt: ELSE $@4 executables •
 
     IF          shift, and go to state 71
     DO          shift, and go to state 72
@@ -4235,7 +4259,58 @@ State 317
     DEALLOCATE  shift, and go to state 79
     IDENTIFIER  shift, and go to state 41
 
-    $default  reduce using rule 99 (case_block)
+    $default  reduce using rule 89 (if_else_opt)
+
+    executable        go to state 80
+    assignment_stmt   go to state 81
+    if_stmt           go to state 82
+    do_stmt           go to state 83
+    dowhile_stmt      go to state 84
+    select_stmt       go to state 85
+    select_rank_stmt  go to state 86
+    call_stmt         go to state 87
+    return_stmt       go to state 88
+    stop_stmt         go to state 89
+    pointer_stmt      go to state 90
+    print_stmt        go to state 91
+    allocate_stmt     go to state 92
+    deallocate_stmt   go to state 93
+    variable_ref      go to state 94
+    identifier        go to state 95
+
+
+State 315
+
+   94 dowhile_stmt: DO WHILE LPAREN $@6 expression RPAREN $@7 executables END DO •
+
+    $default  reduce using rule 94 (dowhile_stmt)
+
+
+State 316
+
+   91 do_stmt: DO IDENTIFIER ASSIGN expression COMMA expression step_opt $@5 executables END • DO
+
+    DO  shift, and go to state 325
+
+
+State 317
+
+   70 executables: executables • executable
+  112 case_block: CASE DEFAULT $@13 executables •
+
+    IF          shift, and go to state 71
+    DO          shift, and go to state 72
+    SELECT      shift, and go to state 73
+    STOP        shift, and go to state 74
+    PRINT       shift, and go to state 75
+    CALL        shift, and go to state 76
+    RETURN      shift, and go to state 77
+    RESULT      shift, and go to state 40
+    ALLOCATE    shift, and go to state 78
+    DEALLOCATE  shift, and go to state 79
+    IDENTIFIER  shift, and go to state 41
+
+    $default  reduce using rule 112 (case_block)
 
     executable        go to state 80
     assignment_stmt   go to state 81
@@ -4257,8 +4332,17 @@ State 317
 
 State 318
 
-   68 executables: executables • executable
-   93 rank_block: RANK LPAREN rank_selector RPAREN executables •
+  110 case_block: CASE LPAREN expression RPAREN • $@12 executables
+
+    $default  reduce using rule 109 ($@12)
+
+    $@12  go to state 326
+
+
+State 319
+
+   70 executables: executables • executable
+  104 rank_block: RANK DEFAULT $@11 executables •
 
     IF          shift, and go to state 71
     DO          shift, and go to state 72
@@ -4272,7 +4356,7 @@ State 318
     DEALLOCATE  shift, and go to state 79
     IDENTIFIER  shift, and go to state 41
 
-    $default  reduce using rule 93 (rank_block)
+    $default  reduce using rule 104 (rank_block)
 
     executable        go to state 80
     assignment_stmt   go to state 81
@@ -4292,131 +4376,270 @@ State 318
     identifier        go to state 95
 
 
-State 319
-
-  138 subprogram: SUBROUTINE identifier LPAREN identifier_list_opt RPAREN program_body END • SUBROUTINE
-  139           | SUBROUTINE identifier LPAREN identifier_list_opt RPAREN program_body END • SUBROUTINE identifier
-
-    SUBROUTINE  shift, and go to state 322
-
-
 State 320
 
-  140 subprogram: FUNCTION identifier LPAREN identifier_list_opt RPAREN program_body END • FUNCTION
-  141           | FUNCTION identifier LPAREN identifier_list_opt RPAREN program_body END • FUNCTION identifier
+  102 rank_block: RANK LPAREN rank_selector RPAREN • $@10 executables
 
-    FUNCTION  shift, and go to state 323
+    $default  reduce using rule 101 ($@10)
+
+    $@10  go to state 327
 
 
 State 321
 
-  142 subprogram: RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT • LPAREN identifier RPAREN program_body END FUNCTION
-  143           | RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT • LPAREN identifier RPAREN program_body END FUNCTION identifier
+  151 subprogram: SUBROUTINE identifier LPAREN identifier_list_opt RPAREN program_body • END SUBROUTINE
+  152           | SUBROUTINE identifier LPAREN identifier_list_opt RPAREN program_body • END SUBROUTINE identifier
 
-    LPAREN  shift, and go to state 324
+    END  shift, and go to state 328
 
 
 State 322
 
-  138 subprogram: SUBROUTINE identifier LPAREN identifier_list_opt RPAREN program_body END SUBROUTINE •
-  139           | SUBROUTINE identifier LPAREN identifier_list_opt RPAREN program_body END SUBROUTINE • identifier
+   51 identifier_list: identifier COMMA identifier_list •
 
-    RESULT      shift, and go to state 40
-    IDENTIFIER  shift, and go to state 41
-
-    $default  reduce using rule 138 (subprogram)
-
-    identifier  go to state 325
+    $default  reduce using rule 51 (identifier_list)
 
 
 State 323
 
-  140 subprogram: FUNCTION identifier LPAREN identifier_list_opt RPAREN program_body END FUNCTION •
-  141           | FUNCTION identifier LPAREN identifier_list_opt RPAREN program_body END FUNCTION • identifier
+  153 subprogram: FUNCTION identifier LPAREN identifier_list_opt RPAREN program_body • END FUNCTION
+  154           | FUNCTION identifier LPAREN identifier_list_opt RPAREN program_body • END FUNCTION identifier
 
-    RESULT      shift, and go to state 40
-    IDENTIFIER  shift, and go to state 41
-
-    $default  reduce using rule 140 (subprogram)
-
-    identifier  go to state 326
+    END  shift, and go to state 329
 
 
 State 324
 
-  142 subprogram: RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN • identifier RPAREN program_body END FUNCTION
-  143           | RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN • identifier RPAREN program_body END FUNCTION identifier
+  155 subprogram: RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN • RESULT LPAREN identifier RPAREN program_body END FUNCTION
+  156           | RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN • RESULT LPAREN identifier RPAREN program_body END FUNCTION identifier
 
-    RESULT      shift, and go to state 40
-    IDENTIFIER  shift, and go to state 41
-
-    identifier  go to state 327
+    RESULT  shift, and go to state 330
 
 
 State 325
 
-  139 subprogram: SUBROUTINE identifier LPAREN identifier_list_opt RPAREN program_body END SUBROUTINE identifier •
+   91 do_stmt: DO IDENTIFIER ASSIGN expression COMMA expression step_opt $@5 executables END DO •
 
-    $default  reduce using rule 139 (subprogram)
+    $default  reduce using rule 91 (do_stmt)
 
 
 State 326
 
-  141 subprogram: FUNCTION identifier LPAREN identifier_list_opt RPAREN program_body END FUNCTION identifier •
+  110 case_block: CASE LPAREN expression RPAREN $@12 • executables
 
-    $default  reduce using rule 141 (subprogram)
+    $default  reduce using rule 69 (executables)
+
+    executables  go to state 331
 
 
 State 327
 
-  142 subprogram: RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier • RPAREN program_body END FUNCTION
-  143           | RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier • RPAREN program_body END FUNCTION identifier
+  102 rank_block: RANK LPAREN rank_selector RPAREN $@10 • executables
 
-    RPAREN  shift, and go to state 328
+    $default  reduce using rule 69 (executables)
+
+    executables  go to state 332
 
 
 State 328
 
-  142 subprogram: RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN • program_body END FUNCTION
-  143           | RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN • program_body END FUNCTION identifier
+  151 subprogram: SUBROUTINE identifier LPAREN identifier_list_opt RPAREN program_body END • SUBROUTINE
+  152           | SUBROUTINE identifier LPAREN identifier_list_opt RPAREN program_body END • SUBROUTINE identifier
 
-    $default  reduce using rule 18 (preamble)
-
-    program_body  go to state 329
-    preamble      go to state 37
+    SUBROUTINE  shift, and go to state 333
 
 
 State 329
 
-  142 subprogram: RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body • END FUNCTION
-  143           | RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body • END FUNCTION identifier
+  153 subprogram: FUNCTION identifier LPAREN identifier_list_opt RPAREN program_body END • FUNCTION
+  154           | FUNCTION identifier LPAREN identifier_list_opt RPAREN program_body END • FUNCTION identifier
 
-    END  shift, and go to state 330
+    FUNCTION  shift, and go to state 334
 
 
 State 330
 
-  142 subprogram: RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END • FUNCTION
-  143           | RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END • FUNCTION identifier
+  155 subprogram: RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT • LPAREN identifier RPAREN program_body END FUNCTION
+  156           | RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT • LPAREN identifier RPAREN program_body END FUNCTION identifier
 
-    FUNCTION  shift, and go to state 331
+    LPAREN  shift, and go to state 335
 
 
 State 331
 
-  142 subprogram: RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION •
-  143           | RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION • identifier
+   70 executables: executables • executable
+  110 case_block: CASE LPAREN expression RPAREN $@12 executables •
 
+    IF          shift, and go to state 71
+    DO          shift, and go to state 72
+    SELECT      shift, and go to state 73
+    STOP        shift, and go to state 74
+    PRINT       shift, and go to state 75
+    CALL        shift, and go to state 76
+    RETURN      shift, and go to state 77
     RESULT      shift, and go to state 40
+    ALLOCATE    shift, and go to state 78
+    DEALLOCATE  shift, and go to state 79
     IDENTIFIER  shift, and go to state 41
 
-    $default  reduce using rule 142 (subprogram)
+    $default  reduce using rule 110 (case_block)
 
-    identifier  go to state 332
+    executable        go to state 80
+    assignment_stmt   go to state 81
+    if_stmt           go to state 82
+    do_stmt           go to state 83
+    dowhile_stmt      go to state 84
+    select_stmt       go to state 85
+    select_rank_stmt  go to state 86
+    call_stmt         go to state 87
+    return_stmt       go to state 88
+    stop_stmt         go to state 89
+    pointer_stmt      go to state 90
+    print_stmt        go to state 91
+    allocate_stmt     go to state 92
+    deallocate_stmt   go to state 93
+    variable_ref      go to state 94
+    identifier        go to state 95
 
 
 State 332
 
-  143 subprogram: RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION identifier •
+   70 executables: executables • executable
+  102 rank_block: RANK LPAREN rank_selector RPAREN $@10 executables •
 
-    $default  reduce using rule 143 (subprogram)
+    IF          shift, and go to state 71
+    DO          shift, and go to state 72
+    SELECT      shift, and go to state 73
+    STOP        shift, and go to state 74
+    PRINT       shift, and go to state 75
+    CALL        shift, and go to state 76
+    RETURN      shift, and go to state 77
+    RESULT      shift, and go to state 40
+    ALLOCATE    shift, and go to state 78
+    DEALLOCATE  shift, and go to state 79
+    IDENTIFIER  shift, and go to state 41
+
+    $default  reduce using rule 102 (rank_block)
+
+    executable        go to state 80
+    assignment_stmt   go to state 81
+    if_stmt           go to state 82
+    do_stmt           go to state 83
+    dowhile_stmt      go to state 84
+    select_stmt       go to state 85
+    select_rank_stmt  go to state 86
+    call_stmt         go to state 87
+    return_stmt       go to state 88
+    stop_stmt         go to state 89
+    pointer_stmt      go to state 90
+    print_stmt        go to state 91
+    allocate_stmt     go to state 92
+    deallocate_stmt   go to state 93
+    variable_ref      go to state 94
+    identifier        go to state 95
+
+
+State 333
+
+  151 subprogram: SUBROUTINE identifier LPAREN identifier_list_opt RPAREN program_body END SUBROUTINE •
+  152           | SUBROUTINE identifier LPAREN identifier_list_opt RPAREN program_body END SUBROUTINE • identifier
+
+    RESULT      shift, and go to state 40
+    IDENTIFIER  shift, and go to state 41
+
+    $default  reduce using rule 151 (subprogram)
+
+    identifier  go to state 336
+
+
+State 334
+
+  153 subprogram: FUNCTION identifier LPAREN identifier_list_opt RPAREN program_body END FUNCTION •
+  154           | FUNCTION identifier LPAREN identifier_list_opt RPAREN program_body END FUNCTION • identifier
+
+    RESULT      shift, and go to state 40
+    IDENTIFIER  shift, and go to state 41
+
+    $default  reduce using rule 153 (subprogram)
+
+    identifier  go to state 337
+
+
+State 335
+
+  155 subprogram: RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN • identifier RPAREN program_body END FUNCTION
+  156           | RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN • identifier RPAREN program_body END FUNCTION identifier
+
+    RESULT      shift, and go to state 40
+    IDENTIFIER  shift, and go to state 41
+
+    identifier  go to state 338
+
+
+State 336
+
+  152 subprogram: SUBROUTINE identifier LPAREN identifier_list_opt RPAREN program_body END SUBROUTINE identifier •
+
+    $default  reduce using rule 152 (subprogram)
+
+
+State 337
+
+  154 subprogram: FUNCTION identifier LPAREN identifier_list_opt RPAREN program_body END FUNCTION identifier •
+
+    $default  reduce using rule 154 (subprogram)
+
+
+State 338
+
+  155 subprogram: RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier • RPAREN program_body END FUNCTION
+  156           | RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier • RPAREN program_body END FUNCTION identifier
+
+    RPAREN  shift, and go to state 339
+
+
+State 339
+
+  155 subprogram: RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN • program_body END FUNCTION
+  156           | RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN • program_body END FUNCTION identifier
+
+    $default  reduce using rule 19 (preamble)
+
+    program_body  go to state 340
+    preamble      go to state 37
+
+
+State 340
+
+  155 subprogram: RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body • END FUNCTION
+  156           | RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body • END FUNCTION identifier
+
+    END  shift, and go to state 341
+
+
+State 341
+
+  155 subprogram: RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END • FUNCTION
+  156           | RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END • FUNCTION identifier
+
+    FUNCTION  shift, and go to state 342
+
+
+State 342
+
+  155 subprogram: RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION •
+  156           | RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION • identifier
+
+    RESULT      shift, and go to state 40
+    IDENTIFIER  shift, and go to state 41
+
+    $default  reduce using rule 155 (subprogram)
+
+    identifier  go to state 343
+
+
+State 343
+
+  156 subprogram: RECURSIVE FUNCTION identifier LPAREN identifier_list_opt RPAREN RESULT LPAREN identifier RPAREN program_body END FUNCTION identifier •
+
+    $default  reduce using rule 156 (subprogram)
